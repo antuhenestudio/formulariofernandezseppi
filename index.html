@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espacio de Escucha y Diagnóstico Ciudadano | Neuquén</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0b2545;
+            --accent: #d90429;
+            --bg-light: #f8f9fa;
+            --text-dark: #1d2d44;
+            --border: #cbd5e1;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; padding-bottom: 3rem; }
+        
+        header {
+            background-color: var(--primary);
+            color: #fff;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+        }
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1rem; max-width: 750px; margin: 0 auto; opacity: 0.9; }
+
+        .container { max-width: 850px; margin: 2.5rem auto; padding: 0 1rem; }
+        .card {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 0.8rem;
+        }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group.full { grid-column: span 2; }
+
+        label { font-weight: 600; font-size: 0.88rem; color: var(--text-dark); }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 37, 69, 0.1);
+        }
+
+        .btn-submit {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .btn-submit:hover { background-color: #b00320; }
+        
+        .alert-success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Espacio de Escucha Ciudadana de Neuquén</h1>
+        <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para recolectar, analizar y resolver las problemáticas de cada barrio mediante la participación vecinal directa.</p>
+    </header>
+
+    <div class="container">
+        <div id="alertSuccess" class="alert-success">
+            <i class="fas fa-check-circle"></i> Su registro ha sido cargado con éxito. Gracias por aportar a la mejora de Neuquén.
+        </div>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-clipboard-list"></i> Registro de Situación Barrio por Barrio</h2>
+            
+            <form id="publicClaimForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nombre">Nombre y Apellido *</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Carlos Gutiérrez">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sexo">Género / Sexo *</label>
+                        <select id="sexo" required>
+                            <option value="">-- Seleccionar --</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                            <option value="Otro">Otro / Prefiero no decir</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edad">Edad *</label>
+                        <input type="number" id="edad" min="16" max="110" required placeholder="Ej. 42">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="barrio">Barrio de la Ciudad de Neuquén *</label>
+                        <select id="barrio" required>
+                            <option value="">-- Seleccione su barrio --</option>
+                            <option value="Alta Barda">Alta Barda</option>
+                            <option value="Anai Mapu">Anai Mapu</option>
+                            <option value="Área Centro Este">Área Centro Este</option>
+                            <option value="Área Centro Oeste">Área Centro Oeste</option>
+                            <option value="Bardas Soleadas">Bardas Soleadas</option>
+                            <option value="Bouquet Roldán">Bouquet Roldán</option>
+                            <option value="Canal V">Canal V</option>
+
+                            <option value="Confluencia Urbana">Confluencia Urbana</option>
+                            <option value="Copol">Copol</option>
+                            <option value="Cumelén">Cumelén</option>
+                            <option value="El Progreso">El Progreso</option>
+                            <option value="Gran Neuquén Norte">Gran Neuquén Norte</option>
+                            <option value="Gran Neuquén Sur">Gran Neuquén Sur</option>
+                            <option value="Huiliches">Huiliches</option>
+                            <option value="Islas Malvinas">Islas Malvinas</option>
+                            <option value="La Sirena">La Sirena</option>
+                            <option value="Limay">Limay</option>
+
+                            <option value="Mercantiles">Mercantiles</option>
+
+                            <option value="Parque Industrial">Parque Industrial</option>
+                            <option value="Rincón de Emilio">Rincón de Emilio</option>
+                            <option value="Río Grande">Río Grande</option>
+                            <option value="San Lorenzo Norte">San Lorenzo Norte</option>
+                            <option value="San Lorenzo Sur">San Lorenzo Sur</option>
+                            <option value="Santa Genoveva">Santa Genoveva</option>
+                            <option value="Sapere">Sapere</option>
+                            <option value="Terrazas de Neuquén">Terrazas de Neuquén</option>
+
+                            <option value="Valentina Sur Urbana">Valentina Sur Urbana</option>
+                            <option value="Villa Ceferino">Villa Ceferino</option>
+                            <option value="Villa Florencia">Villa Florencia</option>
+                            <option value="Villa María">Villa María</option>
+
+                            <option value="Z1">Z1</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contacto">Teléfono de Contacto / WhatsApp *</label>
+                        <input type="tel" id="contacto" required placeholder="Ej. 2994123456">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoria">Problemática Principal *</label>
+                        <select id="categoria" onchange="loadSubcategories()" required>
+                            <option value="">-- Seleccionar Categoría --</option>
+                            <option value="Calles y Estado Vial">Calles y Estado Vial</option>
+                            <option value="Plazas y Espacios Públicos">Plazas y Espacios Públicos</option>
+                            <option value="Alumbrado y Seguridad">Alumbrado y Seguridad</option>
+                            <option value="Pluviales y Cloacas">Pluviales y Cloacas</option>
+                            <option value="Limpieza y Basura">Limpieza y Basura</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="subcategoria">Subcategoría Específica *</label>
+                        <select id="subcategoria" required disabled>
+                            <option value="">-- Seleccione primero una problemática --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="detalle">Descripción Detallada del Reclamo *</label>
+                        <textarea id="detalle" rows="4" required placeholder="Describa la ubicación exacta, gravedad del problema o tiempo transcurrido..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Enviar Registro Ciudadano</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const subData = {
+            "Calles y Estado Vial": ["Baches profundos / Hundimiento", "Calles de tierra transitables / Máquina", "Falta de asfaltado", "Falta de señalización / Lomas de burro"],
+            "Plazas y Espacios Públicos": ["Juegos infantiles destruidos / Peligrosos", "Falta de iluminación en plazas", "Mantenimiento de césped / Arbolado", "Falta de riego / Estado general"],
+            "Alumbrado y Seguridad": ["Luminarias quemadas / Calles oscuras", "Falta de red eléctrica de alumbrado", "Puntos ciegos / Matorrales sin desmalezar"],
+            "Pluviales y Cloacas": ["Desbordes cloacales continuos", "Calles anegadas por pluvial tapado", "Pérdida de agua potable en calzada"],
+            "Limpieza y Basura": ["Microbasurales no autorizados", "Falta de contenedores urbanos", "Frecuencia de recolección insuficiente"]
+        };
+
+        function loadSubcategories() {
+            const cat = document.getElementById("categoria").value;
+            const subSelect = document.getElementById("subcategoria");
+            subSelect.innerHTML = '<option value="">-- Seleccionar Subcategoría --</option>';
+
+            if (cat && subData[cat]) {
+                subSelect.disabled = false;
+                subData[cat].forEach(sub => {
+                    const opt = document.createElement("option");
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subSelect.appendChild(opt);
+                });
+            } else {
+                subSelect.disabled = true;
+            }
+        }
+
+        document.getElementById('publicClaimForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            document.getElementById('alertSuccess').style.display = 'block';
+            e.target.reset();
+            document.getElementById("subcategoria").disabled = true;
+            setTimeout(() => { document.getElementById('alertSuccess').style.display = 'none'; }, 5000);
+        });
+    </script>
+</body>
+</html>
