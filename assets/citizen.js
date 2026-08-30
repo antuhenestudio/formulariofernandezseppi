@@ -62,7 +62,6 @@ function initEventListeners() {
     on('btnGpsLocation', 'click', getUserGPSLocation);
     on('btnCloseProfileModal', 'click', closeProfileModal);
     on('btnCloseSuccessModal', 'click', closeSuccessModal);
-    on('btnWhatsappReceipt', 'click', sendWhatsappReceipt);
     on('btnSkipVideo', 'click', closeVideoGate);
     on('videoGateSoundHint', 'click', activateGateSound);
 
@@ -77,32 +76,83 @@ function initEventListeners() {
     if (problematicaSelect) problematicaSelect.addEventListener('change', loadSubcategories);
 
     const archivoInput = document.getElementById('archivoAdjunto');
-    if (archivoInput) archivoInput.addEventListener('change', showAttachmentPreview);
+    if (archivoInput) archivoInput.addEventListener('change', onArchivoSeleccionado);
 }
 
-// Muestra el nombre y tamaño del archivo elegido, para que la persona confirme
-// que seleccionó lo que quería antes de enviar.
-function showAttachmentPreview() {
-    const fileInput = document.getElementById('archivoAdjunto');
-    const preview = document.getElementById('archivoPreview');
-    if (!fileInput || !preview) return;
+/* ============ ADJUNTOS: hasta 5 fotos, 3 videos y 2 PDF, agregando de a uno ============ */
+const LIMITES_ADJUNTOS = { imagen: 5, video: 3, pdf: 2 };
+const ETIQUETAS_ADJUNTOS = { imagen: 'fotos', video: 'videos', pdf: 'PDF' };
+let archivosSeleccionados = []; // [{ file, tipo, id }]
 
-    if (fileInput.files && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-        const icon = file.type.startsWith('image/') ? 'fa-image' : file.type.startsWith('video/') ? 'fa-video' : 'fa-file-pdf';
-        preview.innerHTML = `<i class="fas ${icon}"></i> ${file.name} (${sizeMb} MB) <button type="button" id="btnQuitarAdjunto" aria-label="Quitar archivo"><i class="fas fa-times"></i></button>`;
-        preview.style.display = 'flex';
-        const btnQuitar = document.getElementById('btnQuitarAdjunto');
-        if (btnQuitar) btnQuitar.addEventListener('click', () => {
-            fileInput.value = '';
-            preview.innerHTML = '';
-            preview.style.display = 'none';
-        });
-    } else {
-        preview.innerHTML = '';
-        preview.style.display = 'none';
+function tipoDeArchivo(file) {
+    if (file.type.startsWith('image/')) return 'imagen';
+    if (file.type.startsWith('video/')) return 'video';
+    if (file.type === 'application/pdf') return 'pdf';
+    return null;
+}
+
+function onArchivoSeleccionado() {
+    const fileInput = document.getElementById('archivoAdjunto');
+    if (!fileInput.files || fileInput.files.length === 0) return;
+    const file = fileInput.files[0];
+
+    const MAX_BYTES = 15 * 1024 * 1024; // 15MB
+    if (file.size > MAX_BYTES) {
+        showToast("Ese archivo pesa más de 15MB. Elegí uno más liviano.", "error");
+        fileInput.value = '';
+        return;
     }
+
+    const tipo = tipoDeArchivo(file);
+    if (!tipo) {
+        showToast("Solo se pueden adjuntar imágenes, videos o archivos PDF.", "error");
+        fileInput.value = '';
+        return;
+    }
+
+    const cantidadActual = archivosSeleccionados.filter(a => a.tipo === tipo).length;
+    if (cantidadActual >= LIMITES_ADJUNTOS[tipo]) {
+        showToast(`Ya adjuntaste el máximo de ${LIMITES_ADJUNTOS[tipo]} ${ETIQUETAS_ADJUNTOS[tipo]}.`, "error");
+        fileInput.value = '';
+        return;
+    }
+
+    archivosSeleccionados.push({ file, tipo, id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}` });
+    fileInput.value = ''; // se limpia para poder "ir agregando" el próximo
+    renderArchivosLista();
+}
+
+function quitarArchivoAdjunto(id) {
+    archivosSeleccionados = archivosSeleccionados.filter(a => a.id !== id);
+    renderArchivosLista();
+}
+
+function renderArchivosLista() {
+    const lista = document.getElementById('archivosLista');
+    const contador = document.getElementById('archivoContador');
+    if (!lista || !contador) return;
+
+    const iconos = { imagen: 'fa-image', video: 'fa-video', pdf: 'fa-file-pdf' };
+    lista.innerHTML = archivosSeleccionados.map(a => {
+        const sizeMb = (a.file.size / (1024 * 1024)).toFixed(1);
+        return `<div class="archivo-item">
+            <i class="fas ${iconos[a.tipo]}"></i>
+            <span class="archivo-item-nombre">${a.file.name}</span>
+            <span>(${sizeMb} MB)</span>
+            <button type="button" data-quitar-id="${a.id}" aria-label="Quitar archivo"><i class="fas fa-times"></i></button>
+        </div>`;
+    }).join('');
+
+    lista.querySelectorAll('button[data-quitar-id]').forEach(btn => {
+        btn.addEventListener('click', () => quitarArchivoAdjunto(btn.dataset.quitarId));
+    });
+
+    contador.innerHTML = Object.keys(LIMITES_ADJUNTOS).map(tipo => {
+        const cantidad = archivosSeleccionados.filter(a => a.tipo === tipo).length;
+        const limite = LIMITES_ADJUNTOS[tipo];
+        const clase = cantidad >= limite ? 'limite-alcanzado' : '';
+        return `<span class="${clase}">${ETIQUETAS_ADJUNTOS[tipo].charAt(0).toUpperCase() + ETIQUETAS_ADJUNTOS[tipo].slice(1)}: ${cantidad}/${limite}</span>`;
+    }).join('');
 }
 
 function showMapLoadError(containerId) {
@@ -557,12 +607,8 @@ document.getElementById('citizenForm').addEventListener('submit', (e) => {
 async function finalizeSubmission() {
     if (!pendingPayload) return;
 
-    let attachment = null;
-    try {
-        attachment = await uploadAttachmentIfAny();
-    } catch (err) {
-        return; // el error específico ya se mostró con showFormError()
-    }
+    const archivos = await subirTodosLosAdjuntos();
+    if (archivos === null) return; // hubo un error subiendo alguno; ya se avisó, no seguimos
 
     if (supabaseClient) {
         try {
@@ -587,8 +633,7 @@ async function finalizeSubmission() {
                 lat: pendingPayload.lat,
                 lng: pendingPayload.lng,
                 estado: pendingPayload.estado,
-                archivo_path: attachment ? attachment.path : null,
-                archivo_nombre_original: attachment ? attachment.nombre : null
+                archivos: archivos
             }]);
             // No pedimos ".select()" de vuelta a propósito: el público (sin login)
             // solo tiene permiso de INSERTAR por seguridad, no de leer — pedir el
@@ -605,7 +650,7 @@ async function finalizeSubmission() {
         }
     }
 
-    pendingPayload.id = Date.now(); // id local solo para el comprobante en pantalla; el real lo asigna la base de datos
+    pendingPayload.id = Date.now(); // id local solo para referencia en pantalla; el real lo asigna la base de datos
 
     lastSubmittedRecord = pendingPayload;
     fetchPublicStats();
@@ -623,57 +668,37 @@ async function finalizeSubmission() {
     turnstileToken = null;
     updateSubmitButtonState(); // vuelve a mostrar el botón bloqueado hasta resolver el próximo CAPTCHA
     if (window.turnstile) { try { turnstile.reset(); } catch (err) { /* noop */ } }
-    const preview = document.getElementById('archivoPreview');
-    if (preview) { preview.innerHTML = ''; preview.style.display = 'none'; }
+    archivosSeleccionados = [];
+    renderArchivosLista();
 }
 
-// Sube el archivo adjunto (foto, video o PDF) a Supabase Storage, si la persona
-// eligió uno. Es opcional: si no hay archivo, no hace nada. Si Supabase no está
-// configurado, avisa y sigue igual (el resto del reclamo se guarda sin adjunto).
-async function uploadAttachmentIfAny() {
-    const fileInput = document.getElementById('archivoAdjunto');
-    if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
-
-    const file = fileInput.files[0];
-    const MAX_BYTES = 15 * 1024 * 1024; // 15MB
-    if (file.size > MAX_BYTES) {
-        showFormError("El archivo adjunto no puede pesar más de 15MB.");
-        document.getElementById('archivoAdjunto').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        throw new Error('archivo_demasiado_grande');
-    }
-    const tiposPermitidos = ['image/', 'video/', 'application/pdf'];
-    if (!tiposPermitidos.some(prefix => file.type.startsWith(prefix))) {
-        showFormError("Solo se pueden adjuntar imágenes, videos o archivos PDF.");
-        document.getElementById('archivoAdjunto').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        throw new Error('archivo_tipo_invalido');
-    }
+// Sube todos los adjuntos elegidos (hasta 5 fotos + 3 videos + 2 PDF) a Supabase
+// Storage. Devuelve un array [{path, nombre, tipo}, ...] para guardar en la
+// columna "archivos" del registro, o [] si no había ninguno. Si Supabase no
+// está configurado, avisa y sigue igual (el resto del reclamo se guarda sin
+// adjuntos). Si falla la subida de alguno, avisa y devuelve null para frenar
+// el envío (así la persona no pierde de vista que algo no se subió).
+async function subirTodosLosAdjuntos() {
+    if (archivosSeleccionados.length === 0) return [];
 
     if (!supabaseClient) {
-        showToast("El adjunto no se subió porque Supabase no está configurado todavía; el resto del reclamo sí se guardó.", "info");
-        return null;
+        showToast("Los adjuntos no se subieron porque Supabase no está configurado todavía; el resto del reclamo sí se guarda.", "info");
+        return [];
     }
 
-    const nombreSeguro = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const path = `${Date.now()}_${nombreSeguro}`;
-
-    const { error } = await supabaseClient.storage.from('adjuntos-vecinales').upload(path, file);
-    if (error) {
-        console.error('Error subiendo el adjunto:', error);
-        showToast("No se pudo subir el archivo adjunto. El resto del reclamo se envió igual.", "error");
-        return null;
+    const resultados = [];
+    for (const item of archivosSeleccionados) {
+        const nombreSeguro = item.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${item.id}_${nombreSeguro}`;
+        const { error } = await supabaseClient.storage.from('adjuntos-vecinales').upload(path, item.file);
+        if (error) {
+            console.error('Error subiendo adjunto:', item.file.name, error);
+            showToast(`No se pudo subir "${item.file.name}". Quitalo o intentá de nuevo.`, "error");
+            return null;
+        }
+        resultados.push({ path, nombre: item.file.name, tipo: item.tipo });
     }
-    return { path, nombre: file.name };
-}
-
-// Comprobante gratuito por WhatsApp: abre WhatsApp con un mensaje ya armado que la
-// persona se envía a sí misma, a modo de constancia. Sin costo, sin backend extra.
-function sendWhatsappReceipt() {
-    if (!lastSubmittedRecord) return;
-    const r = lastSubmittedRecord;
-    const resumen = r.tituloProyecto || r.subproblematica || r.problematica;
-    const msg = encodeURIComponent(`✅ Comprobante Neuquén Escucha\nRegistro #${r.id}\nTipo: ${r.tipoPerfil}\nBarrio: ${r.barrio}\nResumen: ${resumen}\n¡Gracias por participar!`);
-    const phone = r.contacto.replace(/[-\s()]/g, '');
-    window.open(`https://api.whatsapp.com/send?phone=54${phone.replace(/^54/, '').replace(/^0/, '')}&text=${msg}`, '_blank');
+    return resultados;
 }
 
 function closeSuccessModal() {
