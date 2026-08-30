@@ -13,7 +13,7 @@
    usuario/contraseña — útil para probar el diseño, pero NO para producción. */
 const SUPABASE_URL = "https://zjgtckdwqjkwawrbnzt.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_2loRPELWBD6lFYUkPymA6w_EMV3SARn";
-const SUPABASE_CONFIGURED = !SUPABASE_URL.includes("zjgtckdwqjkwawrbnzt") && !SUPABASE_ANON_KEY.includes("sb_publishable_2loRPELWBD6lFYUkPymA6w_EMV3SARn");
+const SUPABASE_CONFIGURED = !SUPABASE_URL.includes("TU-PROYECTO") && !SUPABASE_ANON_KEY.includes("TU_ANON_KEY");
 
 // Blindado con try/catch a propósito: si SUPABASE_URL quedó mal escrita (por
 // ejemplo sin "https://" al copiarla), esto NO debe romper el resto del sitio.
