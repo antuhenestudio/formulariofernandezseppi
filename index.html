@@ -46,8 +46,6 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 25px 60px -10px rgba(0,0,0,0.6);
-            /* Se ajusta al alto disponible de la pantalla (menos el padding del overlay)
-               y calcula el ancho según la relación 9:16 propia de un Short/Reel vertical. */
             height: min(88vh, 780px);
             aspect-ratio: 9 / 16;
             max-width: 92vw;
@@ -131,7 +129,7 @@
             color: var(--text-muted);
         }
 
-        /* LIVE COUNTER BANNER — versión compacta, ocupa poco espacio en cel y PC */
+        /* LIVE COUNTER BANNER */
         .kpi-live-counter-container {
             display: flex;
             flex-wrap: nowrap;
@@ -192,96 +190,111 @@
             white-space: nowrap;
         }
 
+        /* ===== PROFILE SELECTOR OPTIMIZADO ===== */
         .profile-selector {
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 0.8rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
+            max-width: 950px;
+            margin: 0 auto 2rem;
+            padding: 0 0.5rem;
         }
 
         .profile-btn {
             background: #fff;
             border: 2px solid var(--border-color);
-            padding: 0.85rem 1.6rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
+            padding: 0.85rem 1.2rem;
+            border-radius: 14px;
+            font-size: 0.92rem;
             font-weight: 700;
             color: var(--primary);
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
+            justify-content: flex-start;
             gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .profile-btn i {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
+            flex-shrink: 0;
             transition: var(--transition);
+        }
+
+        .profile-btn .btn-text {
+            flex-grow: 1;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .profile-btn:hover {
             border-color: var(--secondary);
             background: #f8fafc;
             transform: translateY(-2px);
-        }
-
-        .profile-btn:hover i {
-            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         .profile-btn.active {
             background: var(--primary);
             color: #fff;
             border-color: var(--primary);
-            box-shadow: 0 8px 20px rgba(11, 37, 69, 0.25);
+            box-shadow: 0 6px 18px rgba(11, 37, 69, 0.25);
         }
 
+        .profile-btn.active i {
+            color: #fff !important;
+        }
+
+        /* Estilos Destacados (Idea y Positivo) */
         .profile-btn.btn-idea-highlight {
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             border: 2px solid var(--gold);
             color: #92400e;
-            animation: pulseGlowGold 3s infinite ease-in-out;
         }
 
         .profile-btn.btn-idea-highlight.active {
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
             color: #fff;
             border-color: #b45309;
-            animation: none;
         }
 
         .profile-btn.btn-positive-highlight {
             background: linear-gradient(135deg, #f0fdf4 0%, var(--green-light) 100%);
             border: 2px solid var(--green-positive);
             color: #14532d;
-            animation: pulseGlowGreen 2.5s infinite ease-in-out;
         }
 
         .profile-btn.btn-positive-highlight.active {
             background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
             color: #fff;
             border-color: #15803d;
-            animation: none;
+        }
+
+        .badge-idea, .badge-positive {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 50px;
+            font-weight: 800;
+            margin-left: auto;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .badge-idea {
             background: var(--accent);
             color: #fff;
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 50px;
-            font-weight: 800;
         }
 
         .badge-positive {
             background: var(--green-positive);
             color: #fff;
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 50px;
-            font-weight: 800;
         }
 
         .form-card {
@@ -399,8 +412,6 @@
             z-index: 1;
         }
 
-        /* Marcador arrastrable hecho en CSS puro (sin imágenes externas), para que
-           siempre se vea aunque falle la carga de los íconos PNG por defecto de Leaflet. */
         .custom-pin-icon {
             width: 32px;
             height: 32px;
@@ -453,7 +464,6 @@
             display: none !important;
         }
 
-        /* Adjuntar fotos/videos/PDF (varios, agregando de a uno) */
         input[type="file"] {
             padding: 0.6rem 0.8rem;
             cursor: pointer;
@@ -513,16 +523,12 @@
             flex-shrink: 0;
         }
 
-        /* CAPTCHA (Cloudflare Turnstile) */
         .turnstile-wrap {
             display: flex;
             justify-content: center;
             margin-top: 1.4rem;
         }
 
-        /* Botón "bloqueado" mientras no se resuelve el CAPTCHA: se ve visiblemente
-           deshabilitado (gris, candado, sin sombra) para que quede claro que hay
-           que resolver la verificación antes de poder enviar. */
         .btn-submit.btn-submit-locked {
             background: #94a3b8;
             box-shadow: none;
@@ -535,7 +541,7 @@
             transform: none;
         }
 
-.btn-submit.btn-submit-idea {
+        .btn-submit.btn-submit-idea {
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
         }
 
@@ -543,10 +549,8 @@
             background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
         }
 
-        /* ===== RESPONSIVE CELULAR ===== */
+        /* ===== RESPONSIVE AUSTES ===== */
         @media (max-width: 768px) {
-            /* El formulario pasa a una sola columna, para que se lea bien de
-               arriba a abajo en vez de dos campos apretados uno al lado del otro. */
             .form-grid {
                 grid-template-columns: 1fr;
             }
@@ -557,34 +561,18 @@
                 padding: 1.3rem;
             }
 
-            /* Botones de perfil (Vecino, Comerciante, etc.) más chicos y en fila,
-               sin salirse nunca del ancho de la pantalla. */
             .profile-selector {
-                justify-content: center;
-                gap: 0.5rem;
+                grid-template-columns: 1fr; /* 1 columna uniforme en móvil */
+                gap: 0.6rem;
             }
+
             .profile-btn {
-                padding: 0.55rem 0.9rem;
-                font-size: 0.76rem;
-                gap: 6px;
-            }
-            .profile-btn i {
+                padding: 0.75rem 1rem;
                 font-size: 0.85rem;
-            }
-            .badge-idea, .badge-positive {
-                font-size: 0.58rem;
-                padding: 1px 6px;
             }
 
             .hero-banner h2 {
                 font-size: 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-btn {
-                padding: 0.48rem 0.7rem;
-                font-size: 0.7rem;
             }
         }
     </style>
@@ -629,8 +617,7 @@
                 <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
-            <!-- LIVE COUNTER BANNER (compacto) — cada tarjeta arranca oculta y solo se
-                 muestra cuando esa categoría llega a 100 registros reales o más. -->
+            <!-- LIVE COUNTER BANNER -->
             <div class="kpi-live-counter-container">
                 <div class="kpi-live-card" data-counter-card="reclamos" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-bullhorn" style="color: var(--accent);"></i></div>
@@ -669,22 +656,22 @@
                 </div>
             </div>
 
-            <!-- Profile Selector Rounded Buttons -->
+            <!-- Profile Selector Buttons (Optimizado) -->
             <div class="profile-selector">
                 <button type="button" class="profile-btn active" data-profile="ciudadano">
-                    <i class="fas fa-user-check"></i> Vecino / Ciudadano
+                    <i class="fas fa-user-check"></i> <span class="btn-text">Vecino / Ciudadano</span>
                 </button>
                 <button type="button" class="profile-btn" data-profile="comerciante">
-                    <i class="fas fa-store"></i> Comerciante / Dueño de Negocio
+                    <i class="fas fa-store"></i> <span class="btn-text">Comerciante / Dueño de Negocio</span>
                 </button>
                 <button type="button" class="profile-btn" data-profile="joven">
-                    <i class="fas fa-graduation-cap"></i> Joven (16 a 30 años)
+                    <i class="fas fa-graduation-cap"></i> <span class="btn-text">Joven (16 a 30 años)</span>
                 </button>
                 <button type="button" class="profile-btn btn-idea-highlight" data-profile="idea">
-                    <i class="fas fa-lightbulb" style="color: var(--gold);"></i> Proponer Idea o Proyecto <span class="badge-idea">Nuevo</span>
+                    <i class="fas fa-lightbulb" style="color: var(--gold);"></i> <span class="btn-text">Proponer Idea o Proyecto</span> <span class="badge-idea">Nuevo</span>
                 </button>
                 <button type="button" class="profile-btn btn-positive-highlight" data-profile="positivo">
-                    <i class="fas fa-heart" style="color: var(--green-positive);"></i> Lo Positivo de Neuquén <span class="badge-positive">Destacar</span>
+                    <i class="fas fa-heart" style="color: var(--green-positive);"></i> <span class="btn-text">Lo Positivo de Neuquén</span> <span class="badge-positive">Destacar</span>
                 </button>
             </div>
 
@@ -934,7 +921,6 @@
             <button class="modal-close-btn" id="btnCloseSuccessModal">Cerrar esta ventana</button>
         </div>
     </div>
-
 
     <footer class="privacy-footer">
         <i class="fas fa-lock"></i> <strong>Tus datos son confidenciales.</strong> Se tratan conforme a la Ley N° 25.326 de Protección de Datos Personales (Argentina) y su Decreto Reglamentario N° 1558/2001, bajo control de la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública (AAIP)</a>. No se publican ni se venden a terceros.
