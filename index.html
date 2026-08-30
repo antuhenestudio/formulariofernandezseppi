@@ -21,6 +21,17 @@
             overflow: hidden;
         }
 
+        /* ===== HEADER STICKY CON EFECTO BLUR TRANSPARENTE ===== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(11, 37, 69, 0.82) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         /* Estilo para el título cliqueable */
         .brand-link {
             text-decoration: none;
@@ -32,7 +43,7 @@
         }
 
         .brand-link:hover {
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         /* ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== */
@@ -621,7 +632,7 @@
 
     <header>
         <!-- Título envuelto en enlace hacia el Inicio -->
-        <a href="index.html" class="brand-link">
+        <a href="index.html" class="brand-link" title="Ir al Inicio">
             <div class="brand">
                 <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
                 <div class="brand-text">
