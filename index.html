@@ -1000,8 +1000,15 @@
             .hero-banner h2 { font-size: 1.5rem; }
             .hero-banner p { font-size: 0.9rem; }
             .form-card { padding: 1.4rem; }
-            .profile-selector { flex-direction: column; align-items: stretch; }
-            .profile-btn { justify-content: center; }
+            .profile-selector { gap: 0.5rem; margin-bottom: 1.4rem; }
+            .profile-btn {
+                padding: 0.5rem 0.9rem;
+                font-size: 0.72rem;
+                gap: 6px;
+                flex: 0 1 auto;
+            }
+            .profile-btn i { font-size: 0.85rem; }
+            .badge-idea, .badge-positive { font-size: 0.58rem; padding: 1px 6px; }
             header { padding: 0.8rem 4%; }
             .brand-text h1 { font-size: 1rem; }
             .brand-text p { display: none; }
@@ -1020,6 +1027,8 @@
             .kpi-live-card { min-width: 112px; }
             .kpi-live-label { font-size: 0.58rem; }
             .modal-card { padding: 1.5rem; }
+            .profile-btn { padding: 0.42rem 0.7rem; font-size: 0.66rem; }
+            .profile-btn i { font-size: 0.78rem; }
         }
     </style>
 </head>
@@ -1609,47 +1618,80 @@
                 "Mal diseño / Instalación arbitraria de Bicisendas",
                 "Cambio de sentido de calles sin consulta previa",
                 "Obras públicas paralizadas o inconclusas",
-                "Falta de semáforos, badenes o señalización vial"
+                "Falta de semáforos, badenes o señalización vial",
+                "Calles de tierra sin pavimentar / enripiado deficiente",
+                "Anegamiento y pozos de agua en la calzada tras lluvias",
+                "Veredas rotas, levantadas o inexistentes",
+                "Falta de rampas de accesibilidad en esquinas y veredas",
+                "Congestión vehicular en horas pico por mala planificación"
             ],
             "Comercio, Obras Municipales Arbitrarias y Tasas": [
                 "Caída drástica de ventas por obras de Bicisendas",
                 "Caída de ventas por cambio de sentido de calles",
                 "Pérdida de estacionamiento para clientes frente al local",
                 "Cierre o traslado forzado de local comercial",
-                "Aumentos desmedidos de Tasas de Licencia Comercial"
+                "Aumentos desmedidos de Tasas de Licencia Comercial",
+                "Competencia desleal de comercio informal / ferias no habilitadas",
+                "Demoras excesivas en habilitaciones y permisos municipales",
+                "Falta de seguridad frente al local (robos, vandalismo)",
+                "Obras que restringen el acceso de proveedores y carga/descarga"
             ],
             "Plazas, Espacios Públicos y Vías Verdes": [
                 "Plazas abandonadas / Pastizales sin mantenimiento",
                 "Juegos infantiles rotos o con riesgo físico",
                 "Falta de riego, arbolado y parquización",
-                "Poco mantenimiento en el Paseo Costero / Riberas"
+                "Poco mantenimiento en el Paseo Costero / Riberas",
+                "Falta de bebederos, bancos o mobiliario urbano",
+                "Ocupación indebida de espacios públicos",
+                "Falta de iluminación en plazas y paseos",
+                "Ausencia de espacios verdes cercanos en el barrio"
             ],
             "Seguridad Urbana y Entorno Seguro": [
                 "Luminarias quemadas / Calles oscuras",
                 "Falta de cámaras urbanas municipales",
                 "Falta de patrullaje y personal policial",
-                "Presencia de puntos ciegos e inseguridad en paradas"
+                "Presencia de puntos ciegos e inseguridad en paradas",
+                "Terrenos o casas abandonadas usadas como aguantaderos",
+                "Falta de respuesta rápida ante denuncias vecinales",
+                "Venta y consumo de sustancias en la vía pública",
+                "Robos y arrebatos reiterados en el barrio"
             ],
             "Servicios Básicos y Redes": [
                 "Pérdida continua de agua potable",
                 "Desbordes cloacales recurrentes en vía pública",
                 "Falta de red de gas natural en el barrio",
-                "Colapso de pluviales y anegamiento por lluvias"
+                "Colapso de pluviales y anegamiento por lluvias",
+                "Baja presión de agua en horas pico",
+                "Cortes de luz frecuentes y prolongados",
+                "Falta de conexión a la red cloacal (pozos ciegos)",
+                "Falta de alumbrado público en calles internas"
             ],
             "Transporte Público y Movilidad": [
                 "Baja frecuencia de líneas de colectivo",
                 "Falta de garitas / Paradas sin refugio ni iluminación",
-                "Costos elevados de la tarifa de transporte"
+                "Costos elevados de la tarifa de transporte",
+                "Recorridos que no cubren todo el barrio",
+                "Falta de rampas y accesibilidad en las unidades",
+                "Mal estado / antigüedad de las unidades de colectivo",
+                "Falta de frecuencias nocturnas o de fin de semana"
             ],
             "Educación y Juventud": [
                 "Infraestructura escolar con problemas de gas/luz",
                 "Falta de espacios y centros de capacitación juvenil municipal",
-                "Ausencia de becas para estudiantes universitarios"
+                "Ausencia de becas para estudiantes universitarios",
+                "Falta de vacantes en jardines y escuelas del barrio",
+                "Falta de espacios deportivos y recreativos para jóvenes",
+                "Escasa oferta de primer empleo o prácticas laborales",
+                "Falta de transporte escolar o boleto estudiantil accesible"
             ],
             "Limpieza, Recolección y Zonas Industriales": [
                 "Microbasurales acumulados en esquinas o baldíos",
                 "Poca frecuencia en la recolección de residuos domésticos",
-                "Abandono e infraestructura deficiente en Parque Industrial"
+                "Abandono e infraestructura deficiente en Parque Industrial",
+                "Falta de contenedores diferenciados / puntos de reciclaje",
+                "Presencia de plagas (roedores, insectos) por acumulación de basura",
+                "Quema de basura a cielo abierto",
+                "Falta de mantenimiento de calles internas en zonas industriales"
             ]
         };
 
