@@ -46,6 +46,104 @@
             opacity: 0.85;
         }
 
+        /* ===== OVERLAY DE CARGA (BLUR AZUL OSCURO CON MOTION GRAPHICS) ===== */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 37, 69, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .loading-card {
+            text-align: center;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 2.5rem;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        /* Motion Graphic Spinner */
+        .motion-spinner-container {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .motion-spinner-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent, #d90429);
+            border-right-color: #0284c7;
+            animation: spinMotion 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        .motion-spinner-icon {
+            font-size: 2.2rem;
+            color: #ffffff;
+            animation: pulseIcon 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes spinMotion {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseIcon {
+            0% { transform: scale(0.85); opacity: 0.7; }
+            100% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .loading-card h3 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .loading-card p {
+            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .loading-dots span {
+            animation: blinkDots 1.4s infinite fill-mode: both;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: .2s; }
+        .loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+        @keyframes blinkDots {
+            0% { opacity: .2; }
+            20% { opacity: 1; }
+            100% { opacity: .2; }
+        }
+
         /* ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== */
         .video-gate-overlay {
             position: fixed;
@@ -614,6 +712,18 @@
 </head>
 <body class="video-gate-active">
 
+    <!-- ===== OVERLAY DE CARGA (AZUL OSCURO BLUR CON MOTION GRAPHIC) ===== -->
+    <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
+        <div class="loading-card">
+            <div class="motion-spinner-container">
+                <div class="motion-spinner-ring"></div>
+                <div class="motion-spinner-icon"><i class="fas fa-bullhorn"></i></div>
+            </div>
+            <h3>Espere un momento<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></h3>
+            <p id="loadingMessageText">Estamos procesando y subiendo la información de forma segura...</p>
+        </div>
+    </div>
+
     <!-- ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== -->
     <div class="video-gate-overlay" id="videoGateOverlay">
         <div class="video-gate-popup">
@@ -913,7 +1023,7 @@
                         <details>
                             <summary>Ver más sobre tus derechos</summary>
                             <div class="privacy-extra">
-                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiendo ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
+                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiending ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
                             </div>
                         </details>
                     </div>
