@@ -6,10 +6,24 @@
  * populateBarrioSelect, populateProblematicaSelect.
  */
 
-let generatedCode = "";
 let pendingPayload = null;
 let currentProfile = "ciudadano";
 let lastSubmittedRecord = null;
+let turnstileToken = null; // token del CAPTCHA (Cloudflare Turnstile); se completa al resolverlo
+
+// Llamada automáticamente por el widget de Turnstile cuando la persona lo resuelve.
+function onTurnstileSuccess(token) {
+    turnstileToken = token;
+    const errBox = document.getElementById('formErrorMsg');
+    if (errBox && errBox.textContent && errBox.textContent.includes('verificación')) showFormError('');
+    updateSubmitButtonState();
+}
+
+// Se llama si el token expira (Turnstile los vence a los pocos minutos) o si falla.
+function onTurnstileExpired() {
+    turnstileToken = null;
+    updateSubmitButtonState();
+}
 
 if (window.L) {
     L.Icon.Default.mergeOptions({
@@ -47,9 +61,6 @@ function initEventListeners() {
 
     on('btnGpsLocation', 'click', getUserGPSLocation);
     on('btnCloseProfileModal', 'click', closeProfileModal);
-    on('btnSendWhatsappCode', 'click', sendWhatsappCode);
-    on('btnConfirmVerifyCode', 'click', confirmVerificationCode);
-    on('btnCloseVerifyModal', 'click', closeVerifyModal);
     on('btnCloseSuccessModal', 'click', closeSuccessModal);
     on('btnWhatsappReceipt', 'click', sendWhatsappReceipt);
     on('btnSkipVideo', 'click', closeVideoGate);
@@ -64,6 +75,34 @@ function initEventListeners() {
 
     const problematicaSelect = document.getElementById('problematica');
     if (problematicaSelect) problematicaSelect.addEventListener('change', loadSubcategories);
+
+    const archivoInput = document.getElementById('archivoAdjunto');
+    if (archivoInput) archivoInput.addEventListener('change', showAttachmentPreview);
+}
+
+// Muestra el nombre y tamaño del archivo elegido, para que la persona confirme
+// que seleccionó lo que quería antes de enviar.
+function showAttachmentPreview() {
+    const fileInput = document.getElementById('archivoAdjunto');
+    const preview = document.getElementById('archivoPreview');
+    if (!fileInput || !preview) return;
+
+    if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+        const icon = file.type.startsWith('image/') ? 'fa-image' : file.type.startsWith('video/') ? 'fa-video' : 'fa-file-pdf';
+        preview.innerHTML = `<i class="fas ${icon}"></i> ${file.name} (${sizeMb} MB) <button type="button" id="btnQuitarAdjunto" aria-label="Quitar archivo"><i class="fas fa-times"></i></button>`;
+        preview.style.display = 'flex';
+        const btnQuitar = document.getElementById('btnQuitarAdjunto');
+        if (btnQuitar) btnQuitar.addEventListener('click', () => {
+            fileInput.value = '';
+            preview.innerHTML = '';
+            preview.style.display = 'none';
+        });
+    } else {
+        preview.innerHTML = '';
+        preview.style.display = 'none';
+    }
 }
 
 function showMapLoadError(containerId) {
@@ -140,25 +179,32 @@ function closeVideoGate() {
     }
 }
 
-/* ============ CONTADORES PÚBLICOS EN VIVO ============ */
-const BASES_IMPARES = { reclamos: 101, jovenes: 103, comerciantes: 105, propuestas: 107, positivos: 109 };
+/* ============ CONTADORES PÚBLICOS EN VIVO ============
+   Cada contador queda OCULTO hasta que la categoría llegue a 100 registros
+   reales o más. A partir de ahí se muestra y anima con el número real (ya no
+   se rellena con ningún valor artificial). */
+const UMBRAL_VISIBILIDAD = 100;
 
-function calcularValorImpar(base, realCount) {
-    let total = base + realCount;
-    if (total % 2 === 0) total += 1;
-    return total;
-}
-
-function animarContador(idElem, objetivo, baseInicial) {
+// idElem: el <span>/<div> del número. cardSelector: la tarjeta completa a
+// mostrar/ocultar (su contenedor .kpi-live-card).
+function animarContador(idElem, cardSelector, valorReal) {
     const elem = document.getElementById(idElem);
-    if (!elem) return;
-    let actual = baseInicial;
+    const card = document.querySelector(cardSelector);
+    if (!elem || !card) return;
+
+    if (valorReal < UMBRAL_VISIBILIDAD) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'flex';
+    let actual = 0;
     const pasos = 25;
-    const incremento = (objetivo - actual) / pasos;
+    const incremento = valorReal / pasos;
     const timer = setInterval(() => {
         actual += incremento;
-        if ((incremento >= 0 && actual >= objetivo) || (incremento < 0 && actual <= objetivo)) {
-            elem.innerText = objetivo;
+        if (actual >= valorReal) {
+            elem.innerText = valorReal;
             clearInterval(timer);
         } else {
             elem.innerText = Math.round(actual);
@@ -181,14 +227,14 @@ async function fetchPublicStats() {
                     positivos: data.total_positivos || 0
                 };
             }
-        } catch (e) { console.log("No se pudieron obtener las métricas de Supabase, se muestran valores base."); }
+        } catch (e) { console.log("No se pudieron obtener las métricas de Supabase."); }
     }
 
-    animarContador('countReclamos', calcularValorImpar(BASES_IMPARES.reclamos, realCounts.reclamos), BASES_IMPARES.reclamos);
-    animarContador('countJovenes', calcularValorImpar(BASES_IMPARES.jovenes, realCounts.jovenes), BASES_IMPARES.jovenes);
-    animarContador('countComerciantes', calcularValorImpar(BASES_IMPARES.comerciantes, realCounts.comerciantes), BASES_IMPARES.comerciantes);
-    animarContador('countPropuestas', calcularValorImpar(BASES_IMPARES.propuestas, realCounts.propuestas), BASES_IMPARES.propuestas);
-    animarContador('countPositivos', calcularValorImpar(BASES_IMPARES.positivos, realCounts.positivos), BASES_IMPARES.positivos);
+    animarContador('countReclamos', '[data-counter-card="reclamos"]', realCounts.reclamos);
+    animarContador('countJovenes', '[data-counter-card="jovenes"]', realCounts.jovenes);
+    animarContador('countComerciantes', '[data-counter-card="comerciantes"]', realCounts.comerciantes);
+    animarContador('countPropuestas', '[data-counter-card="propuestas"]', realCounts.propuestas);
+    animarContador('countPositivos', '[data-counter-card="positivos"]', realCounts.positivos);
 }
 
 /* ============ VALIDACIÓN DE FORMULARIO ============ */
@@ -312,6 +358,9 @@ function setFieldsRequired(profileType) {
     }
 }
 
+let currentSubmitLabel = "Registrar mi Situación / Reclamo";
+let currentSubmitClassExtra = "";
+
 function selectProfile(profileType, evt) {
     currentProfile = profileType;
     document.querySelectorAll('.profile-btn').forEach(btn => btn.classList.remove('active'));
@@ -321,8 +370,6 @@ function selectProfile(profileType, evt) {
     const generalFields = document.querySelectorAll('.general-field');
     const hiddenInput = document.getElementById('tipoPerfil');
     const problematicaSelect = document.getElementById('problematica');
-    const btnSubmit = document.getElementById('btnSubmitForm');
-    const btnSubmitText = document.getElementById('btnSubmitText');
 
     showProfileInfoModal(profileType);
     showFormError('');
@@ -339,35 +386,58 @@ function selectProfile(profileType, evt) {
     if (profileType === 'idea') {
         hiddenInput.value = "Propuesta / Idea Vecinal";
         ideaFields.forEach(f => f.style.display = 'flex');
-        btnSubmit.className = "btn-submit btn-submit-idea";
-        btnSubmitText.innerText = "Enviar Mi Idea / Proyecto Vecinal";
+        currentSubmitClassExtra = "btn-submit-idea";
+        currentSubmitLabel = "Enviar Mi Idea / Proyecto Vecinal";
     } else if (profileType === 'positivo') {
         hiddenInput.value = "Aporte Positivo Vecinal";
         positiveFields.forEach(f => f.style.display = 'flex');
-        btnSubmit.className = "btn-submit btn-submit-positive";
-        btnSubmitText.innerText = "Registrar lo que me Gusta de Neuquén";
+        currentSubmitClassExtra = "btn-submit-positive";
+        currentSubmitLabel = "Registrar lo que me Gusta de Neuquén";
     } else if (profileType === 'comerciante') {
         hiddenInput.value = "Comerciante / Dueño de Negocio";
         merchantFields.forEach(f => f.style.display = 'flex');
-        btnSubmit.className = "btn-submit";
-        btnSubmitText.innerText = "Registrar mi Situación Comercial";
+        currentSubmitClassExtra = "";
+        currentSubmitLabel = "Registrar mi Situación Comercial";
     } else if (profileType === 'joven') {
         hiddenInput.value = "Joven (16 a 30 años)";
         generalFields.forEach(f => f.style.display = 'flex');
         problematicaSelect.value = "Educación y Juventud";
         loadSubcategories();
-        btnSubmit.className = "btn-submit";
-        btnSubmitText.innerText = "Registrar mi Reclamo";
+        currentSubmitClassExtra = "";
+        currentSubmitLabel = "Registrar mi Reclamo";
     } else {
         hiddenInput.value = "Vecino / Ciudadano";
         generalFields.forEach(f => f.style.display = 'flex');
         problematicaSelect.value = "";
         loadSubcategories();
-        btnSubmit.className = "btn-submit";
-        btnSubmitText.innerText = "Registrar mi Situación / Reclamo";
+        currentSubmitClassExtra = "";
+        currentSubmitLabel = "Registrar mi Situación / Reclamo";
     }
 
     setFieldsRequired(profileType);
+    updateSubmitButtonState();
+}
+
+// Actualiza el aspecto del botón de enviar según dos cosas: el perfil elegido
+// (texto y color) y si el CAPTCHA ya está resuelto o no (bloqueado/candado vs
+// habilitado). Se llama al cambiar de perfil y al resolver/vencer el CAPTCHA.
+function updateSubmitButtonState() {
+    const btnSubmit = document.getElementById('btnSubmitForm');
+    const btnSubmitText = document.getElementById('btnSubmitText');
+    const btnSubmitIcon = document.getElementById('btnSubmitIcon');
+    if (!btnSubmit || !btnSubmitText || !btnSubmitIcon) return;
+
+    if (turnstileToken) {
+        btnSubmit.disabled = false;
+        btnSubmit.className = `btn-submit ${currentSubmitClassExtra}`.trim();
+        btnSubmitIcon.className = 'fas fa-paper-plane';
+        btnSubmitText.textContent = currentSubmitLabel;
+    } else {
+        btnSubmit.disabled = true;
+        btnSubmit.className = 'btn-submit btn-submit-locked';
+        btnSubmitIcon.className = 'fas fa-lock';
+        btnSubmitText.textContent = 'Resolvé la verificación para continuar';
+    }
 }
 
 function showProfileInfoModal(profileType) {
@@ -427,6 +497,14 @@ document.getElementById('citizenForm').addEventListener('submit', (e) => {
         return;
     }
 
+    // Verificación antispam por CAPTCHA (reemplaza la verificación anterior por WhatsApp).
+    if (!turnstileToken) {
+        showFormError("Por favor completá la verificación (el casillero de \"No soy un robot\") antes de enviar.");
+        const captchaEl = document.getElementById('turnstileWidget');
+        if (captchaEl) captchaEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
     const payload = { nombre: document.getElementById('nombre').value, contacto: document.getElementById('contacto').value, lat, lng };
     if (!validarRegistroPuro(payload)) return;
 
@@ -472,59 +550,23 @@ document.getElementById('citizenForm').addEventListener('submit', (e) => {
         lat, lng
     };
 
-    // Regla de verificación por edad: a partir de 40 años se envía directo (sin
-    // código de WhatsApp); menores de 40 pasan por la verificación antispam.
-    const EDAD_MINIMA_SIN_VERIFICACION = 40;
-    if (pendingPayload.edad >= EDAD_MINIMA_SIN_VERIFICACION) {
-        finalizeSubmission();
-    } else {
-        openVerifyModal();
-    }
+    finalizeSubmission();
 });
 
-function openVerifyModal() {
-    generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
-    document.getElementById('verifyCodeSection').style.display = 'none';
-    document.getElementById('inputVerifyCode').value = '';
-    document.getElementById('verifyErrorMsg').style.display = 'none';
-    document.getElementById('btnSendWhatsappCode').disabled = false;
-    document.getElementById('verifyModal').style.display = 'flex';
-}
-
-function closeVerifyModal() {
-    document.getElementById('verifyModal').style.display = 'none';
-}
-
-function sendWhatsappCode() {
-    if (!pendingPayload) return;
-    const phone = pendingPayload.contacto.replace(/[-\s()]/g, '');
-    const msg = encodeURIComponent(`Hola! Mi código de verificación para Neuquén Escucha es: ${generatedCode}`);
-    window.open(`https://api.whatsapp.com/send?phone=54${phone.replace(/^54/, '').replace(/^0/, '')}&text=${msg}`, '_blank');
-    document.getElementById('verifyCodeSection').style.display = 'block';
-}
-
-async function confirmVerificationCode() {
-    const entered = document.getElementById('inputVerifyCode').value.trim();
-    const errBox = document.getElementById('verifyErrorMsg');
-    errBox.style.display = 'none';
-
-    if (entered === generatedCode || entered === "1234") {
-        closeVerifyModal();
-        await finalizeSubmission();
-    } else {
-        errBox.innerText = "El código ingresado no es correcto. Verificá tu WhatsApp o intentá nuevamente.";
-        errBox.style.display = 'block';
-    }
-}
-
 // Guarda el registro en Supabase (si está configurado) y resetea el formulario.
-// La llaman tanto el flujo con verificación por WhatsApp como el flujo directo (40+).
 async function finalizeSubmission() {
     if (!pendingPayload) return;
 
+    let attachment = null;
+    try {
+        attachment = await uploadAttachmentIfAny();
+    } catch (err) {
+        return; // el error específico ya se mostró con showFormError()
+    }
+
     if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient.from('registros_vecinales').insert([{
+            const { error } = await supabaseClient.from('registros_vecinales').insert([{
                 tipo_perfil: pendingPayload.tipoPerfil,
                 nombre: pendingPayload.nombre,
                 sexo: pendingPayload.sexo,
@@ -544,13 +586,26 @@ async function finalizeSubmission() {
                 detalle: pendingPayload.detalle,
                 lat: pendingPayload.lat,
                 lng: pendingPayload.lng,
-                estado: pendingPayload.estado
-            }]).select().single();
-            if (!error && data) pendingPayload.id = data.id;
-        } catch (e) { console.error("Error al guardar en Supabase:", e); }
+                estado: pendingPayload.estado,
+                archivo_path: attachment ? attachment.path : null,
+                archivo_nombre_original: attachment ? attachment.nombre : null
+            }]);
+            // No pedimos ".select()" de vuelta a propósito: el público (sin login)
+            // solo tiene permiso de INSERTAR por seguridad, no de leer — pedir el
+            // registro de vuelta chocaría con esa regla y podía frenar el envío.
+            if (error) {
+                console.error("Error al guardar en Supabase:", error);
+                showToast("No se pudo guardar en el servidor. Verificá tu conexión e intentá de nuevo.", "error");
+                return; // no mostramos "éxito" si en realidad no se guardó
+            }
+        } catch (e) {
+            console.error("Error al guardar en Supabase:", e);
+            showToast("No se pudo guardar en el servidor. Verificá tu conexión e intentá de nuevo.", "error");
+            return;
+        }
     }
 
-    if (!pendingPayload.id) pendingPayload.id = Date.now(); // fallback local si no hay Supabase configurado
+    pendingPayload.id = Date.now(); // id local solo para el comprobante en pantalla; el real lo asigna la base de datos
 
     lastSubmittedRecord = pendingPayload;
     fetchPublicStats();
@@ -565,6 +620,49 @@ async function finalizeSubmission() {
     pickerMap.setView([-38.9516, -68.0591], 13);
     selectProfile('ciudadano', { currentTarget: document.querySelector('.profile-btn[data-profile="ciudadano"]') });
     pendingPayload = null;
+    turnstileToken = null;
+    updateSubmitButtonState(); // vuelve a mostrar el botón bloqueado hasta resolver el próximo CAPTCHA
+    if (window.turnstile) { try { turnstile.reset(); } catch (err) { /* noop */ } }
+    const preview = document.getElementById('archivoPreview');
+    if (preview) { preview.innerHTML = ''; preview.style.display = 'none'; }
+}
+
+// Sube el archivo adjunto (foto, video o PDF) a Supabase Storage, si la persona
+// eligió uno. Es opcional: si no hay archivo, no hace nada. Si Supabase no está
+// configurado, avisa y sigue igual (el resto del reclamo se guarda sin adjunto).
+async function uploadAttachmentIfAny() {
+    const fileInput = document.getElementById('archivoAdjunto');
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+
+    const file = fileInput.files[0];
+    const MAX_BYTES = 15 * 1024 * 1024; // 15MB
+    if (file.size > MAX_BYTES) {
+        showFormError("El archivo adjunto no puede pesar más de 15MB.");
+        document.getElementById('archivoAdjunto').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        throw new Error('archivo_demasiado_grande');
+    }
+    const tiposPermitidos = ['image/', 'video/', 'application/pdf'];
+    if (!tiposPermitidos.some(prefix => file.type.startsWith(prefix))) {
+        showFormError("Solo se pueden adjuntar imágenes, videos o archivos PDF.");
+        document.getElementById('archivoAdjunto').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        throw new Error('archivo_tipo_invalido');
+    }
+
+    if (!supabaseClient) {
+        showToast("El adjunto no se subió porque Supabase no está configurado todavía; el resto del reclamo sí se guardó.", "info");
+        return null;
+    }
+
+    const nombreSeguro = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${Date.now()}_${nombreSeguro}`;
+
+    const { error } = await supabaseClient.storage.from('adjuntos-vecinales').upload(path, file);
+    if (error) {
+        console.error('Error subiendo el adjunto:', error);
+        showToast("No se pudo subir el archivo adjunto. El resto del reclamo se envió igual.", "error");
+        return null;
+    }
+    return { path, nombre: file.name };
 }
 
 // Comprobante gratuito por WhatsApp: abre WhatsApp con un mensaje ya armado que la

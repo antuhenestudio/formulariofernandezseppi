@@ -54,9 +54,31 @@ function initAdminEventListeners() {
         auditBody.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-action]');
             if (!btn) return;
+            if (btn.dataset.action === 'ver-adjunto') {
+                verAdjunto(btn.dataset.path);
+                return;
+            }
             const id = parseInt(btn.dataset.id, 10);
             changeRecordStatus(id, btn.dataset.action === 'validar' ? 'valid' : 'spam');
         });
+    }
+}
+
+// Genera un link temporal (válido por 5 minutos) para ver/descargar un adjunto,
+// y lo abre en una pestaña nueva. El link no funciona fuera de esa ventana de
+// tiempo, así los archivos no quedan expuestos con URLs permanentes.
+async function verAdjunto(path) {
+    if (!supabaseClient) {
+        showToast("No se puede abrir el adjunto: Supabase no está configurado.", "error");
+        return;
+    }
+    try {
+        const { data, error } = await supabaseClient.storage.from('adjuntos-vecinales').createSignedUrl(path, 300);
+        if (error || !data) throw error || new Error('Sin datos');
+        window.open(data.signedUrl, '_blank');
+    } catch (err) {
+        console.error('Error generando el link del adjunto:', err);
+        showToast("No se pudo abrir el adjunto.", "error");
     }
 }
 
@@ -159,7 +181,9 @@ function mapDbRowToRecord(row) {
         porQueProyecto: row.por_que_proyecto,
         detalle: row.detalle,
         lat: row.lat,
-        lng: row.lng
+        lng: row.lng,
+        archivoPath: row.archivo_path,
+        archivoNombreOriginal: row.archivo_nombre_original
     };
 }
 
@@ -256,6 +280,15 @@ function applyAnalyticsFilters() {
             if (item.aspectosPositivos && item.aspectosPositivos.length > 0) {
                 subContent = "<b>Positivo:</b> " + item.aspectosPositivos.join(", ");
             }
+            if (item.archivoPath) {
+                const nombreArch = item.archivoNombreOriginal || '';
+                const ext = nombreArch.split('.').pop().toLowerCase();
+                const esImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext);
+                const esVideo = ['mp4', 'mov', 'webm', 'avi'].includes(ext);
+                const icono = esImagen ? 'fa-image' : esVideo ? 'fa-video' : 'fa-file-pdf';
+                const etiqueta = esImagen ? 'Ver foto' : esVideo ? 'Ver video' : 'Ver PDF';
+                subContent += ` <button type="button" class="btn-action-sm btn-adjunto" data-action="ver-adjunto" data-path="${item.archivoPath}"><i class="fas ${icono}"></i> ${etiqueta}</button>`;
+            }
             tr.innerHTML = `
                 <td>#${item.id}</td>
                 <td><strong>${item.nombre}</strong><br><small>${item.tipoPerfil}</small></td>
@@ -332,7 +365,16 @@ function applyAnalyticsFilters() {
             } else {
                 popup += `<b>Área:</b> ${item.problematica}<br><b>Detalle:</b> ${item.detalle}`;
             }
+            if (item.archivoPath) {
+                popup += `<br><button type="button" class="btn-popup-adjunto" data-path="${item.archivoPath}"><i class="fas fa-paperclip"></i> Ver adjunto</button>`;
+            }
             marker.bindPopup(popup);
+            if (item.archivoPath) {
+                marker.on('popupopen', () => {
+                    const btn = document.querySelector(`.btn-popup-adjunto[data-path="${CSS.escape(item.archivoPath)}"]`);
+                    if (btn) btn.addEventListener('click', () => verAdjunto(item.archivoPath));
+                });
+            }
             analyticsMarkersGroup.addLayer(marker);
         });
     }

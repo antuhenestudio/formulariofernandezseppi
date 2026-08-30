@@ -11,10 +11,22 @@
    y "TU_ANON_KEY", el sitio funciona en "modo prototipo" con datos de ejemplo en
    memoria (se pierden al recargar la página) y el login admin acepta cualquier
    usuario/contraseña — útil para probar el diseño, pero NO para producción. */
-const SUPABASE_URL = "https://zjgtckdwqcjkwawrbnzt.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZ3Rja2R3cWNqa3dhd3Jibnp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwNDU1NjAsImV4cCI6MjEwMzYyMTU2MH0.OFmjzOWzWPBz9i2u9VOpEx3FnIMO-25U5fSZ5NC-L-A";
+const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
+const SUPABASE_ANON_KEY = "TU_ANON_KEY";
 const SUPABASE_CONFIGURED = !SUPABASE_URL.includes("TU-PROYECTO") && !SUPABASE_ANON_KEY.includes("TU_ANON_KEY");
-const supabaseClient = (SUPABASE_CONFIGURED && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// Blindado con try/catch a propósito: si SUPABASE_URL quedó mal escrita (por
+// ejemplo sin "https://" al copiarla), esto NO debe romper el resto del sitio.
+// Sin este resguardo, un solo error acá tira abajo TODO shared.js (barrios,
+// categorías, etc.) y con eso deja de funcionar la página entera.
+let supabaseClient = null;
+if (SUPABASE_CONFIGURED && window.supabase) {
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (err) {
+        console.error('No se pudo inicializar Supabase. Revisá que SUPABASE_URL en assets/shared.js sea una URL completa, por ejemplo "https://tuproyecto.supabase.co" (con https:// al principio, sin espacios ni comillas de más).', err);
+    }
+}
 
 /* ============ DATOS COMPARTIDOS ============ */
 const barriosNeuquen = [
