@@ -1043,10 +1043,10 @@
             </div>
         </div>
         <div class="header-actions">
-            <button type="button" class="btn-header-back" id="btnBackToForm" onclick="switchView('citizenView')">
+            <button type="button" class="btn-header-back" id="btnBackToForm">
                 <i class="fas fa-arrow-left"></i> <span>Volver al formulario</span>
             </button>
-            <button type="button" class="btn-header-admin" id="btnAdminAccess" onclick="openLoginModal()">
+            <button type="button" class="btn-header-admin" id="btnAdminAccess">
                 <i class="fas fa-user-shield"></i> <span>Acceso Admin</span>
             </button>
         </div>
@@ -1102,19 +1102,19 @@
 
             <!-- Profile Selector Rounded Buttons -->
             <div class="profile-selector">
-                <button type="button" class="profile-btn active" data-profile="ciudadano" onclick="selectProfile('ciudadano', event)">
+                <button type="button" class="profile-btn active" data-profile="ciudadano">
                     <i class="fas fa-user-check"></i> Vecino / Ciudadano
                 </button>
-                <button type="button" class="profile-btn" data-profile="comerciante" onclick="selectProfile('comerciante', event)">
+                <button type="button" class="profile-btn" data-profile="comerciante">
                     <i class="fas fa-store"></i> Comerciante / Dueño de Negocio
                 </button>
-                <button type="button" class="profile-btn" data-profile="joven" onclick="selectProfile('joven', event)">
+                <button type="button" class="profile-btn" data-profile="joven">
                     <i class="fas fa-graduation-cap"></i> Joven (16 a 30 años)
                 </button>
-                <button type="button" class="profile-btn btn-idea-highlight" data-profile="idea" onclick="selectProfile('idea', event)">
+                <button type="button" class="profile-btn btn-idea-highlight" data-profile="idea">
                     <i class="fas fa-lightbulb" style="color: var(--gold);"></i> Proponer Idea o Proyecto <span class="badge-idea">Nuevo</span>
                 </button>
-                <button type="button" class="profile-btn btn-positive-highlight" data-profile="positivo" onclick="selectProfile('positivo', event)">
+                <button type="button" class="profile-btn btn-positive-highlight" data-profile="positivo">
                     <i class="fas fa-heart" style="color: var(--green-positive);"></i> Lo Positivo de Neuquén <span class="badge-positive">Destacar</span>
                 </button>
             </div>
@@ -1154,7 +1154,7 @@
 
                         <div class="form-group">
                             <label for="barrio"><i class="fas fa-map-marked-alt" style="color: var(--secondary);"></i> Barrio de Neuquén *</label>
-                            <select id="barrio" name="barrio" onchange="centerMapOnBarrio()" required>
+                            <select id="barrio" name="barrio" required>
                                 <option value="">-- Selecciona tu barrio --</option>
                             </select>
                         </div>
@@ -1170,7 +1170,7 @@
                             <div class="geo-picker-container">
                                 <div id="pickerMap"></div>
                                 <div class="geo-controls-bar">
-                                    <button type="button" class="btn-geo-gps" onclick="getUserGPSLocation()">
+                                    <button type="button" class="btn-geo-gps" id="btnGpsLocation">
                                         <i class="fas fa-crosshairs"></i> Usar mi ubicación actual (GPS)
                                     </button>
                                     <div class="geo-coords-readout" id="coordsReadout">
@@ -1279,7 +1279,7 @@
                         <!-- GENERAL CATEGORIES -->
                         <div class="form-group general-field">
                             <label for="problematica"><i class="fas fa-list-alt" style="color: var(--secondary);"></i> Área Temática Principal *</label>
-                            <select id="problematica" name="problematica" onchange="loadSubcategories()">
+                            <select id="problematica" name="problematica">
                                 <option value="">-- Seleccionar área temática --</option>
                                 <option value="Calles, Tránsito y Obras Civiles">Calles, Baches, Tránsito y Obras Civiles</option>
                                 <option value="Comercio, Obras Municipales Arbitrarias y Tasas">Comercio, Obras Municipales Arbitrarias y Tasas</option>
@@ -1334,10 +1334,10 @@
                     </div>
                     
                     <div class="action-export-bar">
-                        <button class="btn-export btn-export-pdf" onclick="exportPDFReport()">
+                        <button class="btn-export btn-export-pdf" id="btnExportPdf">
                             <i class="fas fa-file-pdf"></i> Descargar Reporte PDF
                         </button>
-                        <button class="btn-export btn-export-pptx" onclick="exportPPTXReport()">
+                        <button class="btn-export btn-export-pptx" id="btnExportPptx">
                             <i class="fas fa-file-powerpoint"></i> Descargar Informe PowerPoint
                         </button>
                     </div>
@@ -1356,7 +1356,7 @@
                 <div class="filter-bar">
                     <div class="form-group">
                         <label><i class="fas fa-filter"></i> Estado Auditoría</label>
-                        <select id="filterEstado" onchange="applyAnalyticsFilters()">
+                        <select id="filterEstado">
                             <option value="TODOS">Todos los Estados</option>
                             <option value="valid" selected>Solo Validados (Puros)</option>
                             <option value="suspicious">En Revisión / Sospechosos</option>
@@ -1365,7 +1365,7 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-id-card"></i> Perfil Carga</label>
-                        <select id="filterPerfil" onchange="applyAnalyticsFilters()">
+                        <select id="filterPerfil">
                             <option value="TODOS">Todos los perfiles</option>
                             <option value="Vecino / Ciudadano">Vecino / Ciudadano</option>
                             <option value="Comerciante / Dueño de Negocio">Comerciante</option>
@@ -1376,19 +1376,19 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-map-marker-alt"></i> Barrio</label>
-                        <select id="filterBarrio" onchange="applyAnalyticsFilters()">
+                        <select id="filterBarrio">
                             <option value="TODOS">Todos los barrios</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-folder"></i> Problemática / Eje</label>
-                        <select id="filterProblematica" onchange="applyAnalyticsFilters()">
+                        <select id="filterProblematica">
                             <option value="TODAS">Todas las áreas</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-users"></i> Sexo</label>
-                        <select id="filterSexo" onchange="applyAnalyticsFilters()">
+                        <select id="filterSexo">
                             <option value="TODOS">Todos</option>
                             <option value="Masculino">Masculino</option>
                             <option value="Femenino">Femenino</option>
@@ -1532,7 +1532,7 @@
                 </button>
                 <div class="form-error-msg" id="loginErrorMsg"></div>
             </form>
-            <button class="modal-close-btn" onclick="closeLoginModal()">Cancelar</button>
+            <button class="modal-close-btn" id="btnCloseLoginModal">Cancelar</button>
         </div>
     </div>
 
@@ -1542,7 +1542,7 @@
             <div class="modal-icon icon-info" id="profileModalIcon"><i class="fas fa-info-circle"></i></div>
             <h3 class="modal-title" id="profileModalTitle">Título del Perfil</h3>
             <p class="modal-desc" id="profileModalDesc">Descripción detallada...</p>
-            <button class="btn-submit" onclick="closeProfileModal()" style="margin-top: 0;">¡Entendido, continuar!</button>
+            <button class="btn-submit" id="btnCloseProfileModal" style="margin-top: 0;">¡Entendido, continuar!</button>
         </div>
     </div>
 
@@ -1556,18 +1556,18 @@
                 <i class="fas fa-lock" style="color: #0284c7;"></i> Tu número solo se usa para esta verificación (Ley 25.326 de Protección de Datos Personales). No se publica ni se comparte.
             </p>
             
-            <button class="btn-whatsapp" id="btnSendWhatsappCode" onclick="sendWhatsappCode()">
+            <button class="btn-whatsapp" id="btnSendWhatsappCode">
                 <i class="fab fa-whatsapp"></i> Abrir WhatsApp para recibir código
             </button>
 
             <div id="verifyCodeSection" style="display:none; margin-top: 1.2rem;">
                 <label style="font-size: 0.85rem;"><i class="fas fa-key"></i> Ingresa el código enviado:</label>
                 <input type="text" id="inputVerifyCode" class="code-input-box" maxlength="4" inputmode="numeric" placeholder="0000">
-                <button class="btn-submit" onclick="confirmVerificationCode()"><i class="fas fa-check-circle"></i> Verificar y Confirmar Carga</button>
+                <button class="btn-submit" id="btnConfirmVerifyCode"><i class="fas fa-check-circle"></i> Verificar y Confirmar Carga</button>
                 <div class="form-error-msg" id="verifyErrorMsg"></div>
             </div>
             
-            <button class="modal-close-btn" onclick="closeVerifyModal()">Cancelar</button>
+            <button class="modal-close-btn" id="btnCloseVerifyModal">Cancelar</button>
         </div>
     </div>
 
@@ -1587,7 +1587,7 @@
                 <i class="fab fa-whatsapp"></i> Unirme al Canal de WhatsApp
             </a>
             
-            <button class="modal-close-btn" onclick="closeSuccessModal()">Cerrar esta ventana</button>
+            <button class="modal-close-btn" id="btnCloseSuccessModal">Cerrar esta ventana</button>
         </div>
     </div>
 
@@ -1819,12 +1819,64 @@
             try { initPickerMap(); } catch (err) { console.error('Error inicializando el mapa:', err); showMapLoadError('pickerMap'); }
             try { fetchPublicStats(); } catch (err) { console.error('Error cargando contadores públicos:', err); }
             try { setFieldsRequired('ciudadano'); } catch (err) { console.error('Error configurando campos requeridos:', err); }
+            try { initEventListeners(); } catch (err) { console.error('Error conectando botones:', err); }
 
             if (window.location.pathname.endsWith('/admin') || window.location.search.includes('admin')) {
                 switchView('dashboardView');
                 setTimeout(initDashboardAnalytics, 200);
             }
         });
+
+        // Conecta todos los botones de la página vía addEventListener en lugar de
+        // atributos onclick="..." inline en el HTML. Esto es más compatible con
+        // entornos que restringen la ejecución de JavaScript inline (CSP estricta).
+        function initEventListeners() {
+            const on = (id, evt, fn) => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener(evt, fn);
+                else console.warn(`No se encontró el elemento #${id} para conectar el evento.`);
+            };
+
+            on('btnBackToForm', 'click', () => switchView('citizenView'));
+            on('btnAdminAccess', 'click', openLoginModal);
+            on('btnGpsLocation', 'click', getUserGPSLocation);
+            on('btnExportPdf', 'click', exportPDFReport);
+            on('btnExportPptx', 'click', exportPPTXReport);
+            on('btnCloseLoginModal', 'click', closeLoginModal);
+            on('btnCloseProfileModal', 'click', closeProfileModal);
+            on('btnSendWhatsappCode', 'click', sendWhatsappCode);
+            on('btnConfirmVerifyCode', 'click', confirmVerificationCode);
+            on('btnCloseVerifyModal', 'click', closeVerifyModal);
+            on('btnCloseSuccessModal', 'click', closeSuccessModal);
+
+            document.querySelectorAll('.profile-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => selectProfile(btn.dataset.profile, e));
+            });
+
+            const barrioSelect = document.getElementById('barrio');
+            if (barrioSelect) barrioSelect.addEventListener('change', centerMapOnBarrio);
+
+            const problematicaSelect = document.getElementById('problematica');
+            if (problematicaSelect) problematicaSelect.addEventListener('change', loadSubcategories);
+
+            ['filterEstado', 'filterPerfil', 'filterBarrio', 'filterProblematica', 'filterSexo'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', applyAnalyticsFilters);
+            });
+
+            // Delegación de eventos para los botones Validar/Descartar de la tabla
+            // de auditoría, que se generan dinámicamente con innerHTML.
+            const auditBody = document.getElementById('auditTableBody');
+            if (auditBody) {
+                auditBody.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-action]');
+                    if (!btn) return;
+                    const id = parseInt(btn.dataset.id, 10);
+                    const newStatus = btn.dataset.action === 'validar' ? 'valid' : 'spam';
+                    changeRecordStatus(id, newStatus);
+                });
+            }
+        }
 
         function showMapLoadError(containerId) {
             const el = document.getElementById(containerId);
@@ -2431,8 +2483,8 @@
                         <td>${subContent}</td>
                         <td><span class="status-badge ${item.estado === 'valid' ? 'status-valid' : 'status-spam'}">${item.estado.toUpperCase()}</span></td>
                         <td>
-                            <button class="btn-action-sm btn-approve" onclick="changeRecordStatus(${item.id}, 'valid')">Validar</button>
-                            <button class="btn-action-sm btn-discard" onclick="changeRecordStatus(${item.id}, 'spam')">Descartar</button>
+                            <button class="btn-action-sm btn-approve" data-action="validar" data-id="${item.id}">Validar</button>
+                            <button class="btn-action-sm btn-discard" data-action="descartar" data-id="${item.id}">Descartar</button>
                         </td>
                     `;
                     tbody.appendChild(tr);
