@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuquén Escucha | Registro de Reclamos Vecinales y Proyectos</title>
+    <title>Neuquén Escucha | Registro de Reclamos Vecinales, Proyectos y Lo Positivo</title>
     
     <!-- Librerías de Estilos e Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,6 +26,8 @@
             --gold: #d97706;
             --gold-light: #fef3c7;
             --teal: #0d9488;
+            --green-positive: #16a34a;
+            --green-light: #dcfce7;
             --purple: #7c3aed;
             --light-bg: #f1f5f9;
             --card-bg: #ffffff;
@@ -176,13 +178,25 @@
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             border: 2px solid var(--gold);
             color: #92400e;
-            animation: pulseGlow 2.5s infinite ease-in-out;
         }
 
         .profile-btn.btn-idea-highlight.active {
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
             color: #fff;
             border-color: #b45309;
+        }
+
+        .profile-btn.btn-positive-highlight {
+            background: linear-gradient(135deg, #f0fdf4 0%, var(--green-light) 100%);
+            border: 2px solid var(--green-positive);
+            color: #14532d;
+            animation: pulseGlowGreen 2.5s infinite ease-in-out;
+        }
+
+        .profile-btn.btn-positive-highlight.active {
+            background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
+            color: #fff;
+            border-color: #15803d;
             animation: none;
         }
 
@@ -195,10 +209,19 @@
             font-weight: 800;
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(217, 119, 6, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+        .badge-positive {
+            background: var(--green-positive);
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 2px 7px;
+            border-radius: 50px;
+            font-weight: 800;
+        }
+
+        @keyframes pulseGlowGreen {
+            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
         }
 
         .form-card {
@@ -248,6 +271,47 @@
         input:focus, select:focus, textarea:focus {
             border-color: var(--secondary);
             box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
+        }
+
+        /* Multiselect Checkbox Grid para aspectos positivos */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.8rem;
+            background: #f8fafc;
+            padding: 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            padding: 0.6rem 0.9rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--green-positive);
+            background: #f0fdf4;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--green-positive);
+            cursor: pointer;
+        }
+
+        .checkbox-item span {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-dark);
         }
 
         .geo-picker-container {
@@ -325,6 +389,10 @@
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
         }
 
+        .btn-submit.btn-submit-positive {
+            background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
+        }
+
         /* Modal Base */
         .modal-overlay {
             position: fixed;
@@ -371,6 +439,7 @@
         .modal-icon.icon-success { background: #dcfce7; color: #16a34a; }
         .modal-icon.icon-info { background: #e0f2fe; color: #0284c7; }
         .modal-icon.icon-verify { background: #fef3c7; color: #d97706; }
+        .modal-icon.icon-positive { background: #dcfce7; color: #16a34a; }
 
         .modal-title {
             font-size: 1.4rem;
@@ -515,8 +584,8 @@
 
         .kpi-card-prof.kpi-accent::before { background: var(--accent); }
         .kpi-card-prof.kpi-gold::before { background: var(--gold); }
+        .kpi-card-prof.kpi-green::before { background: var(--green-positive); }
         .kpi-card-prof.kpi-teal::before { background: var(--teal); }
-        .kpi-card-prof.kpi-purple::before { background: var(--purple); }
 
         .kpi-header {
             display: flex;
@@ -654,7 +723,7 @@
             <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
             <div class="brand-text">
                 <h1>Neuquén Escucha</h1>
-                <p>Registro de Reclamos Vecinales y Proyectos</p>
+                <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
             </div>
         </div>
     </header>
@@ -665,7 +734,7 @@
         <section id="citizenView" class="view-section active">
             <div class="hero-banner">
                 <h2>Espacio de Escucha y Participación Ciudadana</h2>
-                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas o proponé tus proyectos para transformar Neuquén.</p>
+                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
             <!-- Profile Selector Rounded Buttons -->
@@ -681,6 +750,9 @@
                 </button>
                 <button type="button" class="profile-btn btn-idea-highlight" onclick="selectProfile('idea')">
                     <i class="fas fa-lightbulb" style="color: var(--gold);"></i> Proponer Idea o Proyecto <span class="badge-idea">Nuevo</span>
+                </button>
+                <button type="button" class="profile-btn btn-positive-highlight" onclick="selectProfile('positivo')">
+                    <i class="fas fa-heart" style="color: var(--green-positive);"></i> Lo Positivo de Neuquén <span class="badge-positive">Destacar</span>
                 </button>
             </div>
 
@@ -802,6 +874,45 @@
                             <input type="text" id="porQueProyecto" name="porQueProyecto" placeholder="Ej. Beneficiará a más de 500 familias que no tienen espacios seguros...">
                         </div>
 
+                        <!-- POSITIVE MULTI-SELECT SPECIFIC -->
+                        <div class="form-group positive-field full-width" style="display:none;">
+                            <label><i class="fas fa-thumbs-up" style="color: var(--green-positive);"></i> ¿Qué aspectos positivos y proyectos valorás de la ciudad? (Podés marcar varios) *</label>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Paseo Costero y Desarrollo de Riberas">
+                                    <span>Paseo Costero y Riberas</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Parques Urbanos y Espacios Verdes">
+                                    <span>Parques Urbanos y Plazas</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Oferta Cultural, Fiestas y Eventos">
+                                    <span>Fiesta de la Confluencia y Cultura</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Desarrollo del Polo Tecnológico">
+                                    <span>Polo Tecnológico e Innovación</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Infraestructura Deportiva y Safaris">
+                                    <span>Pistas de Ciclismo y Deporte</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Limpieza y Mantenimiento de Avenidas">
+                                    <span>Limpieza de Avenidas Principales</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Luminarias LED en Arterias Principales">
+                                    <span>Nuevas Luminarias LED</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Opciones Gastronómicas y Paseos Comerciales">
+                                    <span>Gastronomía y Comercio Local</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- GENERAL CATEGORIES -->
                         <div class="form-group general-field">
                             <label for="problematica">Área Temática Principal *</label>
@@ -827,7 +938,7 @@
 
                         <div class="form-group full-width">
                             <label for="detalle" id="lblDetalle">Descripción Detallada de la Situación *</label>
-                            <textarea id="detalle" name="detalle" rows="4" placeholder="Describa el problema o propuesta..." required></textarea>
+                            <textarea id="detalle" name="detalle" rows="4" placeholder="Describa el problema, propuesta o comentario..." required></textarea>
                         </div>
                     </div>
 
@@ -876,6 +987,7 @@
                             <option value="Comerciante / Dueño de Negocio">Comerciante</option>
                             <option value="Joven (16 a 30 años)">Jóvenes</option>
                             <option value="Propuesta / Idea Vecinal">Proyectos Vecinales</option>
+                            <option value="Aporte Positivo Vecinal">Aportes Positivos</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -914,7 +1026,7 @@
 
                     <div class="kpi-card-prof kpi-accent">
                         <div class="kpi-header">
-                            <span class="kpi-title">Índice Severidad Comercial</span>
+                            <span class="kpi-title">Afectación Comercial</span>
                             <i class="fas fa-store-slash kpi-icon" style="color: var(--accent);"></i>
                         </div>
                         <div class="kpi-value" id="kpiCommercialSeverity" style="color: var(--accent);">0%</div>
@@ -930,6 +1042,15 @@
                         <div class="kpi-subtitle" id="kpiIdeasRatio">0% del total de aportes</div>
                     </div>
 
+                    <div class="kpi-card-prof kpi-green">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Aportes Positivos</span>
+                            <i class="fas fa-heart kpi-icon" style="color: var(--green-positive);"></i>
+                        </div>
+                        <div class="kpi-value" id="kpiPositivos" style="color: var(--green-positive);">0</div>
+                        <div class="kpi-subtitle" id="kpiPositivosRatio">0% valoraciones positivas</div>
+                    </div>
+
                     <div class="kpi-card-prof kpi-teal">
                         <div class="kpi-header">
                             <span class="kpi-title">Barrio Crítico Top</span>
@@ -937,15 +1058,6 @@
                         </div>
                         <div class="kpi-value" id="kpiBarrioTop" style="font-size: 1.25rem; color: var(--teal);">-</div>
                         <div class="kpi-subtitle" id="kpiBarrioTopCount">0 incidentes en zona</div>
-                    </div>
-
-                    <div class="kpi-card-prof kpi-purple">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Área Temática Dominante</span>
-                            <i class="fas fa-chart-pie kpi-icon" style="color: var(--purple);"></i>
-                        </div>
-                        <div class="kpi-value" id="kpiTopCategory" style="font-size: 1.1rem; color: var(--purple);">-</div>
-                        <div class="kpi-subtitle" id="kpiTopCategoryRatio">0% de la masa total</div>
                     </div>
                 </div>
 
@@ -964,6 +1076,13 @@
                     </div>
 
                     <div class="chart-card">
+                        <h4><i class="fas fa-thumbs-up" style="color: var(--green-positive);"></i> Aspectos Positivos Más Valorados</h4>
+                        <div class="chart-container-wrapper">
+                            <canvas id="chartPositivos"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
                         <h4><i class="fas fa-store-alt-slash" style="color: var(--accent);"></i> Causal de Impacto Comercial (Comerciantes)</h4>
                         <div class="chart-container-wrapper">
                             <canvas id="chartMerchants"></canvas>
@@ -974,13 +1093,6 @@
                         <h4><i class="fas fa-users"></i> Demografía por Edades y Sexo</h4>
                         <div class="chart-container-wrapper">
                             <canvas id="chartDemographics"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <h4><i class="fas fa-city"></i> Concentración de Reclamos por Barrio</h4>
-                        <div class="chart-container-wrapper">
-                            <canvas id="chartBarriosTop"></canvas>
                         </div>
                     </div>
                 </div>
@@ -995,7 +1107,7 @@
                                     <th>ID</th>
                                     <th>Perfil / Nombre</th>
                                     <th>Barrio / Teléfono</th>
-                                    <th>Problemática / Título</th>
+                                    <th>Problemática / Título / Aspectos</th>
                                     <th>Estado Auditoría</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -1026,7 +1138,7 @@
         <div class="modal-card">
             <div class="modal-icon icon-verify"><i class="fab fa-whatsapp"></i></div>
             <h3 class="modal-title">Verificación Antispam Gratuita</h3>
-            <p class="modal-desc">Para evitar cargas falsas y validar tu reclamo o proyecto, te enviamos un código de 4 dígitos a tu WhatsApp. Haz clic abajo para recibirlo al instante:</p>
+            <p class="modal-desc">Para evitar cargas falsas y validar tu aporte, te enviamos un código de 4 dígitos a tu WhatsApp. Haz clic abajo para recibirlo al instante:</p>
             
             <button class="btn-whatsapp" id="btnSendWhatsappCode" onclick="sendWhatsappCode()">
                 <i class="fab fa-whatsapp"></i> Abrir WhatsApp para recibir código
@@ -1160,13 +1272,18 @@
                 title: "Espacio de Proyectos e Ideas Vecinales",
                 icon: "<i class='fas fa-lightbulb' style='color:var(--gold);'></i>",
                 desc: "¡Este espacio es para construir! Podés proponer un proyecto que te gustaría ver en tu barrio: un parque lineal, un corredor seguro, un punto de reciclaje o un centro cultural. Contanos el título, por qué es necesario y cómo funcionaría."
+            },
+            "positivo": {
+                title: "Lo Positivo de Neuquén: ¿Qué te gusta de la ciudad?",
+                icon: "<i class='fas fa-heart' style='color:var(--green-positive);'></i>",
+                desc: "¡Queremos saber qué cosas valorás y apoyás de Neuquén! Seleccioná todos los proyectos, obras o espacios que te gustan (Paseo Costero, plazas, eventos culturales, etc.) para potenciar las buenas decisiones y seguir mejorando la ciudad."
             }
         };
 
         let mockDataStore = [
             { id: 1, estado: "valid", tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Mariano Costa", sexo: "Masculino", edad: 46, barrio: "Área Centro Este", contacto: "2994112233", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída drástica de ventas por obras de Bicisendas", nombreComercio: "Calzados Neuquén", ubicacionComercio: "Av. Argentina 320", impactoObra: "Implementación de Bicisenda sin consulta", consecuenciaComercial: "Pérdida drástica de ventas y rentabilidad", detalle: "Perdí el 60% de mis ventas diarias debido a que la bicisenda eliminó la detención rápida de clientes.", lat: -38.9516, lng: -68.0591 },
             { id: 2, estado: "valid", tipoPerfil: "Propuesta / Idea Vecinal", nombre: "Dra. Elena Gómez", sexo: "Femenino", edad: 39, barrio: "San Lorenzo Norte", contacto: "2994000099", problematica: "Propuesta de Proyecto Vecinal", subproblematica: "Infraestructura y Obras para el Barrio", tituloProyecto: "Paseo Deportivo Necochea", ejeIdea: "Infraestructura y Obras para el Barrio", porQueProyecto: "Transformará una arteria peligrosa en un área de salud e integración.", detalle: "Pavimentación con drenaje pluvial, senda peatonal y luces LED.", lat: -38.9431, lng: -68.1095 },
-            { id: 3, estado: "valid", tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Roberto Rossi", sexo: "Masculino", edad: 52, barrio: "Área Centro Oeste", contacto: "2994556677", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída de ventas por cambio de sentido de calles", nombreComercio: "Bazar Belgrano", ubicacionComercio: "Calle Belgrano 450", impactoObra: "Cambio de sentido de circulación de calle", consecuenciaComercial: "Tuve que reducir personal", detalle: "El cambio de sentido desvió el flujo vehicular hacia otras zonas.", lat: -38.9510, lng: -68.0680 },
+            { id: 3, estado: "valid", tipoPerfil: "Aporte Positivo Vecinal", nombre: "Camila Peralta", sexo: "Femenino", edad: 28, barrio: "Alta Balsa", contacto: "2994881122", problematica: "Valoración Positiva de la Ciudad", subproblematica: "Apoyo a Obras y Espacios Públicos", aspectosPositivos: ["Paseo Costero y Desarrollo de Riberas", "Oferta Cultural, Fiestas y Eventos"], detalle: "Excelente el Paseo Costero y los espacios verdes sobre el río Limay, hay que cuidarlos y ampliarlos hacia el oeste.", lat: -38.9350, lng: -68.0800 },
             { id: 4, estado: "valid", tipoPerfil: "Vecino / Ciudadano", nombre: "Juan Pérez", sexo: "Masculino", edad: 38, barrio: "San Lorenzo Norte", contacto: "2994223344", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", detalle: "Calle Necochea destruida. Los colectivos dañan los trenes delanteros.", lat: -38.9431, lng: -68.1095 },
             { id: 5, estado: "valid", tipoPerfil: "Joven (16 a 30 años)", nombre: "Lucas Varela", sexo: "Masculino", edad: 22, barrio: "Cuenca XV", contacto: "2994778899", problematica: "Educación y Juventud", subproblematica: "Falta de espacios y centros de capacitación juvenil municipal", detalle: "No hay talleres de oficios digitales en la zona oeste.", lat: -38.9320, lng: -68.1250 }
         ];
@@ -1177,14 +1294,13 @@
         // MAPS & CHARTS INSTANCES
         let pickerMap = null, pickerMarker = null;
         let analyticsMap = null, heatmapLayer = null, analyticsMarkersGroup = null;
-        let chartCatInstance = null, chartMerchantInstance = null, chartDemoInstance = null, chartBarriosInstance = null;
+        let chartCatInstance = null, chartPositivosInstance = null, chartMerchantInstance = null, chartDemoInstance = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             populateBarrioDropdowns();
             populateFilterCategories();
             initPickerMap();
 
-            // Detect routing for /admin path in GitHub Pages or direct query ?view=admin
             if (window.location.pathname.endsWith('/admin') || window.location.search.includes('admin')) {
                 switchView('dashboardView');
                 setTimeout(initDashboardAnalytics, 200);
@@ -1258,6 +1374,7 @@
             document.querySelectorAll('.profile-btn').forEach(btn => btn.classList.remove('active'));
             const merchantFields = document.querySelectorAll('.merchant-field');
             const ideaFields = document.querySelectorAll('.idea-field');
+            const positiveFields = document.querySelectorAll('.positive-field');
             const generalFields = document.querySelectorAll('.general-field');
             const hiddenInput = document.getElementById('tipoPerfil');
             const problematicaSelect = document.getElementById('problematica');
@@ -1268,24 +1385,36 @@
             problematicaSelect.required = true;
             subproblematicaSelect.required = true;
 
-            // Trigger Pop-up Modal explaining what the user can do in this profile
             showProfileInfoModal(profileType);
 
             if (profileType === 'idea') {
                 event.currentTarget.classList.add('active');
                 hiddenInput.value = "Propuesta / Idea Vecinal";
                 merchantFields.forEach(f => f.style.display = 'none');
+                positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'none');
                 ideaFields.forEach(f => f.style.display = 'flex');
                 problematicaSelect.required = false;
                 subproblematicaSelect.required = false;
                 btnSubmit.className = "btn-submit btn-submit-idea";
                 btnSubmitText.innerText = "Enviar Mi Idea / Proyecto Vecinal";
+            } else if (profileType === 'positivo') {
+                event.currentTarget.classList.add('active');
+                hiddenInput.value = "Aporte Positivo Vecinal";
+                merchantFields.forEach(f => f.style.display = 'none');
+                ideaFields.forEach(f => f.style.display = 'none');
+                generalFields.forEach(f => f.style.display = 'none');
+                positiveFields.forEach(f => f.style.display = 'flex');
+                problematicaSelect.required = false;
+                subproblematicaSelect.required = false;
+                btnSubmit.className = "btn-submit btn-submit-positive";
+                btnSubmitText.innerText = "Registrar lo que me Gusta de Neuquén";
             } else if (profileType === 'comerciante') {
                 event.currentTarget.classList.add('active');
                 hiddenInput.value = "Comerciante / Dueño de Negocio";
                 merchantFields.forEach(f => f.style.display = 'flex');
                 ideaFields.forEach(f => f.style.display = 'none');
+                positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
                 problematicaSelect.value = "Comercio, Obras Municipales Arbitrarias y Tasas";
                 loadSubcategories();
@@ -1296,6 +1425,7 @@
                 hiddenInput.value = "Joven (16 a 30 años)";
                 merchantFields.forEach(f => f.style.display = 'none');
                 ideaFields.forEach(f => f.style.display = 'none');
+                positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
                 problematicaSelect.value = "Educación y Juventud";
                 loadSubcategories();
@@ -1306,6 +1436,7 @@
                 hiddenInput.value = "Vecino / Ciudadano";
                 merchantFields.forEach(f => f.style.display = 'none');
                 ideaFields.forEach(f => f.style.display = 'none');
+                positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
                 problematicaSelect.value = "";
                 loadSubcategories();
@@ -1388,10 +1519,20 @@
 
             let problematicaVal = document.getElementById('problematica').value;
             let subproblematicaVal = document.getElementById('subproblematica').value;
+            let selectedPositivos = [];
 
             if (tipo === "Propuesta / Idea Vecinal") {
                 problematicaVal = "Propuesta de Proyecto Vecinal";
                 subproblematicaVal = document.getElementById('ejeIdea').value;
+            } else if (tipo === "Aporte Positivo Vecinal") {
+                problematicaVal = "Valoración Positiva de la Ciudad";
+                subproblematicaVal = "Apoyo a Obras y Espacios Públicos";
+                const checkboxes = document.querySelectorAll('input[name="aspectosPositivos"]:checked');
+                checkboxes.forEach(cb => selectedPositivos.push(cb.value));
+                if (selectedPositivos.length === 0) {
+                    alert("Por favor seleccione al menos un aspecto positivo que le guste de la ciudad.");
+                    return;
+                }
             }
 
             pendingPayload = {
@@ -1405,6 +1546,7 @@
                 contacto: payload.contacto,
                 problematica: problematicaVal,
                 subproblematica: subproblematicaVal,
+                aspectosPositivos: selectedPositivos,
                 nombreComercio: document.getElementById('nombreComercio') ? document.getElementById('nombreComercio').value : '',
                 ubicacionComercio: document.getElementById('ubicacionComercio') ? document.getElementById('ubicacionComercio').value : '',
                 impactoObra: document.getElementById('impactoObra') ? document.getElementById('impactoObra').value : '',
@@ -1416,7 +1558,6 @@
                 lat: lat, lng: lng
             };
 
-            // Launch Whatsapp Verification Modal
             openVerifyModal();
         });
 
@@ -1434,10 +1575,7 @@
         function sendWhatsappCode() {
             const phone = pendingPayload.contacto.replace(/[-\s()]/g, '');
             const msg = encodeURIComponent(`Hola! Mi código de verificación para Neuquén Escucha es: ${generatedCode}`);
-            
-            // Direct Whatsapp Link (Zero API Cost)
             window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
-            
             document.getElementById('verifyCodeSection').style.display = 'block';
         }
 
@@ -1506,11 +1644,15 @@
             tbody.innerHTML = "";
             mockDataStore.slice(-8).reverse().forEach(item => {
                 const tr = document.createElement('tr');
+                let subContent = item.tituloProyecto || item.problematica;
+                if (item.aspectosPositivos && item.aspectosPositivos.length > 0) {
+                    subContent = "<b>Positivo:</b> " + item.aspectosPositivos.join(", ");
+                }
                 tr.innerHTML = `
                     <td>#${item.id}</td>
                     <td><strong>${item.nombre}</strong><br><small>${item.tipoPerfil}</small></td>
                     <td>${item.barrio}<br><small>${item.contacto}</small></td>
-                    <td>${item.tituloProyecto || item.problematica}</td>
+                    <td>${subContent}</td>
                     <td><span class="status-badge ${item.estado === 'valid' ? 'status-valid' : 'status-spam'}">${item.estado.toUpperCase()}</span></td>
                     <td>
                         <button class="btn-action-sm btn-approve" onclick="changeRecordStatus(${item.id}, 'valid')">Validar</button>
@@ -1534,24 +1676,20 @@
             document.getElementById('kpiIdeas').innerText = ideas.length;
             document.getElementById('kpiIdeasRatio').innerText = `${ideasRatio}% del total de aportes`;
 
+            const positivos = filtered.filter(i => i.tipoPerfil === "Aporte Positivo Vecinal");
+            const positivosRatio = totalCount > 0 ? Math.round((positivos.length / totalCount) * 100) : 0;
+            document.getElementById('kpiPositivos').innerText = positivos.length;
+            document.getElementById('kpiPositivosRatio').innerText = `${positivosRatio}% valoraciones positivas`;
+
             if (totalCount > 0) {
                 const bCount = {};
                 filtered.forEach(i => bCount[i.barrio] = (bCount[i.barrio] || 0) + 1);
                 const topBarrio = Object.keys(bCount).reduce((a, b) => bCount[a] > bCount[b] ? a : b);
                 document.getElementById('kpiBarrioTop').innerText = topBarrio;
                 document.getElementById('kpiBarrioTopCount').innerText = `${bCount[topBarrio]} incidentes en zona`;
-
-                const catCount = {};
-                filtered.forEach(i => catCount[i.problematica] = (catCount[i.problematica] || 0) + 1);
-                const topCat = Object.keys(catCount).reduce((a, b) => catCount[a] > catCount[b] ? a : b);
-                const topCatRatio = Math.round((catCount[topCat] / totalCount) * 100);
-                document.getElementById('kpiTopCategory').innerText = topCat.length > 25 ? topCat.substring(0, 22) + '...' : topCat;
-                document.getElementById('kpiTopCategoryRatio').innerText = `${topCatRatio}% de la masa total`;
             } else {
                 document.getElementById('kpiBarrioTop').innerText = "-";
                 document.getElementById('kpiBarrioTopCount').innerText = "0 incidentes";
-                document.getElementById('kpiTopCategory').innerText = "-";
-                document.getElementById('kpiTopCategoryRatio').innerText = "0%";
             }
 
             // HEATMAP & MAP MARKERS
@@ -1563,22 +1701,29 @@
                 let colorPin = '#134074';
                 if (item.tipoPerfil.includes('Comerciante')) colorPin = '#d90429';
                 if (item.tipoPerfil.includes('Idea')) colorPin = '#d97706';
+                if (item.tipoPerfil.includes('Positivo')) colorPin = '#16a34a';
 
                 const marker = L.circleMarker([item.lat, item.lng], {
-                    radius: item.tipoPerfil.includes('Idea') ? 9 : 7,
+                    radius: item.tipoPerfil.includes('Idea') || item.tipoPerfil.includes('Positivo') ? 9 : 7,
                     fillColor: colorPin, color: '#fff', weight: 2, fillOpacity: 0.95
                 });
 
                 let popup = `<b>${item.nombre}</b> (${item.tipoPerfil})<br><b>Barrio:</b> ${item.barrio}<br>`;
-                popup += item.tipoPerfil.includes('Idea') ? `<b>Proyecto:</b> ${item.tituloProyecto}<br><b>Propuesta:</b> ${item.detalle}` : `<b>Área:</b> ${item.problematica}<br><b>Detalle:</b> ${item.detalle}`;
+                if (item.tipoPerfil.includes('Idea')) {
+                    popup += `<b>Proyecto:</b> ${item.tituloProyecto}<br><b>Propuesta:</b> ${item.detalle}`;
+                } else if (item.tipoPerfil.includes('Positivo')) {
+                    popup += `<b>Aspectos que le gustan:</b> ${item.aspectosPositivos.join(', ')}<br><b>Comentario:</b> ${item.detalle}`;
+                } else {
+                    popup += `<b>Área:</b> ${item.problematica}<br><b>Detalle:</b> ${item.detalle}`;
+                }
                 marker.bindPopup(popup);
                 analyticsMarkersGroup.addLayer(marker);
             });
 
             renderCategoryChart(filtered);
+            renderPositivosChart(filtered);
             renderMerchantChart(filtered);
             renderDemographicsChart(filtered);
-            renderBarriosChart(filtered);
         }
 
         function renderCategoryChart(data) {
@@ -1599,6 +1744,38 @@
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function renderPositivosChart(data) {
+            const ctx = document.getElementById('chartPositivos').getContext('2d');
+            const posData = data.filter(i => i.tipoPerfil === "Aporte Positivo Vecinal");
+            const posCounts = {};
+
+            posData.forEach(item => {
+                if (item.aspectosPositivos) {
+                    item.aspectosPositivos.forEach(asp => {
+                        posCounts[asp] = (posCounts[asp] || 0) + 1;
+                    });
+                }
+            });
+
+            const labels = Object.keys(posCounts);
+            const counts = Object.values(posCounts);
+
+            if (chartPositivosInstance) chartPositivosInstance.destroy();
+            chartPositivosInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ["Paseo Costero", "Fiesta Confluencia", "Parques"],
+                    datasets: [{
+                        label: 'Votos Positivos',
+                        data: counts.length > 0 ? counts : [1, 1, 1],
+                        backgroundColor: '#16a34a',
+                        borderRadius: 6
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
@@ -1642,24 +1819,6 @@
             });
         }
 
-        function renderBarriosChart(data) {
-            const ctx = document.getElementById('chartBarriosTop').getContext('2d');
-            const bCounts = {};
-            data.forEach(i => bCounts[i.barrio] = (bCounts[i.barrio] || 0) + 1);
-            const sortedBarrios = Object.keys(bCounts).sort((a,b) => bCounts[b] - bCounts[a]).slice(0, 5);
-            const sortedCounts = sortedBarrios.map(b => bCounts[b]);
-
-            if (chartBarriosInstance) chartBarriosInstance.destroy();
-            chartBarriosInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: sortedBarrios,
-                    datasets: [{ label: 'Reclamos / Proyectos', data: sortedCounts, backgroundColor: '#0d9488', borderRadius: 6 }]
-                },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        }
-
         /* HIGH QUALITY PDF REPORT GENERATOR */
         function exportPDFReport() {
             const element = document.getElementById('reportExportContainer');
@@ -1684,7 +1843,7 @@
             let slide1 = pptx.addSlide();
             slide1.background = { color: "0B2545" };
             slide1.addText("Neuquén Escucha", { x: 1, y: 1.5, fontSize: 36, color: "FFFFFF", bold: true });
-            slide1.addText("Informe Ejecutivo de Reclamos Vecinales y Proyectos", { x: 1, y: 2.3, fontSize: 18, color: "94A3B8" });
+            slide1.addText("Informe Ejecutivo de Reclamos Vecinales, Proyectos y Aportes Positivos", { x: 1, y: 2.3, fontSize: 18, color: "94A3B8" });
             slide1.addText("Iniciativa impulsada por el Ing. Rubén Fernández Seppi", { x: 1, y: 3.5, fontSize: 14, color: "D97706", italic: true });
 
             let slide2 = pptx.addSlide();
@@ -1693,16 +1852,16 @@
             const total = document.getElementById('kpiTotal').innerText;
             const severity = document.getElementById('kpiCommercialSeverity').innerText;
             const ideas = document.getElementById('kpiIdeas').innerText;
-            const barrioTop = document.getElementById('kpiBarrioTop').innerText;
+            const positivos = document.getElementById('kpiPositivos').innerText;
 
             slide2.addTable([
                 [
                     { text: "Total Registros", options: { bold: true, fill: "F1F5F9" } },
                     { text: "Afectación Comercial", options: { bold: true, fill: "F1F5F9" } },
                     { text: "Proyectos Vecinales", options: { bold: true, fill: "F1F5F9" } },
-                    { text: "Barrio Top Reclamos", options: { bold: true, fill: "F1F5F9" } }
+                    { text: "Aportes Positivos", options: { bold: true, fill: "F1F5F9" } }
                 ],
-                [total, severity, ideas, barrioTop]
+                [total, severity, ideas, positivos]
             ], { x: 0.8, y: 1.5, w: 8.4, colW: [2.1, 2.1, 2.1, 2.1], border: { pt: "1", color: "CBD5E1" } });
 
             pptx.writeFile({ filename: "Presentacion_Ejecutiva_Neuquen_Escucha.pptx" });
