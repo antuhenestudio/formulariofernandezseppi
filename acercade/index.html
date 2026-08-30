@@ -9,10 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/shared.css">
     <style>
-        /* ============ TODO: reemplazar cuando llegue el contenido real ============
-           Buscá la palabra "PLACEHOLDER" en este archivo — son los lugares donde
-           va la foto, la bio, la trayectoria y la motivación reales. */
-
         .about-hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: #fff;
@@ -31,20 +27,6 @@
             background: rgba(255,255,255,0.1);
         }
 
-        .about-photo-placeholder {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 5px dashed rgba(255,255,255,0.4);
-            margin: 0 auto 1.4rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: rgba(255,255,255,0.5);
-            background: rgba(255,255,255,0.08);
-        }
-
         .about-hero h1 {
             font-size: 2rem;
             font-weight: 800;
@@ -55,6 +37,8 @@
             font-size: 1.05rem;
             color: #cbd5e1;
             font-weight: 600;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .about-content {
@@ -90,19 +74,10 @@
             color: var(--text-dark);
             line-height: 1.75;
             margin-bottom: 0.9rem;
+            text-align: justify;
         }
 
         .about-card p:last-child { margin-bottom: 0; }
-
-        .placeholder-note {
-            background: #fef3c7;
-            border: 1px dashed var(--gold);
-            border-radius: 8px;
-            padding: 0.8rem 1rem;
-            font-size: 0.82rem;
-            color: #92400e;
-            font-weight: 600;
-        }
 
         .timeline {
             display: flex;
@@ -131,24 +106,27 @@
             color: var(--text-dark);
             line-height: 1.6;
             padding-top: 0.15rem;
+            text-align: justify;
         }
 
         .about-cta {
             text-align: center;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .about-cta a.btn-submit {
             display: inline-flex;
             width: auto;
-            padding: 0.9rem 2.2rem;
+            padding: 1rem 2.5rem;
             text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
         }
 
         @media (max-width: 600px) {
             .about-hero { padding: 2.2rem 5% 3.5rem; }
             .about-hero h1 { font-size: 1.5rem; }
-            .about-photo, .about-photo-placeholder { width: 130px; height: 130px; }
+            .about-photo { width: 130px; height: 130px; }
             .about-card { padding: 1.4rem; }
         }
     </style>
@@ -171,50 +149,45 @@
     </header>
 
     <section class="about-hero">
-        <!-- PLACEHOLDER: reemplazar por la foto real -->
-        <!-- <img src="foto-ruben.jpg" alt="Rubén Fernández Seppi" class="about-photo"> -->
-        <div class="about-photo-placeholder">
-           
-        </div>
+        <img src="https://lh3.googleusercontent.com/d/11xJjcs2o6uZb8CDYXTbSTuPumSIbQXzv" alt="Ing. Rubén Fernández Seppi" class="about-photo">
         <h1>Ing. Rubén Fernández Seppi</h1>
-        <p class="about-role">Impulsor de Neuquén Escucha | Ingeniero Civil, Empresario de Oil & Gas y Escritor. Un vecino comprometido en transformar la escucha activa en soluciones reales para nuestra comunidad. </p>
+        <p class="about-role">Impulsor de Neuquén Escucha | Ingeniero Civil, Empresario de Oil & Gas y Escritor.<br>Un vecino comprometido en transformar la escucha activa en soluciones reales para nuestra comunidad.</p>
     </section>
 
     <main class="about-content">
 
         <div class="about-card">
             <h2><i class="fas fa-quote-left"></i> Quién es</h2>
-            <p class="placeholder-note">
-                <p> Soy Rubén Fernández Seppi: vecino de Neuquén, Ingeniero Civil, empresario de la industria energética, escritor y, sobre todo, padre de cuatro hijos. A lo largo de más de 36 años he tenido el orgullo de planificar y ejecutar obras civiles, viales e hidráulicas estratégicas que vieron crecer a nuestra provincia. Mi trabajo en el desarrollo de Vaca Muerta, sumado a la experiencia adquirida recorriendo más de 40 países, me demostró una verdad fundamental: el verdadero potencial de un lugar no está solo en sus recursos, sino en la fuerza, el trabajo y las ideas de su gente.</p>
-                <p> Desde mi rol al frente del Clúster Pymes Neuquinas y en la gestión de proyectos de ingeniería, he comprobado que el progreso verdadero nace cuando nos escuchamos de verdad. Inspirado por el espíritu investigador de mi madre y por la convicción de que el conocimiento debe compartirse, escribo libros para conectar con las personas y abrir conversaciones verdaderas. Hoy, pongo toda esa trayectoria técnica y humana a disposición de Neuquén, convencido de que juntos podemos construir la ciudad moderna, justa y próspera que merecemos.</p>
-            </p>
+            <p>Soy <strong>Rubén Fernández Seppi</strong>: vecino de Neuquén, <strong>Ingeniero Civil</strong>, empresario de la industria energética, escritor y, sobre todo, <strong>padre de 4 hijos</strong>. A lo largo de más de <strong>36 años de experiencia</strong>, he tenido el orgullo de planificar y ejecutar obras civiles, viales e hidráulicas estratégicas que acompañaron el crecimiento de nuestra provincia. Mi trabajo en el desarrollo de <strong>Vaca Muerta</strong>, sumado a la vivencia adquirida recorriendo más de <strong>40 países</strong>, me demostró una verdad fundamental: el verdadero potencial de un lugar no está solo en sus recursos, sino en la fuerza, el trabajo y las ideas de su gente.</p>
+            <p>Desde mi rol al frente del <strong>Clúster Pymes Neuquinas</strong> y en la gestión de proyectos de ingeniería, he comprobado que el progreso verdadero nace cuando nos escuchamos de verdad. Inspirado por el espíritu investigador de mi madre y por la convicción de que el conocimiento debe compartirse, escribo libros para conectar con las personas y abrir conversaciones verdaderas. Hoy, pongo toda esa <strong>trayectoria técnica y humana a disposición de Neuquén</strong>, convencido de que juntos podemos construir la ciudad moderna, justa y próspera que merecemos.</p>
         </div>
 
         <div class="about-card">
             <h2><i class="fas fa-road"></i> Trayectoria</h2>
             <div class="timeline">
-                <!-- PLACEHOLDER: agregar un bloque más por cada hito de la trayectoria -->
                 <div class="timeline-item">
-                    <span class="timeline-year">AAAA</span>
-                    <span class="timeline-desc">PLACEHOLDER — Hito de trayectoria (estudios, cargo, proyecto, etc.)</span>
+                    <span class="timeline-year">1990 - Presente</span>
+                    <span class="timeline-desc"><strong>Liderazgo y Gestión de Ingeniería:</strong> Como Socio Gerente de <strong>Seppi y Asociados</strong> y <strong>FERSE SRL</strong>, he liderado obras civiles, asesoramientos estratégicos y proyectos de ingeniería para el sector energético e industrial.</span>
                 </div>
                 <div class="timeline-item">
-                    <span class="timeline-year">AAAA</span>
-                    <span class="timeline-desc">PLACEHOLDER — Otro hito de trayectoria.</span>
+                    <span class="timeline-year">2005 - 2010</span>
+                    <span class="timeline-desc"><strong>Formación Académica Ejecutiva:</strong> Posgrado en <strong>Máster en Gestión Empresaria</strong> por la Universidad Nacional del Comahue, complementando el título de grado en <strong>Ingeniería Civil</strong>.</span>
                 </div>
                 <div class="timeline-item">
-                    <span class="timeline-year">AAAA</span>
-                    <span class="timeline-desc">PLACEHOLDER — Otro hito de trayectoria.</span>
+                    <span class="timeline-year">Gestión Actual</span>
+                    <span class="timeline-desc"><strong>Compromiso con el Desarrollo Pyme:</strong> Presidente del <strong>Clúster Pymes Neuquinas</strong>, Vicepresidente de Confluencia Rep. y miembro activo de <strong>MONAPY</strong>, impulsando la cadena de valor regional en torno a Vaca Muerta.</span>
+                </div>
+                <div class="timeline-item">
+                    <span class="timeline-year">2024</span>
+                    <span class="timeline-desc"><strong>Difusión Cultural y Literatura:</strong> Autor de las obras <em>"De Neuquén a Rusia – El viaje de las mil sensaciones"</em> y <em>"América y nuestras almas al desnudo"</em>, presentadas en la Feria Internacional del Libro.</span>
                 </div>
             </div>
         </div>
 
         <div class="about-card">
             <h2><i class="fas fa-heart"></i> Por qué hace lo que hace</h2>
-            <p class="placeholder-note">
-                <i class="fas fa-info-circle"></i> PLACEHOLDER — Acá va la motivación personal: por qué se involucró
-                en esto, qué lo mueve, qué quiere lograr para Neuquén. Es la parte más "humana" de la página.
-            </p>
+            <p>Llegó el momento de pasar del diagnóstico a las soluciones reales. Desarrollé la iniciativa independiente <strong>Neuquén Escucha</strong> porque entiendo que los grandes cambios no se diseñan desde un escritorio cerrado, sino caminando los barrios, conversando de frente con los vecinos, apoyando a los comerciantes que sostienen sus negocios y dando espacio a los jóvenes que buscan un futuro en nuestra provincia.</p>
+            <p>No me mueven los intereses tradicionales ni las promesas vacías: me mueve la <strong>responsabilidad ética y profesional</strong> de volcar más de tres décadas de experiencia al servicio de quienes más lo necesitan. Creo profundamente en un Neuquén donde las buenas ideas se transformen en proyectos concretos. Si queremos una ciudad mejor, <strong>el momento de construirla e involucrarse es ahora</strong>.</p>
         </div>
 
         <div class="about-cta">
