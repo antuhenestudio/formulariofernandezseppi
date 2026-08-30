@@ -1,13 +1,14 @@
 # Neuquén Escucha
 
-Plataforma de participación ciudadana: los vecinos cargan reclamos, proyectos e ideas desde `index.html`, y el equipo del Ing. Rubén Fernández Seppi los audita y analiza desde `admin.html`.
+Plataforma de participación ciudadana: los vecinos cargan reclamos, proyectos e ideas desde `index.html`, y el equipo del Ing. Rubén Fernández Seppi los audita y analiza desde `admin/` (el panel **no tiene ningún botón ni link visible en la web pública** — se accede escribiendo la URL directamente).
 
 ## Estructura del proyecto
 
 ```
 /
 ├── index.html              → Formulario público (lo que ve el vecino)
-├── admin.html               → Panel de estadísticas (lo que ves vos/tu equipo)
+├── admin/
+│   └── index.html            → Panel de estadísticas (URL: /admin/, sin link público)
 ├── assets/
 │   ├── shared.css           → Estilos comunes a ambas páginas
 │   ├── shared.js             → Config de Supabase + datos comunes (barrios, categorías)
@@ -17,11 +18,11 @@ Plataforma de participación ciudadana: los vecinos cargan reclamos, proyectos e
 └── README.md                 → Este archivo
 ```
 
-**Regla de oro:** si necesitás cambiar algo del panel de estadísticas, tocás `admin.html` / `admin.js` y no rozás el formulario público. Si necesitás cambiar algo del formulario, tocás `index.html` / `citizen.js` y no rozás el panel. Los barrios, categorías y la configuración de Supabase están en un solo lugar (`assets/shared.js`) para no tener que duplicar cambios en los dos archivos.
+**Regla de oro:** si necesitás cambiar algo del panel de estadísticas, tocás `admin/index.html` / `admin.js` y no rozás el formulario público. Si necesitás cambiar algo del formulario, tocás `index.html` / `citizen.js` y no rozás el panel. Los barrios, categorías y la configuración de Supabase están en un solo lugar (`assets/shared.js`) para no tener que duplicar cambios en los dos archivos.
 
 ## 1. Poner en marcha sin Supabase (modo prototipo)
 
-Si subís el repositorio a GitHub Pages tal cual, **ya funciona**: el formulario guarda los datos solo en la memoria del navegador (se pierden al recargar), y `admin.html` te deja entrar con cualquier usuario/contraseña, mostrando datos de ejemplo. Sirve para mostrar el diseño, probar el flujo, o hacer una demo — **no para producción real**, porque los datos no se guardan de verdad y cualquiera puede entrar al panel.
+Si subís el repositorio a GitHub Pages tal cual, **ya funciona**: el formulario guarda los datos solo en la memoria del navegador (se pierden al recargar), y el panel (`/admin/`) te deja entrar con cualquier usuario/contraseña, mostrando datos de ejemplo. Sirve para mostrar el diseño, probar el flujo, o hacer una demo — **no para producción real**, porque los datos no se guardan de verdad y cualquiera puede entrar al panel.
 
 ## 2. Configurar Supabase (para datos reales y login seguro)
 
@@ -43,7 +44,7 @@ Supabase es gratis para este volumen de uso (plan Free: hasta 500MB de base de d
      ```sql
      update public.profiles set role = 'super_admin' where email = 'tu-email@ejemplo.com';
      ```
-6. Subí los cambios a GitHub. Listo: el formulario ya guarda en Supabase de verdad, y `admin.html` solo deja entrar a los usuarios con rol asignado.
+6. Subí los cambios a GitHub. Listo: el formulario ya guarda en Supabase de verdad, y el panel solo deja entrar a los usuarios con rol asignado.
 
 ### Seguridad: cómo queda protegido
 
@@ -79,8 +80,23 @@ Aparece como un popup ajustado a la pantalla apenas se entra al sitio, con volum
 1. Subí todo este repositorio a GitHub.
 2. En el repositorio: **Settings → Pages → Branch**: elegí `main` (o la rama que uses) y carpeta `/ (root)`.
 3. En un par de minutos el sitio queda disponible en `https://tu-usuario.github.io/nombre-del-repo/`.
-4. El link al panel es `https://tu-usuario.github.io/nombre-del-repo/admin.html`.
+4. El panel queda en `https://tu-usuario.github.io/nombre-del-repo/admin/` — **no hay ningún botón que lleve ahí desde la página pública**, a propósito. Guardalo en tus favoritos o compartilo solo con quien tenga que usarlo.
 
-## 6. Barrios, categorías y subproblemáticas
+**Importante — esto no reemplaza la seguridad real:** que la URL no tenga un link visible solo evita que un visitante casual la encuentre por accidente; no es una barrera real (alguien podría adivinarla, encontrarla en el historial del navegador, en una captura, etc.). La protección de verdad sigue siendo el login con usuario y contraseña de Supabase Auth que ya tiene el panel — eso es lo que impide que alguien sin credenciales válidas vea los datos, aunque llegue a la URL.
+
+## 6. Evitar que Supabase pause el proyecto por falta de uso
+
+El plan gratuito de Supabase **pausa el proyecto después de 7 días sin ninguna llamada a la API** (no borra los datos, pero el sitio deja de responder hasta reactivarlo manualmente desde el dashboard). Este repositorio incluye un workflow de GitHub Actions (`.github/workflows/keep-alive.yml`) que hace una consulta mínima cada 3-4 días para que esto nunca pase, sin costo extra.
+
+Para activarlo (una sola vez):
+1. En GitHub: **Settings → Secrets and variables → Actions → New repository secret**.
+2. Creá dos secrets con los mismos valores que pusiste en `assets/shared.js`:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+3. Listo. Podés probarlo manualmente desde la pestaña **Actions** del repositorio → `Mantener Supabase activo` → botón **Run workflow**.
+
+Si en algún momento el proyecto crece y necesita estar siempre disponible sin depender de este workaround (por ejemplo, si empieza a recibir tráfico real de forma sostenida), la alternativa definitiva es pasar al plan **Pro de Supabase (USD 25/mes)**, que no pausa proyectos y suma backups diarios.
+
+## 7. Barrios, categorías y subproblemáticas
 
 Todo vive en `assets/shared.js`, en las constantes `barriosNeuquen`, `subcategoriasDict` y `barrioCoords`. Agregar un barrio o una subproblemática nueva es agregar una línea ahí — se refleja automáticamente en el formulario público y en los filtros del panel, sin tocar ningún otro archivo.

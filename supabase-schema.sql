@@ -37,8 +37,16 @@ create table if not exists public.registros_vecinales (
     por_que_proyecto        text,
     detalle                 text,
     lat                     double precision,
-    lng                     double precision
+    lng                     double precision,
+    archivo_path            text,  -- ruta del adjunto (foto/video/PDF) en Supabase Storage, si cargó uno
+    archivo_nombre_original text   -- nombre original del archivo, para mostrarlo en el panel admin
 );
+
+-- Si ya habías creado la tabla antes (sin estas dos columnas), esto se las
+-- agrega sin tocar ni borrar ningún dato existente. Es seguro correrlo aunque
+-- ya hayas ejecutado este script una vez.
+alter table public.registros_vecinales add column if not exists archivo_path text;
+alter table public.registros_vecinales add column if not exists archivo_nombre_original text;
 
 comment on table public.registros_vecinales is 'Reclamos, proyectos y aportes positivos cargados por vecinos en index.html';
 
@@ -171,7 +179,49 @@ grant execute on function public.get_public_stats() to anon, authenticated;
 
 
 -- ============================================================================
--- 5) CÓMO CREAR TU PRIMER USUARIO ADMIN (hacelo una sola vez)
+-- 5) ALMACENAMIENTO DE ADJUNTOS (fotos, videos, PDF)
+--    Crea el "bucket" (carpeta de almacenamiento) donde se guardan los
+--    archivos que suben los vecinos desde index.html, con las mismas reglas
+--    de seguridad que el resto: cualquiera puede subir, pero solo el panel
+--    admin (usuarios con rol autorizado) puede verlos/descargarlos.
+-- ============================================================================
+
+-- Crea el bucket "adjuntos-vecinales" como privado (no público): los archivos
+-- no son accesibles por URL directa, solo mediante un link temporal que genera
+-- el panel admin al pedirlo (createSignedUrl), y solo si estás logueado.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('adjuntos-vecinales', 'adjuntos-vecinales', false, 15728640) -- 15MB máximo por archivo
+on conflict (id) do nothing;
+
+-- Cualquier persona (anónima) puede SUBIR un archivo a este bucket — es lo que
+-- hace index.html al adjuntar una foto/video/PDF — pero no puede leer ni
+-- listar lo que ya subieron otros.
+drop policy if exists "subida_publica_adjuntos" on storage.objects;
+create policy "subida_publica_adjuntos"
+    on storage.objects
+    for insert
+    to anon
+    with check (bucket_id = 'adjuntos-vecinales');
+
+-- Solo usuarios logueados con rol autorizado pueden LEER/DESCARGAR los
+-- adjuntos — es lo que hace admin.html al mostrar "Ver adjunto".
+drop policy if exists "lectura_solo_admins_adjuntos" on storage.objects;
+create policy "lectura_solo_admins_adjuntos"
+    on storage.objects
+    for select
+    to authenticated
+    using (
+        bucket_id = 'adjuntos-vecinales'
+        and exists (
+            select 1 from public.profiles
+            where profiles.id = auth.uid()
+              and profiles.role in ('super_admin', 'admin', 'visor')
+        )
+    );
+
+
+-- ============================================================================
+-- 6) CÓMO CREAR TU PRIMER USUARIO ADMIN (hacelo una sola vez)
 -- ============================================================================
 -- 1. En el panel de Supabase: Authentication > Users > "Add user" > "Create
 --    new user". Cargá tu email y una contraseña segura. Confirmá el email

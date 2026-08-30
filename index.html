@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     <!-- Estilos: primero los compartidos, después los propios de esta página -->
     <link rel="stylesheet" href="assets/shared.css">
@@ -452,6 +453,59 @@
             display: none !important;
         }
 
+        /* Adjuntar foto/video/PDF */
+        input[type="file"] {
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+        }
+
+        .archivo-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .archivo-preview {
+            align-items: center;
+            gap: 8px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+
+        .archivo-preview button {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* CAPTCHA (Cloudflare Turnstile) */
+        .turnstile-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.4rem;
+        }
+
+        /* Botón "bloqueado" mientras no se resuelve el CAPTCHA: se ve visiblemente
+           deshabilitado (gris, candado, sin sombra) para que quede claro que hay
+           que resolver la verificación antes de poder enviar. */
+        .btn-submit.btn-submit-locked {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+
+        .btn-submit.btn-submit-locked:hover {
+            background: #94a3b8;
+            transform: none;
+        }
+
 .btn-submit.btn-submit-idea {
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
         }
@@ -489,11 +543,6 @@
                 <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
             </div>
         </div>
-        <div class="header-actions">
-            <a href="admin.html" class="btn-header-admin">
-                <i class="fas fa-user-shield"></i> <span>Acceso Admin</span>
-            </a>
-        </div>
     </header>
 
     <main class="main-wrapper">
@@ -503,40 +552,41 @@
                 <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
-            <!-- LIVE COUNTER BANNER (compacto) -->
+            <!-- LIVE COUNTER BANNER (compacto) — cada tarjeta arranca oculta y solo se
+                 muestra cuando esa categoría llega a 100 registros reales o más. -->
             <div class="kpi-live-counter-container">
-                <div class="kpi-live-card">
+                <div class="kpi-live-card" data-counter-card="reclamos" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-bullhorn" style="color: var(--accent);"></i></div>
                     <div>
-                        <div class="kpi-live-number" id="countReclamos">101</div>
+                        <div class="kpi-live-number" id="countReclamos">0</div>
                         <div class="kpi-live-label">Reclamos</div>
                     </div>
                 </div>
-                <div class="kpi-live-card">
+                <div class="kpi-live-card" data-counter-card="jovenes" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-graduation-cap" style="color: var(--teal);"></i></div>
                     <div>
-                        <div class="kpi-live-number" id="countJovenes">103</div>
+                        <div class="kpi-live-number" id="countJovenes">0</div>
                         <div class="kpi-live-label">Jóvenes</div>
                     </div>
                 </div>
-                <div class="kpi-live-card">
+                <div class="kpi-live-card" data-counter-card="comerciantes" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-store" style="color: #c2410c;"></i></div>
                     <div>
-                        <div class="kpi-live-number" id="countComerciantes">105</div>
+                        <div class="kpi-live-number" id="countComerciantes">0</div>
                         <div class="kpi-live-label">Comercios</div>
                     </div>
                 </div>
-                <div class="kpi-live-card">
+                <div class="kpi-live-card" data-counter-card="propuestas" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-lightbulb" style="color: var(--gold);"></i></div>
                     <div>
-                        <div class="kpi-live-number" id="countPropuestas">107</div>
+                        <div class="kpi-live-number" id="countPropuestas">0</div>
                         <div class="kpi-live-label">Propuestas</div>
                     </div>
                 </div>
-                <div class="kpi-live-card">
+                <div class="kpi-live-card" data-counter-card="positivos" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-heart" style="color: var(--green-positive);"></i></div>
                     <div>
-                        <div class="kpi-live-number" id="countPositivos">109</div>
+                        <div class="kpi-live-number" id="countPositivos">0</div>
                         <div class="kpi-live-label">Positivos</div>
                     </div>
                 </div>
@@ -745,6 +795,13 @@
                             <label for="detalle" id="lblDetalle"><i class="fas fa-align-left" style="color: var(--secondary);"></i> Descripción Detallada de la Situación *</label>
                             <textarea id="detalle" name="detalle" rows="4" placeholder="Describa el problema, propuesta o comentario..." required></textarea>
                         </div>
+
+                        <div class="form-group full-width">
+                            <label for="archivoAdjunto"><i class="fas fa-paperclip" style="color: var(--secondary);"></i> Adjuntar foto, video o PDF (opcional)</label>
+                            <input type="file" id="archivoAdjunto" name="archivoAdjunto" accept="image/*,video/*,application/pdf">
+                            <div class="archivo-hint">Máximo 15MB. Útil para mostrar el estado de una calle, un plano de proyecto, etc.</div>
+                            <div class="archivo-preview" id="archivoPreview" style="display:none;"></div>
+                        </div>
                     </div>
 
                     <div class="privacy-notice-box">
@@ -758,8 +815,12 @@
                         </details>
                     </div>
 
-                    <button type="submit" class="btn-submit" id="btnSubmitForm">
-                        <i class="fas fa-paper-plane"></i> <span id="btnSubmitText">Registrar mi Situación / Reclamo</span>
+                    <div class="turnstile-wrap" id="turnstileWidget">
+                        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"></div>
+                    </div>
+
+                    <button type="submit" class="btn-submit btn-submit-locked" id="btnSubmitForm" disabled>
+                        <i class="fas fa-lock" id="btnSubmitIcon"></i> <span id="btnSubmitText">Resolvé la verificación para continuar</span>
                     </button>
                     <div class="form-error-msg" id="formErrorMsg"></div>
                 </form>
@@ -774,30 +835,6 @@
             <h3 class="modal-title" id="profileModalTitle">Título del Perfil</h3>
             <p class="modal-desc" id="profileModalDesc">Descripción detallada...</p>
             <button class="btn-submit" id="btnCloseProfileModal" style="margin-top: 0;">¡Entendido, continuar!</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="verifyModal">
-        <div class="modal-card">
-            <div class="modal-icon icon-verify"><i class="fab fa-whatsapp"></i></div>
-            <h3 class="modal-title">Verificación Antispam Gratuita</h3>
-            <p class="modal-desc">Para evitar cargas falsas y validar tu aporte, te enviamos un código de 4 dígitos a tu WhatsApp. Haz clic abajo para recibirlo al instante:</p>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: -0.6rem; margin-bottom: 1rem;">
-                <i class="fas fa-lock" style="color: #0284c7;"></i> Tu número solo se usa para esta verificación (Ley 25.326 de Protección de Datos Personales). No se publica ni se comparte.
-            </p>
-            
-            <button class="btn-whatsapp" id="btnSendWhatsappCode">
-                <i class="fab fa-whatsapp"></i> Abrir WhatsApp para recibir código
-            </button>
-
-            <div id="verifyCodeSection" style="display:none; margin-top: 1.2rem;">
-                <label style="font-size: 0.85rem;"><i class="fas fa-key"></i> Ingresa el código enviado:</label>
-                <input type="text" id="inputVerifyCode" class="code-input-box" maxlength="4" inputmode="numeric" placeholder="0000">
-                <button class="btn-submit" id="btnConfirmVerifyCode"><i class="fas fa-check-circle"></i> Verificar y Confirmar Carga</button>
-                <div class="form-error-msg" id="verifyErrorMsg"></div>
-            </div>
-            
-            <button class="modal-close-btn" id="btnCloseVerifyModal">Cancelar</button>
         </div>
     </div>
 
