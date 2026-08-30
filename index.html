@@ -107,6 +107,7 @@
             justify-content: center;
             font-size: 1.25rem;
             animation: motionFloat 3s ease-in-out infinite;
+            flex-shrink: 0;
         }
 
         .brand-text h1 {
@@ -120,7 +121,13 @@
             color: #94a3b8;
         }
 
-        .btn-header-admin {
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .btn-header-admin, .btn-header-back {
             background: rgba(255,255,255,0.12);
             color: #fff;
             border: 1px solid rgba(255,255,255,0.25);
@@ -133,12 +140,15 @@
             align-items: center;
             gap: 8px;
             transition: var(--transition);
+            white-space: nowrap;
         }
 
-        .btn-header-admin:hover {
+        .btn-header-admin:hover, .btn-header-back:hover {
             background: rgba(255,255,255,0.25);
             transform: translateY(-1px);
         }
+
+        .btn-header-back { display: none; }
 
         .main-wrapper {
             flex: 1;
@@ -165,7 +175,7 @@
         .hero-banner {
             text-align: center;
             max-width: 850px;
-            margin: 0 auto 1.8rem;
+            margin: 0 auto 1.4rem;
         }
 
         .hero-banner h2 {
@@ -180,51 +190,65 @@
             color: var(--text-muted);
         }
 
-        /* LIVE COUNTER BANNER (ARRANCANDO EN IMPARES MAYORES A 100) */
+        /* LIVE COUNTER BANNER — versión compacta, ocupa poco espacio en cel y PC */
         .kpi-live-counter-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.2rem;
-            max-width: 1250px;
-            margin: 0 auto 2.5rem;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 0.6rem;
+            max-width: 1100px;
+            margin: 0 auto 1.6rem;
+            padding: 0.2rem 0.1rem 0.5rem;
+            scrollbar-width: thin;
+            justify-content: center;
         }
 
         .kpi-live-card {
             background: #ffffff;
             border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 1.2rem;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+            border-radius: 10px;
+            padding: 0.5rem 0.85rem;
+            text-align: left;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex: 0 0 auto;
+            min-width: 150px;
         }
 
         .kpi-live-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-2px);
         }
 
         .kpi-live-icon {
-            font-size: 1.8rem;
-            margin-bottom: 0.4rem;
-            animation: motionFloat 3s ease-in-out infinite;
+            font-size: 1rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .kpi-live-number {
-            font-size: 2.2rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--primary);
-            line-height: 1.1;
+            line-height: 1;
         }
 
         .kpi-live-label {
-            font-size: 0.78rem;
+            font-size: 0.62rem;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            margin-top: 0.3rem;
-            letter-spacing: 0.5px;
+            margin-top: 0.15rem;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .profile-selector {
@@ -371,6 +395,11 @@
             box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
         }
 
+        .field-error {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.12) !important;
+        }
+
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -404,6 +433,7 @@
             height: 18px;
             accent-color: var(--green-positive);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .checkbox-item span {
@@ -492,6 +522,12 @@
             transform: translateY(-2px);
         }
 
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-submit.btn-submit-idea {
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
         }
@@ -514,6 +550,7 @@
             justify-content: center;
             z-index: 1000;
             padding: 1rem;
+            overflow-y: auto;
         }
 
         .modal-card {
@@ -525,6 +562,7 @@
             text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            margin: auto;
         }
 
         @keyframes modalScale {
@@ -592,6 +630,7 @@
         }
 
         .btn-whatsapp:hover { background: #1da851; transform: translateY(-1px); }
+        .btn-whatsapp:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .modal-close-btn {
             background: transparent;
@@ -611,6 +650,88 @@
             width: 180px;
             margin: 1rem auto;
             display: block;
+        }
+
+        .form-error-msg {
+            display: none;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        /* AVISO DE PRIVACIDAD / PROTECCIÓN DE DATOS PERSONALES */
+        .privacy-notice-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-left: 4px solid #0284c7;
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            margin: 1.4rem 0;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            line-height: 1.55;
+        }
+
+        .privacy-notice-box .privacy-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            color: #075985;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .privacy-notice-box details {
+            margin-top: 0.5rem;
+        }
+
+        .privacy-notice-box summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: #0284c7;
+            font-size: 0.82rem;
+            list-style: none;
+        }
+
+        .privacy-notice-box summary::-webkit-details-marker { display: none; }
+
+        .privacy-notice-box summary::before {
+            content: "▸ ";
+        }
+
+        .privacy-notice-box details[open] summary::before {
+            content: "▾ ";
+        }
+
+        .privacy-notice-box .privacy-extra {
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px dashed #bae6fd;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .privacy-footer {
+            background: var(--primary);
+            color: #cbd5e1;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 1.2rem 4%;
+            line-height: 1.6;
+        }
+
+        .privacy-footer strong { color: #fff; }
+
+        .privacy-footer a { color: #7dd3fc; text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .privacy-notice-box { padding: 0.85rem 0.9rem; font-size: 0.8rem; }
         }
 
         /* Dashboard UI & IA Recommendation Panel */
@@ -825,6 +946,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
+            min-width: 640px;
         }
 
         .audit-table th, .audit-table td {
@@ -838,6 +960,7 @@
             border-radius: 50px;
             font-size: 0.72rem;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .status-valid { background: #dcfce7; color: #15803d; }
@@ -850,22 +973,52 @@
             cursor: pointer;
             font-size: 0.75rem;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .btn-approve { background: #16a34a; color: #fff; }
         .btn-discard { background: var(--accent); color: #fff; }
 
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
         @media (max-width: 992px) {
             .charts-grid { grid-template-columns: 1fr; }
             .chart-card.full-width { grid-column: span 1; }
+            #analyticsMapContainer { height: 340px; }
+            .main-wrapper { padding: 1.5rem 3%; }
         }
 
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
             .form-group.full-width { grid-column: span 1; }
-            .hero-banner h2 { font-size: 1.6rem; }
+            .hero-banner h2 { font-size: 1.5rem; }
+            .hero-banner p { font-size: 0.9rem; }
             .form-card { padding: 1.4rem; }
-            .profile-selector { flex-direction: column; }
+            .profile-selector { flex-direction: column; align-items: stretch; }
+            .profile-btn { justify-content: center; }
+            header { padding: 0.8rem 4%; }
+            .brand-text h1 { font-size: 1rem; }
+            .brand-text p { display: none; }
+            .main-wrapper { padding: 1.2rem 4%; }
+            .kpi-live-counter-container { justify-content: flex-start; }
+            .kpi-live-card { min-width: 130px; padding: 0.45rem 0.7rem; }
+            .kpi-live-number { font-size: 1rem; }
+            #pickerMap { height: 200px; }
+            .dashboard-header h2 { font-size: 1.25rem; }
+            .ia-recommendation-box { flex-direction: column; }
+            .action-export-bar { width: 100%; }
+            .action-export-bar .btn-export { flex: 1; justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-live-card { min-width: 112px; }
+            .kpi-live-label { font-size: 0.58rem; }
+            .modal-card { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -879,9 +1032,14 @@
                 <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
             </div>
         </div>
-        <button type="button" class="btn-header-admin" onclick="openLoginModal()">
-            <i class="fas fa-user-shield"></i> Acceso Admin
-        </button>
+        <div class="header-actions">
+            <button type="button" class="btn-header-back" id="btnBackToForm" onclick="switchView('citizenView')">
+                <i class="fas fa-arrow-left"></i> <span>Volver al formulario</span>
+            </button>
+            <button type="button" class="btn-header-admin" id="btnAdminAccess" onclick="openLoginModal()">
+                <i class="fas fa-user-shield"></i> <span>Acceso Admin</span>
+            </button>
+        </div>
     </header>
 
     <main class="main-wrapper">
@@ -893,57 +1051,67 @@
                 <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
-            <!-- LIVE COUNTER BANNER (ARRANCANDO EN IMPARES MAYORES A 100) -->
+            <!-- LIVE COUNTER BANNER (compacto) -->
             <div class="kpi-live-counter-container">
                 <div class="kpi-live-card">
-                    <i class="fas fa-bullhorn kpi-live-icon" style="color: var(--accent);"></i>
-                    <div class="kpi-live-number" id="countReclamos">101</div>
-                    <div class="kpi-live-label">Reclamos Vecinales</div>
+                    <div class="kpi-live-icon"><i class="fas fa-bullhorn" style="color: var(--accent);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countReclamos">101</div>
+                        <div class="kpi-live-label">Reclamos</div>
+                    </div>
                 </div>
                 <div class="kpi-live-card">
-                    <i class="fas fa-graduation-cap kpi-live-icon" style="color: var(--teal);"></i>
-                    <div class="kpi-live-number" id="countJovenes">103</div>
-                    <div class="kpi-live-label">Aportes de Jóvenes</div>
+                    <div class="kpi-live-icon"><i class="fas fa-graduation-cap" style="color: var(--teal);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countJovenes">103</div>
+                        <div class="kpi-live-label">Jóvenes</div>
+                    </div>
                 </div>
                 <div class="kpi-live-card">
-                    <i class="fas fa-store kpi-live-icon" style="color: #c2410c;"></i>
-                    <div class="kpi-live-number" id="countComerciantes">105</div>
-                    <div class="kpi-live-label">Comercios Afectados</div>
+                    <div class="kpi-live-icon"><i class="fas fa-store" style="color: #c2410c;"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countComerciantes">105</div>
+                        <div class="kpi-live-label">Comercios</div>
+                    </div>
                 </div>
                 <div class="kpi-live-card">
-                    <i class="fas fa-lightbulb kpi-live-icon" style="color: var(--gold);"></i>
-                    <div class="kpi-live-number" id="countPropuestas">107</div>
-                    <div class="kpi-live-label">Propuestas e Ideas</div>
+                    <div class="kpi-live-icon"><i class="fas fa-lightbulb" style="color: var(--gold);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countPropuestas">107</div>
+                        <div class="kpi-live-label">Propuestas</div>
+                    </div>
                 </div>
                 <div class="kpi-live-card">
-                    <i class="fas fa-heart kpi-live-icon" style="color: var(--green-positive);"></i>
-                    <div class="kpi-live-number" id="countPositivos">109</div>
-                    <div class="kpi-live-label">Cosas Positivas</div>
+                    <div class="kpi-live-icon"><i class="fas fa-heart" style="color: var(--green-positive);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countPositivos">109</div>
+                        <div class="kpi-live-label">Positivos</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Profile Selector Rounded Buttons -->
             <div class="profile-selector">
-                <button type="button" class="profile-btn active" onclick="selectProfile('ciudadano')">
+                <button type="button" class="profile-btn active" data-profile="ciudadano" onclick="selectProfile('ciudadano', event)">
                     <i class="fas fa-user-check"></i> Vecino / Ciudadano
                 </button>
-                <button type="button" class="profile-btn" onclick="selectProfile('comerciante')">
+                <button type="button" class="profile-btn" data-profile="comerciante" onclick="selectProfile('comerciante', event)">
                     <i class="fas fa-store"></i> Comerciante / Dueño de Negocio
                 </button>
-                <button type="button" class="profile-btn" onclick="selectProfile('joven')">
+                <button type="button" class="profile-btn" data-profile="joven" onclick="selectProfile('joven', event)">
                     <i class="fas fa-graduation-cap"></i> Joven (16 a 30 años)
                 </button>
-                <button type="button" class="profile-btn btn-idea-highlight" onclick="selectProfile('idea')">
+                <button type="button" class="profile-btn btn-idea-highlight" data-profile="idea" onclick="selectProfile('idea', event)">
                     <i class="fas fa-lightbulb" style="color: var(--gold);"></i> Proponer Idea o Proyecto <span class="badge-idea">Nuevo</span>
                 </button>
-                <button type="button" class="profile-btn btn-positive-highlight" onclick="selectProfile('positivo')">
+                <button type="button" class="profile-btn btn-positive-highlight" data-profile="positivo" onclick="selectProfile('positivo', event)">
                     <i class="fas fa-heart" style="color: var(--green-positive);"></i> Lo Positivo de Neuquén <span class="badge-positive">Destacar</span>
                 </button>
             </div>
 
             <!-- DYNAMIC FORM CONTAINER -->
             <div class="form-card">
-                <form id="citizenForm">
+                <form id="citizenForm" novalidate>
                     <input type="hidden" id="tipoPerfil" name="tipoPerfil" value="Vecino / Ciudadano">
                     <input type="hidden" id="geoLat" name="geoLat" value="-38.9516">
                     <input type="hidden" id="geoLng" name="geoLng" value="-68.0591">
@@ -1002,7 +1170,7 @@
                             </div>
                         </div>
 
-                        <!-- MERCHANTS SPECIFIC (Líneas de Áreas Generales removidas completamente) -->
+                        <!-- MERCHANTS SPECIFIC -->
                         <div class="form-group merchant-field" style="display:none;">
                             <label for="nombreComercio"><i class="fas fa-store-alt" style="color: var(--accent);"></i> Nombre Fantasía / Rubro del Comercio *</label>
                             <input type="text" id="nombreComercio" name="nombreComercio" placeholder="Ej. Panadería San Martín / Calzados">
@@ -1101,7 +1269,7 @@
                         <!-- GENERAL CATEGORIES -->
                         <div class="form-group general-field">
                             <label for="problematica"><i class="fas fa-list-alt" style="color: var(--secondary);"></i> Área Temática Principal *</label>
-                            <select id="problematica" name="problematica" onchange="loadSubcategories()" required>
+                            <select id="problematica" name="problematica" onchange="loadSubcategories()">
                                 <option value="">-- Seleccionar área temática --</option>
                                 <option value="Calles, Tránsito y Obras Civiles">Calles, Baches, Tránsito y Obras Civiles</option>
                                 <option value="Comercio, Obras Municipales Arbitrarias y Tasas">Comercio, Obras Municipales Arbitrarias y Tasas</option>
@@ -1116,7 +1284,7 @@
 
                         <div class="form-group full-width general-field">
                             <label for="subproblematica"><i class="fas fa-indent" style="color: var(--secondary);"></i> Subproblemática Específica *</label>
-                            <select id="subproblematica" name="subproblematica" required disabled>
+                            <select id="subproblematica" name="subproblematica" disabled>
                                 <option value="">-- Primero elige el área temática --</option>
                             </select>
                         </div>
@@ -1127,9 +1295,21 @@
                         </div>
                     </div>
 
+                    <div class="privacy-notice-box">
+                        <div class="privacy-title"><i class="fas fa-shield-alt"></i> Tus datos están protegidos</div>
+                        Tu nombre, teléfono y ubicación son <strong>estrictamente confidenciales</strong>: se usan únicamente para validar tu aporte y evitar cargas falsas, y no se publican ni se comparten con terceros. La información se trata conforme a la <strong>Ley N° 25.326 de Protección de Datos Personales</strong> y su Decreto Reglamentario N° 1558/2001, bajo el control de la Agencia de Acceso a la Información Pública (AAIP).
+                        <details>
+                            <summary>Ver más sobre tus derechos</summary>
+                            <div class="privacy-extra">
+                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiendo ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
+                            </div>
+                        </details>
+                    </div>
+
                     <button type="submit" class="btn-submit" id="btnSubmitForm">
                         <i class="fas fa-paper-plane"></i> <span id="btnSubmitText">Registrar mi Situación / Reclamo</span>
                     </button>
+                    <div class="form-error-msg" id="formErrorMsg"></div>
                 </form>
             </div>
         </section>
@@ -1317,6 +1497,10 @@
 
     </main>
 
+    <footer class="privacy-footer">
+        <i class="fas fa-lock"></i> <strong>Tus datos son confidenciales.</strong> Se tratan conforme a la Ley N° 25.326 de Protección de Datos Personales (Argentina) y su Decreto Reglamentario N° 1558/2001, bajo control de la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública (AAIP)</a>. No se publican ni se venden a terceros.
+    </footer>
+
     <!-- POPUP LOGIN ADMINISTRATIVO (SUPABASE AUTH) -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
@@ -1333,9 +1517,10 @@
                     <label for="adminPassword">Contraseña</label>
                     <input type="password" id="adminPassword" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-submit" style="margin-top: 0;">
+                <button type="submit" class="btn-submit" id="btnLoginSubmit" style="margin-top: 0;">
                     <i class="fas fa-sign-in-alt"></i> Ingresar al Dashboard
                 </button>
+                <div class="form-error-msg" id="loginErrorMsg"></div>
             </form>
             <button class="modal-close-btn" onclick="closeLoginModal()">Cancelar</button>
         </div>
@@ -1357,6 +1542,9 @@
             <div class="modal-icon icon-verify"><i class="fab fa-whatsapp"></i></div>
             <h3 class="modal-title">Verificación Antispam Gratuita</h3>
             <p class="modal-desc">Para evitar cargas falsas y validar tu aporte, te enviamos un código de 4 dígitos a tu WhatsApp. Haz clic abajo para recibirlo al instante:</p>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: -0.6rem; margin-bottom: 1rem;">
+                <i class="fas fa-lock" style="color: #0284c7;"></i> Tu número solo se usa para esta verificación (Ley 25.326 de Protección de Datos Personales). No se publica ni se comparte.
+            </p>
             
             <button class="btn-whatsapp" id="btnSendWhatsappCode" onclick="sendWhatsappCode()">
                 <i class="fab fa-whatsapp"></i> Abrir WhatsApp para recibir código
@@ -1364,8 +1552,9 @@
 
             <div id="verifyCodeSection" style="display:none; margin-top: 1.2rem;">
                 <label style="font-size: 0.85rem;"><i class="fas fa-key"></i> Ingresa el código enviado:</label>
-                <input type="text" id="inputVerifyCode" class="code-input-box" maxlength="4" placeholder="0000">
+                <input type="text" id="inputVerifyCode" class="code-input-box" maxlength="4" inputmode="numeric" placeholder="0000">
                 <button class="btn-submit" onclick="confirmVerificationCode()"><i class="fas fa-check-circle"></i> Verificar y Confirmar Carga</button>
+                <div class="form-error-msg" id="verifyErrorMsg"></div>
             </div>
             
             <button class="modal-close-btn" onclick="closeVerifyModal()">Cancelar</button>
@@ -1397,7 +1586,8 @@
         // CONFIGURACIÓN CLIENTE SUPABASE (Reemplazar URL y ANON_KEY con las tuyas)
         const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
         const SUPABASE_ANON_KEY = "TU_ANON_KEY";
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+        const SUPABASE_CONFIGURED = !SUPABASE_URL.includes("TU-PROYECTO") && !SUPABASE_ANON_KEY.includes("TU_ANON_KEY");
+        const supabase = (SUPABASE_CONFIGURED && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         const barriosNeuquen = [
             "Alta Balsa", "Altos del Limay", "Área Centro Este", "Área Centro Oeste", "Bajo Balsa",
@@ -1462,17 +1652,56 @@
             ]
         };
 
+        // Coordenadas aproximadas para TODOS los barrios (fallback centrado en Neuquén capital si no hay dato exacto)
+        const DEFAULT_COORDS = [-38.9516, -68.0591];
         const barrioCoords = {
             "Área Centro Este": [-38.9516, -68.0591],
             "Área Centro Oeste": [-38.9510, -68.0680],
             "San Lorenzo Norte": [-38.9431, -68.1095],
             "San Lorenzo Sur": [-38.9520, -68.1110],
             "Confluencia Urbano": [-38.9650, -68.0380],
+            "Confluencia Rural": [-38.9700, -68.0250],
             "Cuenca XV": [-38.9320, -68.1250],
             "Valentina Sur Urbana": [-38.9800, -68.1200],
+            "Valentina Sur Rural": [-38.9850, -68.1350],
+            "Valentina Norte Urbana": [-38.9150, -68.0700],
+            "Valentina Norte Rural": [-38.9050, -68.0600],
             "Alta Balsa": [-38.9350, -68.0800],
+            "Bajo Balsa": [-38.9400, -68.0850],
             "Villa Ceferino": [-38.9390, -68.0890],
-            "Belgrano": [-38.9620, -68.0550]
+            "Belgrano": [-38.9620, -68.0550],
+            "Bardas Soleadas": [-38.9250, -68.0950],
+            "Barreneche": [-38.9280, -68.1000],
+            "Bouquet Roldán": [-38.9480, -68.0620],
+            "Canal V": [-38.9900, -68.1000],
+            "Ciudad Industrial": [-38.9750, -68.0900],
+            "Copol": [-38.9550, -68.0480],
+            "Cumelén": [-38.9200, -68.0850],
+            "Don Bosco II": [-38.9450, -68.0950],
+            "Don Bosco III": [-38.9470, -68.0980],
+            "El Progreso": [-38.9600, -68.0700],
+            "Esfuerzo": [-38.9670, -68.0620],
+            "Gran Neuquén Norte": [-38.9200, -68.0500],
+            "Gran Neuquén Sur": [-38.9950, -68.0850],
+            "Hibepa": [-38.9380, -68.1050],
+            "Huiliches": [-38.9500, -68.1150],
+            "Islas Malvinas": [-38.9700, -68.0500],
+            "La Sirena": [-38.9330, -68.0900],
+            "Limay": [-38.9550, -68.0400],
+            "Loteo Social": [-38.9800, -68.0950],
+            "Mariano Moreno": [-38.9430, -68.0750],
+            "Melipal": [-38.9270, -68.0800],
+            "Mercantiles": [-38.9490, -68.0630],
+            "Militar": [-38.9530, -68.0560],
+            "Parque Industrial": [-38.9820, -68.1050],
+            "Rincón de Emilio": [-38.9640, -68.0950],
+            "Río Grande": [-38.9880, -68.0700],
+            "Santa Genoveva": [-38.9180, -68.0620],
+            "Terrazas del Neuquén": [-38.9230, -68.0700],
+            "Unión de Mayo": [-38.9720, -68.0800],
+            "Altos del Limay": [-38.9150, -68.0550],
+            "Villa Florencia": [-38.9580, -68.1000],
+            "Villa María": [-38.9420, -68.0900]
         };
 
         const profileExplainerTexts = {
@@ -1513,6 +1742,7 @@
 
         let generatedCode = "";
         let pendingPayload = null;
+        let currentProfile = "ciudadano";
 
         // MAPS & CHARTS INSTANCES
         let pickerMap = null, pickerMarker = null;
@@ -1523,7 +1753,8 @@
             populateBarrioDropdowns();
             populateFilterCategories();
             initPickerMap();
-            fetchPublicStats(); // Carga de contadores animados que arrancan en impares +100
+            fetchPublicStats();
+            setFieldsRequired('ciudadano');
 
             if (window.location.pathname.endsWith('/admin') || window.location.search.includes('admin')) {
                 switchView('dashboardView');
@@ -1548,6 +1779,7 @@
 
         function animarContador(idElem, objetivo, baseInicial) {
             const elem = document.getElementById(idElem);
+            if (!elem) return;
             let inicio = baseInicial;
             const duracion = 1200;
             const pasos = 25;
@@ -1556,7 +1788,7 @@
             
             const timer = setInterval(() => {
                 actual += incremento;
-                if (actual >= objetivo) {
+                if ((incremento >= 0 && actual >= objetivo) || (incremento < 0 && actual <= objetivo)) {
                     elem.innerText = objetivo;
                     clearInterval(timer);
                 } else {
@@ -1574,7 +1806,6 @@
                 positivos: mockDataStore.filter(i => i.tipoPerfil === 'Aporte Positivo Vecinal').length
             };
 
-            // Intentar obtener de Supabase si está disponible
             if (supabase) {
                 try {
                     const { data, error } = await supabase.rpc('get_public_stats');
@@ -1597,21 +1828,35 @@
             animarContador('countPositivos', calcularValorImpar(BASES_IMPARES.positivos, realCounts.positivos), BASES_IMPARES.positivos);
         }
 
+        function showFormError(msg) {
+            const box = document.getElementById('formErrorMsg');
+            box.innerText = msg;
+            box.style.display = msg ? 'block' : 'none';
+        }
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+        }
+
         function validarRegistroPuro(datos) {
-            if (datos.nombre.trim().length < 3 || /^(.)\1+$/.test(datos.nombre)) {
-                alert("Por favor, ingrese un Nombre y Apellido real y válido.");
+            clearFieldErrors();
+
+            if (!datos.nombre || datos.nombre.trim().length < 3 || /^(.)\1+$/.test(datos.nombre.trim())) {
+                document.getElementById('nombre').classList.add('field-error');
+                showFormError("Por favor, ingresá un Nombre y Apellido real y válido.");
                 return false;
             }
 
             const regexTel = /^(?:(?:00)?54)?(?:9)?(?:299|11|298|2942)\d{6,8}$/;
             const numLimpio = datos.contacto.replace(/[-\s()]/g, '');
             if (!regexTel.test(numLimpio) && numLimpio.length < 8) {
-                alert("Por favor, ingrese un número de teléfono / WhatsApp válido de Argentina (ej. 2994123456).");
+                document.getElementById('contacto').classList.add('field-error');
+                showFormError("Por favor, ingresá un número de teléfono / WhatsApp válido de Argentina (ej. 2994123456).");
                 return false;
             }
 
-            if (datos.lat > -38.85 || datos.lat < -39.05 || datos.lng > -67.95 || datos.lng < -68.25) {
-                alert("La ubicación marcada debe estar dentro de la Ciudad de Neuquén.");
+            if (datos.lat > -38.80 || datos.lat < -39.10 || datos.lng > -67.90 || datos.lng < -68.30) {
+                showFormError("La ubicación marcada debe estar dentro de la Ciudad de Neuquén y alrededores. Mové el marcador en el mapa.");
                 return false;
             }
 
@@ -1621,7 +1866,7 @@
         function initPickerMap() {
             const defaultLat = -38.9516, defaultLng = -68.0591;
             pickerMap = L.map('pickerMap').setView([defaultLat, defaultLng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(pickerMap);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(pickerMap);
 
             pickerMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(pickerMap);
             pickerMarker.on('dragend', function () {
@@ -1632,6 +1877,10 @@
                 pickerMarker.setLatLng(e.latlng);
                 updateGeoFields(e.latlng.lat, e.latlng.lng);
             });
+
+            // Asegura que el mapa se dibuje bien apenas está visible (evita tiles rotos)
+            setTimeout(() => pickerMap.invalidateSize(), 300);
+            window.addEventListener('resize', () => { if (pickerMap) pickerMap.invalidateSize(); });
         }
 
         function updateGeoFields(lat, lng) {
@@ -1647,20 +1896,49 @@
                     pickerMap.setView([lat, lng], 16);
                     pickerMarker.setLatLng([lat, lng]);
                     updateGeoFields(lat, lng);
+                }, (err) => {
+                    alert("No se pudo obtener tu ubicación GPS. Revisá los permisos del navegador o marcá el punto manualmente en el mapa.");
                 });
+            } else {
+                alert("Tu navegador no soporta geolocalización. Marcá el punto manualmente en el mapa.");
             }
         }
 
         function centerMapOnBarrio() {
             const b = document.getElementById('barrio').value;
-            if (barrioCoords[b]) {
-                pickerMap.setView(barrioCoords[b], 14);
-                pickerMarker.setLatLng(barrioCoords[b]);
-                updateGeoFields(barrioCoords[b][0], barrioCoords[b][1]);
+            const coords = barrioCoords[b] || DEFAULT_COORDS;
+            pickerMap.setView(coords, 14);
+            pickerMarker.setLatLng(coords);
+            updateGeoFields(coords[0], coords[1]);
+        }
+
+        function setFieldsRequired(profileType) {
+            // Limpia "required" de todos los campos condicionales primero
+            ['nombreComercio','ubicacionComercio','impactoObra','consecuenciaComercial',
+             'tituloProyecto','ejeIdea','porQueProyecto','problematica','subproblematica'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.required = false;
+            });
+
+            if (profileType === 'comerciante') {
+                ['nombreComercio','ubicacionComercio','impactoObra','consecuenciaComercial'].forEach(id => {
+                    document.getElementById(id).required = true;
+                });
+            } else if (profileType === 'idea') {
+                ['tituloProyecto','ejeIdea','porQueProyecto'].forEach(id => {
+                    document.getElementById(id).required = true;
+                });
+            } else if (profileType === 'positivo') {
+                // Validación de checkboxes se hace aparte
+            } else {
+                // ciudadano / joven
+                document.getElementById('problematica').required = true;
+                document.getElementById('subproblematica').required = true;
             }
         }
 
-        function selectProfile(profileType) {
+        function selectProfile(profileType, evt) {
+            currentProfile = profileType;
             document.querySelectorAll('.profile-btn').forEach(btn => btn.classList.remove('active'));
             const merchantFields = document.querySelectorAll('.merchant-field');
             const ideaFields = document.querySelectorAll('.idea-field');
@@ -1668,83 +1946,53 @@
             const generalFields = document.querySelectorAll('.general-field');
             const hiddenInput = document.getElementById('tipoPerfil');
             const problematicaSelect = document.getElementById('problematica');
-            const subproblematicaSelect = document.getElementById('subproblematica');
             const btnSubmit = document.getElementById('btnSubmitForm');
             const btnSubmitText = document.getElementById('btnSubmitText');
 
             showProfileInfoModal(profileType);
+            showFormError('');
+            clearFieldErrors();
+
+            const activeBtn = (evt && evt.currentTarget) || document.querySelector(`.profile-btn[data-profile="${profileType}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            merchantFields.forEach(f => f.style.display = 'none');
+            ideaFields.forEach(f => f.style.display = 'none');
+            positiveFields.forEach(f => f.style.display = 'none');
+            generalFields.forEach(f => f.style.display = 'none');
 
             if (profileType === 'idea') {
-                event.currentTarget.classList.add('active');
                 hiddenInput.value = "Propuesta / Idea Vecinal";
-                merchantFields.forEach(f => f.style.display = 'none');
-                positiveFields.forEach(f => f.style.display = 'none');
-                generalFields.forEach(f => f.style.display = 'none');
                 ideaFields.forEach(f => f.style.display = 'flex');
-                
-                problematicaSelect.required = false;
-                subproblematicaSelect.required = false;
-                
                 btnSubmit.className = "btn-submit btn-submit-idea";
                 btnSubmitText.innerText = "Enviar Mi Idea / Proyecto Vecinal";
             } else if (profileType === 'positivo') {
-                event.currentTarget.classList.add('active');
                 hiddenInput.value = "Aporte Positivo Vecinal";
-                merchantFields.forEach(f => f.style.display = 'none');
-                ideaFields.forEach(f => f.style.display = 'none');
-                generalFields.forEach(f => f.style.display = 'none');
                 positiveFields.forEach(f => f.style.display = 'flex');
-                
-                problematicaSelect.required = false;
-                subproblematicaSelect.required = false;
-                
                 btnSubmit.className = "btn-submit btn-submit-positive";
                 btnSubmitText.innerText = "Registrar lo que me Gusta de Neuquén";
             } else if (profileType === 'comerciante') {
-                event.currentTarget.classList.add('active');
                 hiddenInput.value = "Comerciante / Dueño de Negocio";
                 merchantFields.forEach(f => f.style.display = 'flex');
-                ideaFields.forEach(f => f.style.display = 'none');
-                positiveFields.forEach(f => f.style.display = 'none');
-                
-                // Removidas las desplegables generales para el perfil comercial
-                generalFields.forEach(f => f.style.display = 'none');
-                problematicaSelect.required = false;
-                subproblematicaSelect.required = false;
-                
                 btnSubmit.className = "btn-submit";
                 btnSubmitText.innerText = "Registrar mi Situación Comercial";
             } else if (profileType === 'joven') {
-                event.currentTarget.classList.add('active');
                 hiddenInput.value = "Joven (16 a 30 años)";
-                merchantFields.forEach(f => f.style.display = 'none');
-                ideaFields.forEach(f => f.style.display = 'none');
-                positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
-                
-                problematicaSelect.required = true;
-                subproblematicaSelect.required = true;
                 problematicaSelect.value = "Educación y Juventud";
                 loadSubcategories();
-                
                 btnSubmit.className = "btn-submit";
                 btnSubmitText.innerText = "Registrar mi Reclamo";
             } else {
-                event.currentTarget.classList.add('active');
                 hiddenInput.value = "Vecino / Ciudadano";
-                merchantFields.forEach(f => f.style.display = 'none');
-                ideaFields.forEach(f => f.style.display = 'none');
-                positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
-                
-                problematicaSelect.required = true;
-                subproblematicaSelect.required = true;
                 problematicaSelect.value = "";
                 loadSubcategories();
-                
                 btnSubmit.className = "btn-submit";
                 btnSubmitText.innerText = "Registrar mi Situación / Reclamo";
             }
+
+            setFieldsRequired(profileType);
         }
 
         function showProfileInfoModal(profileType) {
@@ -1762,6 +2010,7 @@
         }
 
         function openLoginModal() {
+            document.getElementById('loginErrorMsg').style.display = 'none';
             document.getElementById('loginModal').style.display = 'flex';
         }
 
@@ -1769,36 +2018,48 @@
             document.getElementById('loginModal').style.display = 'none';
         }
 
-        // LOGIN SUPABASE DE ADMINISTRADORES
+        // LOGIN SUPABASE DE ADMINISTRADORES (con fallback de prototipo si no hay Supabase configurado)
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
+            const errBox = document.getElementById('loginErrorMsg');
+            const btn = document.getElementById('btnLoginSubmit');
+            errBox.style.display = 'none';
+            btn.disabled = true;
 
-            if (supabase) {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    alert("Error de autenticación: " + error.message);
-                    return;
-                }
-                
-                // Consultar rol en public.profiles
-                const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-                if (!profile || !['super_admin', 'admin', 'visor'].includes(profile.role)) {
-                    await supabase.auth.signOut();
-                    alert("Acceso denegado. No posee permisos de administración.");
-                    return;
+            try {
+                if (supabase) {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        errBox.innerText = "Error de autenticación: " + error.message;
+                        errBox.style.display = 'block';
+                        return;
+                    }
+
+                    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+                    if (!profile || !['super_admin', 'admin', 'visor'].includes(profile.role)) {
+                        await supabase.auth.signOut();
+                        errBox.innerText = "Acceso denegado. No posee permisos de administración.";
+                        errBox.style.display = 'block';
+                        return;
+                    }
+
+                    sessionStorage.setItem('user_role', profile.role);
+                } else {
+                    // Modo prototipo de pruebas (sin backend configurado todavía)
+                    sessionStorage.setItem('user_role', 'admin');
                 }
 
-                sessionStorage.setItem('user_role', profile.role);
-            } else {
-                // Modo prototipo de pruebas
-                sessionStorage.setItem('user_role', 'admin');
+                closeLoginModal();
+                switchView('dashboardView');
+                setTimeout(initDashboardAnalytics, 200);
+            } catch (err) {
+                errBox.innerText = "Ocurrió un error inesperado al iniciar sesión. Intentá nuevamente.";
+                errBox.style.display = 'block';
+            } finally {
+                btn.disabled = false;
             }
-
-            closeLoginModal();
-            switchView('dashboardView');
-            setTimeout(initDashboardAnalytics, 200);
         });
 
         function populateBarrioDropdowns() {
@@ -1845,11 +2106,30 @@
         // ENVÍO DE FORMULARIO CON VERIFICACIÓN Y REGISTRO
         document.getElementById('citizenForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            showFormError('');
+            clearFieldErrors();
+
             if (document.getElementById('website_hp').value !== "") return;
 
             const tipo = document.getElementById('tipoPerfil').value;
             const lat = parseFloat(document.getElementById('geoLat').value);
             const lng = parseFloat(document.getElementById('geoLng').value);
+
+            // Validación nativa de campos requeridos visibles
+            const form = document.getElementById('citizenForm');
+            let firstInvalid = null;
+            form.querySelectorAll('[required]').forEach(el => {
+                const visible = el.offsetParent !== null;
+                if (visible && !el.value) {
+                    el.classList.add('field-error');
+                    if (!firstInvalid) firstInvalid = el;
+                }
+            });
+            if (firstInvalid) {
+                showFormError("Por favor completá todos los campos obligatorios (*) antes de continuar.");
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
 
             const payload = {
                 nombre: document.getElementById('nombre').value,
@@ -1875,13 +2155,13 @@
                 const checkboxes = document.querySelectorAll('input[name="aspectosPositivos"]:checked');
                 checkboxes.forEach(cb => selectedPositivos.push(cb.value));
                 if (selectedPositivos.length === 0) {
-                    alert("Por favor seleccione al menos un aspecto positivo que le guste de la ciudad.");
+                    showFormError("Por favor seleccioná al menos un aspecto positivo que te guste de la ciudad.");
                     return;
                 }
             }
 
             pendingPayload = {
-                id: mockDataStore.length + 1,
+                id: mockDataStore.length ? Math.max(...mockDataStore.map(i => i.id)) + 1 : 1,
                 estado: "valid",
                 tipoPerfil: tipo,
                 nombre: payload.nombre,
@@ -1910,6 +2190,8 @@
             generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('verifyCodeSection').style.display = 'none';
             document.getElementById('inputVerifyCode').value = '';
+            document.getElementById('verifyErrorMsg').style.display = 'none';
+            document.getElementById('btnSendWhatsappCode').disabled = false;
             document.getElementById('verifyModal').style.display = 'flex';
         }
 
@@ -1918,17 +2200,19 @@
         }
 
         function sendWhatsappCode() {
+            if (!pendingPayload) return;
             const phone = pendingPayload.contacto.replace(/[-\s()]/g, '');
             const msg = encodeURIComponent(`Hola! Mi código de verificación para Neuquén Escucha es: ${generatedCode}`);
-            window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${msg}`, '_blank');
+            window.open(`https://api.whatsapp.com/send?phone=54${phone.replace(/^54/, '').replace(/^0/, '')}&text=${msg}`, '_blank');
             document.getElementById('verifyCodeSection').style.display = 'block';
         }
 
         async function confirmVerificationCode() {
             const entered = document.getElementById('inputVerifyCode').value.trim();
+            const errBox = document.getElementById('verifyErrorMsg');
+            errBox.style.display = 'none';
+
             if (entered === generatedCode || entered === "1234") {
-                
-                // Guardar en Supabase si está conectado
                 if (supabase) {
                     try {
                         await supabase.from('registros_vecinales').insert([{
@@ -1957,13 +2241,20 @@
 
                 mockDataStore.push(pendingPayload);
                 closeVerifyModal();
-                fetchPublicStats(); // Actualizar métricas animadas
-                
+                fetchPublicStats();
+
                 document.getElementById('successModal').style.display = 'flex';
                 document.getElementById('citizenForm').reset();
-                selectProfile('ciudadano');
+                document.getElementById('subproblematica').innerHTML = '<option value="">-- Primero elige el área temática --</option>';
+                document.getElementById('subproblematica').disabled = true;
+                updateGeoFields(-38.9516, -68.0591);
+                pickerMarker.setLatLng([-38.9516, -68.0591]);
+                pickerMap.setView([-38.9516, -68.0591], 13);
+                selectProfile('ciudadano', { currentTarget: document.querySelector('.profile-btn[data-profile="ciudadano"]') });
+                pendingPayload = null;
             } else {
-                alert("El código ingresado no es correcto. Verifique su WhatsApp o intente nuevamente.");
+                errBox.innerText = "El código ingresado no es correcto. Verificá tu WhatsApp o intentá nuevamente.";
+                errBox.style.display = 'block';
             }
         }
 
@@ -1974,12 +2265,23 @@
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
+
+            const isDashboard = viewId === 'dashboardView';
+            document.getElementById('btnBackToForm').style.display = isDashboard ? 'flex' : 'none';
+            document.getElementById('btnAdminAccess').style.display = isDashboard ? 'none' : 'flex';
+
+            if (viewId === 'citizenView' && pickerMap) {
+                setTimeout(() => pickerMap.invalidateSize(), 100);
+            }
+            if (isDashboard && analyticsMap) {
+                setTimeout(() => analyticsMap.invalidateSize(), 100);
+            }
         }
 
         function initDashboardAnalytics() {
             if (!analyticsMap) {
                 analyticsMap = L.map('analyticsMapContainer').setView([-38.9516, -68.0591], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(analyticsMap);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(analyticsMap);
 
                 heatmapLayer = new HeatmapOverlay({
                     "radius": 0.020, "maxOpacity": .85, "scaleRadius": true, "useLocalExtrema": true,
@@ -1988,6 +2290,7 @@
                 heatmapLayer.addTo(analyticsMap);
                 analyticsMarkersGroup = L.layerGroup().addTo(analyticsMap);
             }
+            setTimeout(() => analyticsMap.invalidateSize(), 100);
             applyAnalyticsFilters();
         }
 
@@ -2013,28 +2316,33 @@
                 return true;
             });
 
-            // Tabla de Auditoría
+            // Tabla de Auditoría (siempre muestra todos los registros, no solo los filtrados)
             const tbody = document.getElementById('auditTableBody');
             tbody.innerHTML = "";
-            mockDataStore.slice(-8).reverse().forEach(item => {
-                const tr = document.createElement('tr');
-                let subContent = item.tituloProyecto || item.problematica;
-                if (item.aspectosPositivos && item.aspectosPositivos.length > 0) {
-                    subContent = "<b>Positivo:</b> " + item.aspectosPositivos.join(", ");
-                }
-                tr.innerHTML = `
-                    <td>#${item.id}</td>
-                    <td><strong>${item.nombre}</strong><br><small>${item.tipoPerfil}</small></td>
-                    <td>${item.barrio}<br><small>${item.contacto}</small></td>
-                    <td>${subContent}</td>
-                    <td><span class="status-badge ${item.estado === 'valid' ? 'status-valid' : 'status-spam'}">${item.estado.toUpperCase()}</span></td>
-                    <td>
-                        <button class="btn-action-sm btn-approve" onclick="changeRecordStatus(${item.id}, 'valid')">Validar</button>
-                        <button class="btn-action-sm btn-discard" onclick="changeRecordStatus(${item.id}, 'spam')">Descartar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            const recentRecords = mockDataStore.slice(-8).reverse();
+            if (recentRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Todavía no hay registros cargados.</td></tr>`;
+            } else {
+                recentRecords.forEach(item => {
+                    const tr = document.createElement('tr');
+                    let subContent = item.tituloProyecto || item.problematica;
+                    if (item.aspectosPositivos && item.aspectosPositivos.length > 0) {
+                        subContent = "<b>Positivo:</b> " + item.aspectosPositivos.join(", ");
+                    }
+                    tr.innerHTML = `
+                        <td>#${item.id}</td>
+                        <td><strong>${item.nombre}</strong><br><small>${item.tipoPerfil}</small></td>
+                        <td>${item.barrio}<br><small>${item.contacto}</small></td>
+                        <td>${subContent}</td>
+                        <td><span class="status-badge ${item.estado === 'valid' ? 'status-valid' : 'status-spam'}">${item.estado.toUpperCase()}</span></td>
+                        <td>
+                            <button class="btn-action-sm btn-approve" onclick="changeRecordStatus(${item.id}, 'valid')">Validar</button>
+                            <button class="btn-action-sm btn-discard" onclick="changeRecordStatus(${item.id}, 'spam')">Descartar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
 
             // KPIs
             const totalCount = filtered.length;
@@ -2068,8 +2376,9 @@
             }
 
             // RECOMENDACIÓN ESTRATÉGICA IA
-            document.getElementById('iaTextContainer').innerText = 
-                `Diagnóstico Neuquén IA: Se observa concentración crítica de reclamos en ${topBarrio}. La afectación comercial asciende al ${merchantSeverityRatio}%. Se recomienda planificar mesas de diálogo con frentistas e intensificar obras de pavimentación e iluminación LED prioritariamente en esta zona.`;
+            document.getElementById('iaTextContainer').innerText = totalCount > 0
+                ? `Diagnóstico Neuquén IA: Se observa concentración crítica de reclamos en ${topBarrio}. La afectación comercial asciende al ${merchantSeverityRatio}%. Se recomienda planificar mesas de diálogo con frentistas e intensificar obras de pavimentación e iluminación LED prioritariamente en esta zona.`
+                : `Diagnóstico Neuquén IA: No hay registros que coincidan con los filtros seleccionados. Ajustá los filtros para ver el diagnóstico estratégico.`;
 
             // Mapa
             const heatPoints = filtered.map(item => ({ lat: item.lat, lng: item.lng, count: 1 }));
@@ -2122,7 +2431,7 @@
                         borderRadius: 6
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
             });
         }
 
@@ -2146,15 +2455,15 @@
             chartPositivosInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels.length > 0 ? labels : ["Paseo Costero", "Fiesta Confluencia", "Parques"],
+                    labels: labels.length > 0 ? labels : ["Sin datos aún"],
                     datasets: [{
                         label: 'Votos Positivos',
-                        data: counts.length > 0 ? counts : [1, 1, 1],
+                        data: counts.length > 0 ? counts : [0],
                         backgroundColor: '#16a34a',
                         borderRadius: 6
                     }]
                 },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
             });
         }
 
@@ -2169,13 +2478,14 @@
                 "Aumento desmedido de Tasas e Impuestos Municipales"
             ];
             const counts = causes.map(c => merchantsData.filter(i => i.impactoObra === c).length);
+            const hasData = counts.some(c => c > 0);
 
             if (chartMerchantInstance) chartMerchantInstance.destroy();
             chartMerchantInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ["Bicisenda", "Sentido Calle", "Obra Prolongada", "Estacionamiento", "Tasas Municipales"],
-                    datasets: [{ data: counts, backgroundColor: ['#d90429', '#0b2545', '#134074', '#d97706', '#64748b'] }]
+                    labels: hasData ? ["Bicisenda", "Sentido Calle", "Obra Prolongada", "Estacionamiento", "Tasas Municipales"] : ["Sin datos aún"],
+                    datasets: [{ data: hasData ? counts : [1], backgroundColor: hasData ? ['#d90429', '#0b2545', '#134074', '#d97706', '#64748b'] : ['#e2e8f0'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
@@ -2186,13 +2496,14 @@
             const mCount = data.filter(i => i.sexo === "Masculino").length;
             const fCount = data.filter(i => i.sexo === "Femenino").length;
             const oCount = data.filter(i => i.sexo !== "Masculino" && i.sexo !== "Femenino").length;
+            const hasData = (mCount + fCount + oCount) > 0;
 
             if (chartDemoInstance) chartDemoInstance.destroy();
             chartDemoInstance = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: ["Masculino", "Femenino", "Otro / Prefiero no decir"],
-                    datasets: [{ data: [mCount, fCount, oCount], backgroundColor: ['#0b2545', '#0d9488', '#94a3b8'] }]
+                    datasets: [{ data: hasData ? [mCount, fCount, oCount] : [1, 0, 0], backgroundColor: ['#0b2545', '#0d9488', '#94a3b8'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
