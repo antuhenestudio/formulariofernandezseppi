@@ -9,6 +9,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/shared.css">
     <style>
+        /* Estilo para el título cliqueable */
+        .brand-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .brand-link:hover {
+            opacity: 0.9;
+        }
+
         .about-hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: #fff;
@@ -162,13 +176,16 @@
 <body>
 
     <header>
-        <div class="brand">
-            <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
-            <div class="brand-text">
-                <h1>Neuquén Escucha</h1>
-                <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
+        <!-- Título envuelto en enlace para ir al Inicio (formulario principal) -->
+        <a href="../index.html" class="brand-link">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="brand-text">
+                    <h1>Neuquén Escucha</h1>
+                    <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
+                </div>
             </div>
-        </div>
+        </a>
         <div class="header-actions">
             <a href="../index.html" class="btn-header-back" style="display:flex;">
                 <i class="fas fa-arrow-left"></i> <span>Volver al formulario</span>
@@ -230,5 +247,12 @@
         <i class="fas fa-lock"></i> <strong>Tus datos son confidenciales.</strong> Se tratan conforme a la Ley N° 25.326 de Protección de Datos Personales (Argentina) y su Decreto Reglamentario N° 1558/2001, bajo control de la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública (AAIP)</a>.
     </footer>
 
+    <!-- Script para asegurar que al ingresar o recargar la página empiece siempre arriba de todo -->
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+    </script>
 </body>
 </html>
