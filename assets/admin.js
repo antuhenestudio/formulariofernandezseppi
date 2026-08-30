@@ -120,10 +120,9 @@ function showDashboardView() {
     document.getElementById('dashboardView').style.display = 'block';
 }
 
-/* ================= CARGA DE DATOS SEGUROLINK & FILTROS TEMPORALES ================= */
+/* ================= CARGA DE DATOS Y FILTROS TEMPORALES ================= */
 async function loadDashboardData() {
     try {
-        // Realizamos la consulta por ID para evitar el fallo 400 en caso de inconvenientes con created_at
         let { data, error } = await supabaseClient
             .from('registros_vecinales')
             .select('*')
@@ -228,7 +227,6 @@ function applyFiltersAndRender() {
         if (problematica !== 'TODAS' && r.problematica !== problematica) return false;
         if (sexo !== 'TODOS' && r.sexo !== sexo) return false;
 
-        // Comparación por Fecha (created_at si está disponible)
         if (r.created_at) {
             const regFecha = r.created_at.split('T')[0];
             if (fechaDesde && regFecha < fechaDesde) return false;
@@ -265,10 +263,10 @@ function renderAuditTable() {
         }
 
         return `
-            <tr onclick="openCitizenDetailModal('${r.id}')" title="Haz clic para ver el detalle completo">
-                <td>#${r.id.toString().slice(-4)}</td>
+            <tr onclick="openCitizenDetailModal('${r.id}')" style="cursor: pointer;" title="Haz clic para ver el detalle completo">
+                <td>#${String(r.id).slice(-4)}</td>
                 <td>
-                    <strong style="color: var(--primary); font-size: 0.95rem;">${escapeHtml(r.nombre || 'Anónimo')}</strong><br>
+                    <strong style="color: var(--primary); font-size: 0.95rem; text-decoration: underline;">${escapeHtml(r.nombre || 'Anónimo')}</strong><br>
                     <small style="color: var(--text-muted); font-weight: 600;">${escapeHtml(r.tipo_perfil || 'Vecino')}</small>
                 </td>
                 <td>
@@ -289,8 +287,12 @@ function renderAuditTable() {
 }
 
 function openCitizenDetailModal(id) {
-    const r = allRecords.find(item => item.id == id);
-    if (!r) return;
+    // Búsqueda flexible comparando id como String para asegurar coincidencia
+    const r = allRecords.find(item => String(item.id) === String(id));
+    if (!r) {
+        console.error('No se encontró el registro con ID:', id);
+        return;
+    }
 
     selectedRegistroId = id;
 
@@ -331,7 +333,7 @@ function openCitizenDetailModal(id) {
         boxProyecto.style.display = 'none';
     }
 
-    // Visor Webview de Archivos Adjuntos (Fotos, Videos, PDFs)
+    // Visor Webview de Archivos Adjuntos
     const mediaContainer = document.getElementById('mediaViewerContainer');
     const boxAdjuntos = document.getElementById('boxAdjuntos');
     mediaContainer.innerHTML = '';
@@ -404,19 +406,36 @@ function openCitizenDetailModal(id) {
         boxAdjuntos.style.display = 'none';
     }
 
-    document.getElementById('detailModal').classList.add('active');
+    // Despliegue del modal con garantía de clase activa e inserción de estilo
+    const modalEl = document.getElementById('detailModal');
+    if (modalEl) {
+        modalEl.classList.add('active');
+        modalEl.style.display = 'flex';
+    }
 }
 
 function closeDetailModal() {
-    document.getElementById('detailModal').classList.remove('active');
+    const modalEl = document.getElementById('detailModal');
+    if (modalEl) {
+        modalEl.classList.remove('active');
+        modalEl.style.display = 'none';
+    }
 }
 
 function promptDeleteConfirmation() {
-    document.getElementById('confirmDeleteModal').classList.add('active');
+    const confirmEl = document.getElementById('confirmDeleteModal');
+    if (confirmEl) {
+        confirmEl.classList.add('active');
+        confirmEl.style.display = 'flex';
+    }
 }
 
 function closeConfirmDeleteModal() {
-    document.getElementById('confirmDeleteModal').classList.remove('active');
+    const confirmEl = document.getElementById('confirmDeleteModal');
+    if (confirmEl) {
+        confirmEl.classList.remove('active');
+        confirmEl.style.display = 'none';
+    }
 }
 
 async function executeDeleteCitizen() {
@@ -450,7 +469,7 @@ async function updateRecordStatus(id, newStatus) {
 
         if (error) throw error;
 
-        showToast(`Registro #${id.toString().slice(-4)} actualizado a ${newStatus.toUpperCase()}`, 'success');
+        showToast(`Registro #${String(id).slice(-4)} actualizado a ${newStatus.toUpperCase()}`, 'success');
         loadDashboardData();
     } catch (err) {
         console.error('Error actualizando estado:', err);
@@ -662,8 +681,8 @@ async function exportToPDF() {
     const margin = 15;
     let currentY = 15;
 
-    const PRIMARY_COLOR = [11, 37, 69];    // #0b2545
-    const BG_LIGHT = [248, 249, 250];      // Gris Claro
+    const PRIMARY_COLOR = [11, 37, 69];
+    const BG_LIGHT = [248, 249, 250];
     const TEXT_DARK = [33, 37, 41];
 
     function drawHeader() {
@@ -707,7 +726,6 @@ async function exportToPDF() {
     doc.text("Resumen Ejecutivo y Métricas de Auditoría", margin, currentY);
     currentY += 8;
 
-    // Filtros Activos
     doc.setFillColor(...BG_LIGHT);
     doc.setDrawColor(220, 224, 230);
     doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 16, 2, 2, "FD");
@@ -727,7 +745,6 @@ async function exportToPDF() {
     doc.text(`Período: ${fDesde} al ${fHasta}`, pageWidth - margin - 4, currentY + 11, { align: "right" });
     currentY += 22;
 
-    // Diagnóstico IA
     const iaText = document.getElementById("iaTextContainer")?.innerText || "Sin diagnóstico disponible.";
     doc.setFillColor(238, 242, 255);
     doc.setDrawColor(199, 210, 254);
@@ -744,7 +761,6 @@ async function exportToPDF() {
     doc.text(splitIA, margin + 4, currentY + 12);
     currentY += 28;
 
-    // KPIs
     const totalReg = filteredRecords.length;
     const mercCount = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes("Comerciante")).length;
     const ideasCount = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes("Idea")).length;
@@ -787,7 +803,6 @@ async function exportToPDF() {
     });
     currentY += 26;
 
-    // Gráficos
     doc.setTextColor(...PRIMARY_COLOR);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
@@ -814,7 +829,7 @@ async function exportToPDF() {
         doc.addImage(imgDemo, "PNG", xPos2, currentY + 2, chartWidth, chartHeight);
     }
 
-    // PÁGINA 2: TABLA DE AUDITORÍA
+    // PÁGINA 2
     doc.addPage();
     drawHeader();
     currentY = 30;
@@ -833,7 +848,7 @@ async function exportToPDF() {
         }
 
         return [
-            `#${r.id.toString().slice(-4)}`,
+            `#${String(r.id).slice(-4)}`,
             fechaStr,
             `${r.nombre || 'Anónimo'}\n(${r.tipo_perfil || 'Vecino'})`,
             `${r.barrio || '-'}\nTel: ${r.contacto || '-'}`,
