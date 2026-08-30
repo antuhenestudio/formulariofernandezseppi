@@ -36,10 +36,12 @@ function initEventListeners() {
     on('loginForm', 'submit', handleAdminLogin);
     on('btnLogout', 'click', handleAdminLogout);
 
-    // Filtros
-    ['filterEstado', 'filterPerfil', 'filterBarrio', 'filterProblematica', 'filterSexo'].forEach(id => {
+    // Filtros generales y de fecha
+    ['filterEstado', 'filterPerfil', 'filterBarrio', 'filterProblematica', 'filterSexo', 'filterFechaDesde', 'filterFechaHasta'].forEach(id => {
         on(id, 'change', applyFiltersAndRender);
     });
+
+    on('filterPeriodoRapido', 'change', handlePeriodoRapidoChange);
 
     // Exportación
     on('btnExportPdf', 'click', exportToPDF);
@@ -118,7 +120,7 @@ function showDashboardView() {
     document.getElementById('dashboardView').style.display = 'block';
 }
 
-/* ================= CARGA DE DATOS Y FILTROS ================= */
+/* ================= CARGA DE DATOS Y FILTROS TEMPORALES ================= */
 async function loadDashboardData() {
     try {
         const { data, error } = await supabaseClient
@@ -160,12 +162,58 @@ function populateFilterDropdowns() {
     }
 }
 
+function handlePeriodoRapidoChange(e) {
+    const val = e.target.value;
+    const desdeInput = document.getElementById('filterFechaDesde');
+    const hastaInput = document.getElementById('filterFechaHasta');
+    const hoy = new Date();
+
+    if (!desdeInput || !hastaInput) return;
+
+    if (val === 'TODOS') {
+        desdeInput.value = '';
+        hastaInput.value = '';
+    } else if (val === 'HOY') {
+        const iso = hoy.toISOString().split('T')[0];
+        desdeInput.value = iso;
+        hastaInput.value = iso;
+    } else if (val === '7_DIAS') {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        desdeInput.value = d.toISOString().split('T')[0];
+        hastaInput.value = hoy.toISOString().split('T')[0];
+    } else if (val === '30_DIAS') {
+        const d = new Date();
+        d.setDate(d.getDate() - 30);
+        desdeInput.value = d.toISOString().split('T')[0];
+        hastaInput.value = hoy.toISOString().split('T')[0];
+    } else if (val === 'ESTE_MES') {
+        const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        desdeInput.value = inicioMes.toISOString().split('T')[0];
+        hastaInput.value = hoy.toISOString().split('T')[0];
+    } else if (val === 'MES_ANTERIOR') {
+        const inicioMesAnt = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        const finMesAnt = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        desdeInput.value = inicioMesAnt.toISOString().split('T')[0];
+        hastaInput.value = finMesAnt.toISOString().split('T')[0];
+    } else if (val === 'ESTE_ANO') {
+        const inicioAno = new Date(hoy.getFullYear(), 0, 1);
+        desdeInput.value = inicioAno.toISOString().split('T')[0];
+        hastaInput.value = hoy.toISOString().split('T')[0];
+    }
+
+    applyFiltersAndRender();
+}
+
 function applyFiltersAndRender() {
-    const estado = document.getElementById('filterEstado').value;
-    const perfil = document.getElementById('filterPerfil').value;
-    const barrio = document.getElementById('filterBarrio').value;
-    const problematica = document.getElementById('filterProblematica').value;
-    const sexo = document.getElementById('filterSexo').value;
+    const estado = document.getElementById('filterEstado')?.value || 'TODOS';
+    const perfil = document.getElementById('filterPerfil')?.value || 'TODOS';
+    const barrio = document.getElementById('filterBarrio')?.value || 'TODOS';
+    const problematica = document.getElementById('filterProblematica')?.value || 'TODAS';
+    const sexo = document.getElementById('filterSexo')?.value || 'TODOS';
+
+    const fechaDesde = document.getElementById('filterFechaDesde')?.value;
+    const fechaHasta = document.getElementById('filterFechaHasta')?.value;
 
     filteredRecords = allRecords.filter(r => {
         if (estado !== 'TODOS' && r.estado !== estado) return false;
@@ -173,6 +221,14 @@ function applyFiltersAndRender() {
         if (barrio !== 'TODOS' && r.barrio !== barrio) return false;
         if (problematica !== 'TODAS' && r.problematica !== problematica) return false;
         if (sexo !== 'TODOS' && r.sexo !== sexo) return false;
+
+        // Comparación por Fecha (created_at)
+        if (r.created_at) {
+            const regFecha = r.created_at.split('T')[0];
+            if (fechaDesde && regFecha < fechaDesde) return false;
+            if (fechaHasta && regFecha > fechaHasta) return false;
+        }
+
         return true;
     });
 
@@ -579,19 +635,257 @@ function generateIADiagnosis() {
     iaBox.innerHTML = `Prioridad de intervención detectada en el barrio <strong>${topBarrio}</strong> con mayor concentración de reclamos. Se registra un <strong>${((merchants/total)*100).toFixed(1)}%</strong> de afectación directa sobre el sector comercial por obras o tasas. Se recomienda priorizar mesas de trabajo viales y proyectos participativos de espacio público en esta zona.`;
 }
 
-/* ================= EXPORTACIÓN PDF / PPTX ================= */
-function exportToPDF() {
-    const element = document.getElementById('reportExportContainer');
-    showToast('Generando reporte PDF...', 'info');
-    html2pdf().set({
-        margin: 10,
-        filename: 'Informe_Neuquen_Escucha.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    }).from(element).save().then(() => {
-        showToast('PDF descargado con éxito', 'success');
+/* ================= EXPORTACIÓN PROFESIONAL PDF / PPTX ================= */
+async function exportToPDF() {
+    const { jsPDF } = window.jspdf || {};
+    if (!jsPDF) {
+        showToast("Error: No se encontró la librería jsPDF.", "error");
+        return;
+    }
+
+    showToast("Generando Informe Ejecutivo PDF...", "info");
+
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
     });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    let currentY = 15;
+
+    const PRIMARY_COLOR = [11, 37, 69];    // #0b2545
+    const BG_LIGHT = [248, 249, 250];      // Gris Claro
+    const TEXT_DARK = [33, 37, 41];
+
+    function drawHeader() {
+        doc.setFillColor(...PRIMARY_COLOR);
+        doc.rect(0, 0, pageWidth, 22, "F");
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("NEUQUÉN ESCUCHA", margin, 12);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("INFORME EJECUTIVO DE AUDITORÍA Y TERRITORIO", margin, 17);
+
+        const dateStr = new Date().toLocaleDateString("es-AR", {
+            day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+        });
+        doc.text(`Fecha de emisión: ${dateStr}`, pageWidth - margin, 14, { align: "right" });
+    }
+
+    function drawFooter(pageNumber, totalPages) {
+        doc.setDrawColor(220, 224, 230);
+        doc.setLineWidth(0.5);
+        doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+
+        doc.setTextColor(100, 110, 120);
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text("Documento Oficial de Auditoría Interna — Ley N° 25.326 Protección de Datos Personales", margin, pageHeight - 7);
+        doc.text(`Página ${pageNumber} de ${totalPages}`, pageWidth - margin, pageHeight - 7, { align: "right" });
+    }
+
+    // PÁGINA 1
+    drawHeader();
+    currentY = 32;
+
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Resumen Ejecutivo y Métricas de Auditoría", margin, currentY);
+    currentY += 8;
+
+    // Filtros Activos
+    doc.setFillColor(...BG_LIGHT);
+    doc.setDrawColor(220, 224, 230);
+    doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 16, 2, 2, "FD");
+
+    const fEstado = document.getElementById("filterEstado")?.value || "TODOS";
+    const fPerfil = document.getElementById("filterPerfil")?.value || "TODOS";
+    const fBarrio = document.getElementById("filterBarrio")?.value || "TODOS";
+    const fDesde = document.getElementById("filterFechaDesde")?.value || "Histórico";
+    const fHasta = document.getElementById("filterFechaHasta")?.value || "Hoy";
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(...TEXT_DARK);
+    doc.setFont("helvetica", "bold");
+    doc.text("Segmentación Aplicada:", margin + 4, currentY + 6);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Estado: ${fEstado} | Perfil: ${fPerfil} | Barrio: ${fBarrio}`, margin + 4, currentY + 11);
+    doc.text(`Período: ${fDesde} al ${fHasta}`, pageWidth - margin - 4, currentY + 11, { align: "right" });
+    currentY += 22;
+
+    // Diagnóstico IA
+    const iaText = document.getElementById("iaTextContainer")?.innerText || "Sin diagnóstico disponible.";
+    doc.setFillColor(238, 242, 255);
+    doc.setDrawColor(199, 210, 254);
+    doc.roundedRect(margin, currentY, pageWidth - (margin * 2), 22, 2, 2, "FD");
+
+    doc.setTextColor(30, 27, 75);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.text("DIAGNÓSTICO ESTRATÉGICO Y CRITICIDAD DE ZONA", margin + 4, currentY + 6);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    const splitIA = doc.splitTextToSize(iaText, pageWidth - (margin * 2) - 8);
+    doc.text(splitIA, margin + 4, currentY + 12);
+    currentY += 28;
+
+    // KPIs
+    const totalReg = filteredRecords.length;
+    const mercCount = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes("Comerciante")).length;
+    const ideasCount = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes("Idea")).length;
+    const posCount = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes("Positivo")).length;
+    const topBarrio = document.getElementById("kpiBarrioTop")?.innerText || "-";
+
+    const kpiBoxes = [
+        { title: "TOTAL REGISTROS", val: `${totalReg}`, sub: "Registros Auditados" },
+        { title: "AFECT. COMERCIAL", val: `${totalReg > 0 ? ((mercCount/totalReg)*100).toFixed(1) : 0}%`, sub: `${mercCount} comercios` },
+        { title: "PROYECTOS VECINALES", val: `${ideasCount}`, sub: "Ideas de mejora" },
+        { title: "VALORACIÓN POSITIVA", val: `${posCount}`, sub: "Aportes vecinos" },
+        { title: "ZONA CRÍTICA TOP", val: topBarrio, sub: "Barrio con más casos" }
+    ];
+
+    const boxWidth = (pageWidth - (margin * 2) - (4 * 3)) / 5;
+    kpiBoxes.forEach((kpi, i) => {
+        const xPos = margin + (i * (boxWidth + 3));
+        doc.setFillColor(...PRIMARY_COLOR);
+        doc.rect(xPos, currentY, boxWidth, 2, "F");
+
+        doc.setFillColor(...BG_LIGHT);
+        doc.rect(xPos, currentY + 2, boxWidth, 18, "F");
+        doc.setDrawColor(220, 224, 230);
+        doc.rect(xPos, currentY, boxWidth, 20, "D");
+
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(100, 110, 120);
+        doc.text(kpi.title, xPos + (boxWidth / 2), currentY + 6, { align: "center" });
+
+        doc.setFontSize(10.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...PRIMARY_COLOR);
+        doc.text(kpi.val, xPos + (boxWidth / 2), currentY + 12, { align: "center" });
+
+        doc.setFontSize(6);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(120, 130, 140);
+        doc.text(kpi.sub, xPos + (boxWidth / 2), currentY + 17, { align: "center" });
+    });
+    currentY += 26;
+
+    // Gráficos
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Análisis Estadístico Avanzado", margin, currentY);
+    currentY += 6;
+
+    const chartWidth = (pageWidth - (margin * 2) - 10) / 2;
+    const chartHeight = 55;
+
+    const canvasCat = document.getElementById("chartCategories");
+    if (canvasCat) {
+        const imgCat = canvasCat.toDataURL("image/png", 1.0);
+        doc.setFontSize(9);
+        doc.text("Distribución por Área / Problemática", margin, currentY);
+        doc.addImage(imgCat, "PNG", margin, currentY + 2, chartWidth, chartHeight);
+    }
+
+    const canvasDemo = document.getElementById("chartDemographics");
+    if (canvasDemo) {
+        const imgDemo = canvasDemo.toDataURL("image/png", 1.0);
+        const xPos2 = margin + chartWidth + 10;
+        doc.setFontSize(9);
+        doc.text("Segmentación Demográfica (Edad y Sexo)", xPos2, currentY);
+        doc.addImage(imgDemo, "PNG", xPos2, currentY + 2, chartWidth, chartHeight);
+    }
+
+    // PÁGINA 2: TABLA DE AUDITORÍA
+    doc.addPage();
+    drawHeader();
+    currentY = 30;
+
+    doc.setTextColor(...PRIMARY_COLOR);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Auditoría Detallada de Ingreso de Datos", margin, currentY);
+    currentY += 6;
+
+    const tableBody = filteredRecords.map(r => {
+        const fechaStr = r.created_at ? new Date(r.created_at).toLocaleDateString("es-AR") : "-";
+        let descripcion = r.problematica || r.titulo_proyecto || "-";
+        if (r.aspectos_positivos && Array.isArray(r.aspectos_positivos) && r.aspectos_positivos.length > 0) {
+            descripcion = r.aspectos_positivos.join(", ");
+        }
+
+        return [
+            `#${r.id.toString().slice(-4)}`,
+            fechaStr,
+            `${r.nombre || 'Anónimo'}\n(${r.tipo_perfil || 'Vecino'})`,
+            `${r.barrio || '-'}\nTel: ${r.contacto || '-'}`,
+            descripcion,
+            (r.estado || 'VALID').toUpperCase()
+        ];
+    });
+
+    if (doc.autoTable) {
+        doc.autoTable({
+            startY: currentY,
+            head: [["ID", "Fecha", "Ciudadano / Perfil", "Barrio / Contacto", "Problemática / Detalle", "Estado"]],
+            body: tableBody,
+            margin: { left: margin, right: margin },
+            styles: {
+                fontSize: 7.5,
+                cellPadding: 3,
+                valign: "middle",
+                overflow: "linebreak"
+            },
+            headStyles: {
+                fillColor: PRIMARY_COLOR,
+                textColor: [255, 255, 255],
+                fontStyle: "bold"
+            },
+            alternateRowStyles: {
+                fillColor: [245, 247, 250]
+            },
+            columnStyles: {
+                0: { cellWidth: 14, fontStyle: "bold" },
+                1: { cellWidth: 20 },
+                2: { cellWidth: 42 },
+                3: { cellWidth: 38 },
+                4: { cellWidth: 50 },
+                5: { cellWidth: 16, fontStyle: "bold", halign: "center" }
+            },
+            didParseCell: function(data) {
+                if (data.section === 'body' && data.column.index === 5) {
+                    const val = data.cell.raw;
+                    if (val === 'VALID') {
+                        data.cell.styles.textColor = [22, 163, 74];
+                    } else if (val === 'SPAM') {
+                        data.cell.styles.textColor = [220, 38, 38];
+                    }
+                }
+            }
+        });
+    }
+
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        drawFooter(i, pageCount);
+    }
+
+    const fileName = `Informe_Auditoria_NeuquenEscucha_${new Date().toISOString().split("T")[0]}.pdf`;
+    doc.save(fileName);
+    showToast("Informe PDF generado y descargado correctamente.", "success");
 }
 
 function exportToPPTX() {
