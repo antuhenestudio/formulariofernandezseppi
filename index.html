@@ -1810,17 +1810,28 @@
         let chartCatInstance = null, chartPositivosInstance = null, chartMerchantInstance = null, chartDemoInstance = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            populateBarrioDropdowns();
-            populateFilterCategories();
-            initPickerMap();
-            fetchPublicStats();
-            setFieldsRequired('ciudadano');
+            // Cada inicialización va en su propio try/catch: si una librería externa
+            // (mapa, gráficos, etc.) no llega a cargar por algún bloqueo de red,
+            // el resto de la página (selección de perfil, formulario, login admin)
+            // debe seguir funcionando igual.
+            try { populateBarrioDropdowns(); } catch (err) { console.error('Error cargando barrios:', err); }
+            try { populateFilterCategories(); } catch (err) { console.error('Error cargando categorías de filtro:', err); }
+            try { initPickerMap(); } catch (err) { console.error('Error inicializando el mapa:', err); showMapLoadError('pickerMap'); }
+            try { fetchPublicStats(); } catch (err) { console.error('Error cargando contadores públicos:', err); }
+            try { setFieldsRequired('ciudadano'); } catch (err) { console.error('Error configurando campos requeridos:', err); }
 
             if (window.location.pathname.endsWith('/admin') || window.location.search.includes('admin')) {
                 switchView('dashboardView');
                 setTimeout(initDashboardAnalytics, 200);
             }
         });
+
+        function showMapLoadError(containerId) {
+            const el = document.getElementById(containerId);
+            if (el) {
+                el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:180px;background:#f1f5f9;color:#64748b;font-size:0.85rem;text-align:center;padding:1rem;">No se pudo cargar el mapa (sin conexión a los servidores de mapas). Podés seguir completando el resto del formulario; tu barrio ya ubica aproximadamente la zona.</div>';
+            }
+        }
 
         /* --- LÓGICA DE CONTADORES PÚBLICOS EN VIVO (ARRANQUE EN IMPARES MAYORES A 100) --- */
         const BASES_IMPARES = {
@@ -2344,25 +2355,37 @@
 
         function initDashboardAnalytics() {
             if (!analyticsMap) {
-                analyticsMap = L.map('analyticsMapContainer').setView([-38.9516, -68.0591], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }).addTo(analyticsMap);
-
                 try {
-                    heatmapLayer = new HeatmapOverlay({
-                        "radius": 0.020, "maxOpacity": .85, "scaleRadius": true, "useLocalExtrema": true,
-                        latField: 'lat', lngField: 'lng', valueField: 'count'
-                    });
-                    heatmapLayer.addTo(analyticsMap);
+                    analyticsMap = L.map('analyticsMapContainer').setView([-38.9516, -68.0591], 12);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }).addTo(analyticsMap);
+
+                    try {
+                        heatmapLayer = new HeatmapOverlay({
+                            "radius": 0.020, "maxOpacity": .85, "scaleRadius": true, "useLocalExtrema": true,
+                            latField: 'lat', lngField: 'lng', valueField: 'count'
+                        });
+                        heatmapLayer.addTo(analyticsMap);
+                    } catch (err) {
+                        console.error("No se pudo cargar el mapa de calor:", err);
+                        heatmapLayer = null;
+                    }
+                    analyticsMarkersGroup = L.layerGroup().addTo(analyticsMap);
                 } catch (err) {
-                    console.error("No se pudo cargar el mapa de calor:", err);
+                    console.error("No se pudo inicializar el mapa del panel:", err);
+                    analyticsMap = null;
                     heatmapLayer = null;
+                    analyticsMarkersGroup = null;
+                    showMapLoadError('analyticsMapContainer');
                 }
-                analyticsMarkersGroup = L.layerGroup().addTo(analyticsMap);
             }
-            [100, 350, 800, 1500].forEach(ms => setTimeout(() => { if (analyticsMap) analyticsMap.invalidateSize(); }, ms));
+            if (analyticsMap) {
+                [100, 350, 800, 1500].forEach(ms => setTimeout(() => { if (analyticsMap) analyticsMap.invalidateSize(); }, ms));
+            }
+            // Los KPIs, la tabla y los gráficos deben calcularse siempre,
+            // haya fallado el mapa o no.
             applyAnalyticsFilters();
         }
 
@@ -2459,34 +2482,38 @@
                 catch (err) { console.error("Error actualizando el mapa de calor:", err); }
             }
 
-            analyticsMarkersGroup.clearLayers();
-            filtered.forEach(item => {
-                let colorPin = '#134074';
-                if (item.tipoPerfil.includes('Comerciante')) colorPin = '#d90429';
-                if (item.tipoPerfil.includes('Idea')) colorPin = '#d97706';
-                if (item.tipoPerfil.includes('Positivo')) colorPin = '#16a34a';
+            analyticsMarkersGroup && analyticsMarkersGroup.clearLayers();
+            if (analyticsMarkersGroup) {
+                filtered.forEach(item => {
+                    let colorPin = '#134074';
+                    if (item.tipoPerfil.includes('Comerciante')) colorPin = '#d90429';
+                    if (item.tipoPerfil.includes('Idea')) colorPin = '#d97706';
+                    if (item.tipoPerfil.includes('Positivo')) colorPin = '#16a34a';
 
-                const marker = L.circleMarker([item.lat, item.lng], {
-                    radius: item.tipoPerfil.includes('Idea') || item.tipoPerfil.includes('Positivo') ? 9 : 7,
-                    fillColor: colorPin, color: '#fff', weight: 2, fillOpacity: 0.95
+                    const marker = L.circleMarker([item.lat, item.lng], {
+                        radius: item.tipoPerfil.includes('Idea') || item.tipoPerfil.includes('Positivo') ? 9 : 7,
+                        fillColor: colorPin, color: '#fff', weight: 2, fillOpacity: 0.95
+                    });
+
+                    let popup = `<b>${item.nombre}</b> (${item.tipoPerfil})<br><b>Barrio:</b> ${item.barrio}<br>`;
+                    if (item.tipoPerfil.includes('Idea')) {
+                        popup += `<b>Proyecto:</b> ${item.tituloProyecto}<br><b>Propuesta:</b> ${item.detalle}`;
+                    } else if (item.tipoPerfil.includes('Positivo')) {
+                        popup += `<b>Aspectos que le gustan:</b> ${item.aspectosPositivos.join(', ')}<br><b>Comentario:</b> ${item.detalle}`;
+                    } else {
+                        popup += `<b>Área:</b> ${item.problematica}<br><b>Detalle:</b> ${item.detalle}`;
+                    }
+                    marker.bindPopup(popup);
+                    analyticsMarkersGroup.addLayer(marker);
                 });
+            }
 
-                let popup = `<b>${item.nombre}</b> (${item.tipoPerfil})<br><b>Barrio:</b> ${item.barrio}<br>`;
-                if (item.tipoPerfil.includes('Idea')) {
-                    popup += `<b>Proyecto:</b> ${item.tituloProyecto}<br><b>Propuesta:</b> ${item.detalle}`;
-                } else if (item.tipoPerfil.includes('Positivo')) {
-                    popup += `<b>Aspectos que le gustan:</b> ${item.aspectosPositivos.join(', ')}<br><b>Comentario:</b> ${item.detalle}`;
-                } else {
-                    popup += `<b>Área:</b> ${item.problematica}<br><b>Detalle:</b> ${item.detalle}`;
-                }
-                marker.bindPopup(popup);
-                analyticsMarkersGroup.addLayer(marker);
-            });
-
-            renderCategoryChart(filtered);
-            renderPositivosChart(filtered);
-            renderMerchantChart(filtered);
-            renderDemographicsChart(filtered);
+            // Los gráficos (Chart.js) se calculan siempre, incluso si el mapa falló;
+            // y cada uno va en su propio try/catch por si Chart.js tampoco cargó.
+            try { renderCategoryChart(filtered); } catch (err) { console.error("Error en gráfico de categorías:", err); }
+            try { renderPositivosChart(filtered); } catch (err) { console.error("Error en gráfico de positivos:", err); }
+            try { renderMerchantChart(filtered); } catch (err) { console.error("Error en gráfico de comercios:", err); }
+            try { renderDemographicsChart(filtered); } catch (err) { console.error("Error en gráfico de demografía:", err); }
         }
 
         function renderCategoryChart(data) {
@@ -2586,6 +2613,10 @@
 
         /* EXPORTACIÓN PDF Y POWERPOINT */
         function exportPDFReport() {
+            if (typeof html2pdf === 'undefined') {
+                alert("No se pudo cargar la librería de exportación a PDF (sin conexión). Probá recargar la página con internet disponible.");
+                return;
+            }
             const element = document.getElementById('reportExportContainer');
             const opt = {
                 margin:       [0.4, 0.4, 0.4, 0.4],
@@ -2599,6 +2630,10 @@
         }
 
         function exportPPTXReport() {
+            if (typeof PptxGenJS === 'undefined') {
+                alert("No se pudo cargar la librería de exportación a PowerPoint (sin conexión). Probá recargar la página con internet disponible.");
+                return;
+            }
             const pptx = new PptxGenJS();
             pptx.author = "Neuquén Escucha";
             pptx.company = "Ing. Rubén Fernández Seppi";
