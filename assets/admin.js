@@ -14,9 +14,10 @@ let chartPositivosInst = null;
 let chartMerchantsInst = null;
 let chartDemographicsInst = null;
 
-// Instancia del Mapa de Calor
+// Instancias de Mapa y Capas
 let heatmapMap = null;
 let heatmapLayer = null;
+let markersLayerGroup = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initAdminApp();
@@ -52,6 +53,25 @@ function initEventListeners() {
     on('btnDeleteCitizen', 'click', promptDeleteConfirmation);
     on('btnCancelDelete', 'click', closeConfirmDeleteModal);
     on('btnConfirmDelete', 'click', executeDeleteCitizen);
+
+    // CERRAR MODALES HACIENDO CLIC AFUERA (Backdrop Click)
+    const detailModal = document.getElementById('detailModal');
+    if (detailModal) {
+        detailModal.addEventListener('click', (e) => {
+            if (e.target === detailModal) {
+                closeDetailModal();
+            }
+        });
+    }
+
+    const confirmModal = document.getElementById('confirmDeleteModal');
+    if (confirmModal) {
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                closeConfirmDeleteModal();
+            }
+        });
+    }
 }
 
 /* ================= AUTENTICACIÓN SUPABASE ================= */
@@ -287,7 +307,6 @@ function renderAuditTable() {
 }
 
 function openCitizenDetailModal(id) {
-    // Búsqueda flexible comparando id como String para asegurar coincidencia
     const r = allRecords.find(item => String(item.id) === String(id));
     if (!r) {
         console.error('No se encontró el registro con ID:', id);
@@ -406,7 +425,6 @@ function openCitizenDetailModal(id) {
         boxAdjuntos.style.display = 'none';
     }
 
-    // Despliegue del modal con garantía de clase activa e inserción de estilo
     const modalEl = document.getElementById('detailModal');
     if (modalEl) {
         modalEl.classList.add('active');
@@ -614,6 +632,7 @@ function renderCharts() {
     }
 }
 
+/* ================= RENDERIZADO MAPA DE CALOR E INTERACTIVIDAD DE MANCHAS ================= */
 function renderHeatmap() {
     const container = document.getElementById('analyticsMapContainer');
     if (!container) return;
@@ -625,7 +644,7 @@ function renderHeatmap() {
         }).addTo(heatmapMap);
 
         const config = {
-            "radius": 0.008,
+            "radius": 0.012,
             "maxOpacity": .8,
             "scaleRadius": true,
             "useLocalExtrema": true,
@@ -635,11 +654,60 @@ function renderHeatmap() {
         };
         heatmapLayer = new HeatmapOverlay(config);
         heatmapMap.addLayer(heatmapLayer);
+
+        // Capa interactiva de círculos/marcadores sobre las manchas
+        markersLayerGroup = L.layerGroup().addTo(heatmapMap);
     }
 
-    const points = filteredRecords
-        .filter(r => r.lat && r.lng)
-        .map(r => ({ lat: parseFloat(r.lat), lng: parseFloat(r.lng), count: 1 }));
+    // Limpiar marcadores anteriores
+    if (markersLayerGroup) {
+        markersLayerGroup.clearLayers();
+    }
+
+    const points = [];
+
+    filteredRecords.forEach(r => {
+        if (r.lat && r.lng) {
+            const latNum = parseFloat(r.lat);
+            const lngNum = parseFloat(r.lng);
+
+            if (!isNaN(latNum) && !isNaN(lngNum)) {
+                points.push({ lat: latNum, lng: lngNum, count: 1 });
+
+                // Crear punto interactivo sobre cada ubicación
+                const circleMarker = L.circleMarker([latNum, lngNum], {
+                    radius: 9,
+                    fillColor: "#d90429",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 0.9,
+                    fillOpacity: 0.65
+                });
+
+                const tooltipHtml = `
+                    <div style="font-family: sans-serif; font-size: 0.82rem; line-height: 1.4;">
+                        <strong style="color: #0b2545;">${escapeHtml(r.nombre || 'Vecino')}</strong><br>
+                        <span style="color: #64748b;">${escapeHtml(r.tipo_perfil || 'Aporte')}</span><br>
+                        <small style="color: #d90429; font-weight: bold;">${escapeHtml(r.barrio || 'Neuquén')}</small><br>
+                        <em style="font-size: 0.75rem; color: #1e293b;">Haz clic para ver la ficha completa</em>
+                    </div>
+                `;
+
+                // Tooltip al pasar el cursor (Hover)
+                circleMarker.bindTooltip(tooltipHtml, {
+                    direction: 'top',
+                    offset: [0, -5]
+                });
+
+                // Clic en la mancha/marcador para abrir el modal del ciudadano
+                circleMarker.on('click', () => {
+                    openCitizenDetailModal(r.id);
+                });
+
+                markersLayerGroup.addLayer(circleMarker);
+            }
+        }
+    });
 
     heatmapLayer.setData({ max: 5, data: points });
 }
