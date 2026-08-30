@@ -1,493 +1,615 @@
 /**
  * admin.js — Neuquén Escucha
- * Lógica exclusiva de admin.html (panel gerencial). Usa shared.js: SUPABASE_*,
- * supabaseClient, barriosNeuquen, subcategoriasDict, showToast,
- * populateBarrioSelect, populateProblematicaSelect.
- *
- * Modo prototipo: si no configuraste Supabase todavía (ver shared.js), este panel
- * muestra datos de ejemplo (DEMO_DATA más abajo) y el login acepta cualquier
- * usuario/contraseña — solo para poder mostrar y probar el diseño. Configurá
- * Supabase para usarlo en producción con datos reales y login seguro
- * (ver supabase-schema.sql y el README del repositorio).
+ * Lógica del Panel Administrativo y Tablero Gerencial.
  */
 
-// Datos de ejemplo que se muestran SOLO si Supabase no está configurado.
-const DEMO_DATA = [
-    { id: 1, estado: "valid", tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Mariano Costa", sexo: "Masculino", edad: 46, barrio: "Área Centro Este", contacto: "2994112233", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída drástica de ventas por obras de Bicisendas", nombreComercio: "Calzados Neuquén", impactoObra: "Implementación de Bicisenda sin consulta", detalle: "Perdí el 60% de mis ventas diarias por la bicisenda.", lat: -38.9516, lng: -68.0591 },
-    { id: 2, estado: "valid", tipoPerfil: "Propuesta / Idea Vecinal", nombre: "Dra. Elena Gómez", sexo: "Femenino", edad: 39, barrio: "San Lorenzo Norte", contacto: "2994000099", problematica: "Propuesta de Proyecto Vecinal", subproblematica: "Infraestructura y Obras para el Barrio", tituloProyecto: "Paseo Deportivo Necochea", detalle: "Pavimentación con drenaje pluvial, senda peatonal y luces LED.", lat: -38.9431, lng: -68.1095 },
-    { id: 3, estado: "valid", tipoPerfil: "Aporte Positivo Vecinal", nombre: "Camila Peralta", sexo: "Femenino", edad: 28, barrio: "Alta Balsa", contacto: "2994881122", problematica: "Valoración Positiva de la Ciudad", subproblematica: "Apoyo a Obras y Espacios Públicos", aspectosPositivos: ["Paseo Costero y Desarrollo de Riberas", "Oferta Cultural, Fiestas y Eventos"], detalle: "Excelente el Paseo Costero.", lat: -38.9350, lng: -68.0800 },
-    { id: 4, estado: "valid", tipoPerfil: "Vecino / Ciudadano", nombre: "Juan Pérez", sexo: "Masculino", edad: 38, barrio: "San Lorenzo Norte", contacto: "2994223344", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", detalle: "Calle Necochea destruida.", lat: -38.9431, lng: -68.1095 },
-    { id: 5, estado: "valid", tipoPerfil: "Joven (16 a 30 años)", nombre: "Lucas Varela", sexo: "Masculino", edad: 22, barrio: "Cuenca XV", contacto: "2994778899", problematica: "Educación y Juventud", subproblematica: "Falta de espacios y centros de capacitación juvenil municipal", detalle: "No hay talleres de oficios digitales en la zona oeste.", lat: -38.9320, lng: -68.1250 }
-];
+let allRecords = [];
+let filteredRecords = [];
+let selectedRegistroId = null;
+let currentAdminUser = null;
 
-let dataStore = [];
-let analyticsMap = null, heatmapLayer = null, analyticsMarkersGroup = null;
-let chartCatInstance = null, chartPositivosInstance = null, chartMerchantInstance = null, chartDemoInstance = null;
+// Instancias de gráficos
+let chartCategoriesInst = null;
+let chartPositivosInst = null;
+let chartMerchantsInst = null;
+let chartDemographicsInst = null;
+
+// Instancia del Mapa de Calor
+let heatmapMap = null;
+let heatmapLayer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    try { populateBarrioSelect('filterBarrio', false); } catch (err) { console.error(err); }
-    try { populateProblematicaSelect('filterProblematica', false); } catch (err) { console.error(err); }
-    try { initAdminEventListeners(); } catch (err) { console.error('Error conectando botones:', err); }
-    checkExistingSession();
+    initAdminApp();
 });
 
-function initAdminEventListeners() {
+async function initAdminApp() {
+    initEventListeners();
+    checkAuthSession();
+}
+
+function initEventListeners() {
     const on = (id, evt, fn) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(evt, fn);
     };
 
-    on('btnExportPdf', 'click', exportPDFReport);
-    on('btnExportPptx', 'click', exportPPTXReport);
-    on('btnLogout', 'click', logoutAdmin);
+    on('loginForm', 'submit', handleAdminLogin);
+    on('btnLogout', 'click', handleAdminLogout);
 
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
-
+    // Filtros
     ['filterEstado', 'filterPerfil', 'filterBarrio', 'filterProblematica', 'filterSexo'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', applyAnalyticsFilters);
+        on(id, 'change', applyFiltersAndRender);
     });
 
-    const auditBody = document.getElementById('auditTableBody');
-    if (auditBody) {
-        auditBody.addEventListener('click', (e) => {
-            const btn = e.target.closest('button[data-action]');
-            if (!btn) return;
-            if (btn.dataset.action === 'ver-adjunto') {
-                verAdjunto(btn.dataset.path);
-                return;
-            }
-            const id = parseInt(btn.dataset.id, 10);
-            changeRecordStatus(id, btn.dataset.action === 'validar' ? 'valid' : 'spam');
+    // Exportación
+    on('btnExportPdf', 'click', exportToPDF);
+    on('btnExportPptx', 'click', exportToPPTX);
+
+    // Modales
+    on('btnCloseDetailModal', 'click', closeDetailModal);
+    on('btnDeleteCitizen', 'click', promptDeleteConfirmation);
+    on('btnCancelDelete', 'click', closeConfirmDeleteModal);
+    on('btnConfirmDelete', 'click', executeDeleteCitizen);
+}
+
+/* ================= AUTENTICACIÓN SUPABASE ================= */
+async function checkAuthSession() {
+    if (!supabaseClient) {
+        showLoginView();
+        return;
+    }
+
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            currentAdminUser = session.user;
+            showDashboardView();
+            loadDashboardData();
+        } else {
+            showLoginView();
+        }
+    } catch (err) {
+        console.error('Error verificando sesión:', err);
+        showLoginView();
+    }
+}
+
+async function handleAdminLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const errorBox = document.getElementById('loginErrorMsg');
+
+    if (errorBox) errorBox.style.display = 'none';
+
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        currentAdminUser = data.user;
+        showDashboardView();
+        loadDashboardData();
+        showToast('Sesión iniciada correctamente', 'success');
+    } catch (err) {
+        console.error('Error de autenticación:', err);
+        if (errorBox) {
+            errorBox.textContent = 'Credenciales inválidas o no autorizadas.';
+            errorBox.style.display = 'block';
+        }
+    }
+}
+
+async function handleAdminLogout() {
+    if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+    }
+    currentAdminUser = null;
+    showLoginView();
+    showToast('Sesión cerrada', 'info');
+}
+
+function showLoginView() {
+    document.getElementById('adminLoginView').style.display = 'flex';
+    document.getElementById('dashboardView').style.display = 'none';
+}
+
+function showDashboardView() {
+    document.getElementById('adminLoginView').style.display = 'none';
+    document.getElementById('dashboardView').style.display = 'block';
+}
+
+/* ================= CARGA DE DATOS Y FILTROS ================= */
+async function loadDashboardData() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('registros_vecinales')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        allRecords = data || [];
+        populateFilterDropdowns();
+        applyFiltersAndRender();
+    } catch (err) {
+        console.error('Error cargando registros:', err);
+        showToast('Error al obtener datos de Supabase', 'error');
+    }
+}
+
+function populateFilterDropdowns() {
+    const barrioSelect = document.getElementById('filterBarrio');
+    const probSelect = document.getElementById('filterProblematica');
+
+    if (barrioSelect && barrioSelect.options.length <= 1) {
+        const barrios = [...new Set(allRecords.map(r => r.barrio).filter(Boolean))].sort();
+        barrios.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b; opt.textContent = b;
+            barrioSelect.appendChild(opt);
+        });
+    }
+
+    if (probSelect && probSelect.options.length <= 1) {
+        const probs = [...new Set(allRecords.map(r => r.problematica).filter(Boolean))].sort();
+        probs.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p; opt.textContent = p;
+            probSelect.appendChild(opt);
         });
     }
 }
 
-// Genera un link temporal (válido por 5 minutos) para ver/descargar un adjunto,
-// y lo abre en una pestaña nueva. El link no funciona fuera de esa ventana de
-// tiempo, así los archivos no quedan expuestos con URLs permanentes.
-async function verAdjunto(path) {
-    if (!supabaseClient) {
-        showToast("No se puede abrir el adjunto: Supabase no está configurado.", "error");
-        return;
-    }
-    try {
-        const { data, error } = await supabaseClient.storage.from('adjuntos-vecinales').createSignedUrl(path, 300);
-        if (error || !data) throw error || new Error('Sin datos');
-        window.open(data.signedUrl, '_blank');
-    } catch (err) {
-        console.error('Error generando el link del adjunto:', err);
-        showToast("No se pudo abrir el adjunto.", "error");
-    }
-}
+function applyFiltersAndRender() {
+    const estado = document.getElementById('filterEstado').value;
+    const perfil = document.getElementById('filterPerfil').value;
+    const barrio = document.getElementById('filterBarrio').value;
+    const problematica = document.getElementById('filterProblematica').value;
+    const sexo = document.getElementById('filterSexo').value;
 
-/* ============ LOGIN ============ */
-// Si ya hay una sesión de Supabase activa (o modo prototipo ya validado), entra
-// directo al panel sin pedir login de nuevo.
-async function checkExistingSession() {
-    if (supabaseClient) {
-        const { data } = await supabaseClient.auth.getSession();
-        if (data && data.session) {
-            showDashboard();
-            return;
-        }
-    } else if (sessionStorage.getItem('user_role')) {
-        showDashboard();
-        return;
-    }
-    document.getElementById('adminLoginView').style.display = 'flex';
-}
-
-async function handleLoginSubmit(e) {
-    e.preventDefault();
-    const email = document.getElementById('adminEmail').value;
-    const password = document.getElementById('adminPassword').value;
-    const errBox = document.getElementById('loginErrorMsg');
-    const btn = document.getElementById('btnLoginSubmit');
-    errBox.style.display = 'none';
-    btn.disabled = true;
-
-    try {
-        if (supabaseClient) {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) {
-                errBox.innerText = "Error de autenticación: " + error.message;
-                errBox.style.display = 'block';
-                return;
-            }
-            // La tabla "profiles" (ver supabase-schema.sql) guarda el rol de cada
-            // usuario. Solo entran quienes tengan un rol autorizado.
-            const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', data.user.id).single();
-            if (!profile || !['super_admin', 'admin', 'visor'].includes(profile.role)) {
-                await supabaseClient.auth.signOut();
-                errBox.innerText = "Acceso denegado. Tu usuario no tiene permisos de administración.";
-                errBox.style.display = 'block';
-                return;
-            }
-            sessionStorage.setItem('user_role', profile.role);
-        } else {
-            // Modo prototipo (sin Supabase configurado todavía): cualquier dato entra.
-            sessionStorage.setItem('user_role', 'admin');
-        }
-        showToast("Sesión iniciada correctamente", "success");
-        showDashboard();
-    } catch (err) {
-        errBox.innerText = "Ocurrió un error inesperado al iniciar sesión. Intentá nuevamente.";
-        errBox.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-    }
-}
-
-async function logoutAdmin() {
-    if (supabaseClient) { try { await supabaseClient.auth.signOut(); } catch (err) { /* noop */ } }
-    sessionStorage.removeItem('user_role');
-    document.getElementById('dashboardView').style.display = 'none';
-    document.getElementById('adminLoginView').style.display = 'flex';
-}
-
-function showDashboard() {
-    document.getElementById('adminLoginView').style.display = 'none';
-    document.getElementById('dashboardView').style.display = 'block';
-    if (!SUPABASE_CONFIGURED) {
-        showToast("Modo prototipo: configurá Supabase para usar datos reales.", "info");
-    }
-    setTimeout(initDashboardAnalytics, 150);
-}
-
-/* ============ CARGA DE DATOS ============ */
-// Convierte una fila de la tabla de Supabase (columnas en snake_case) al formato
-// camelCase que usa el resto del panel.
-function mapDbRowToRecord(row) {
-    return {
-        id: row.id,
-        estado: row.estado || 'valid',
-        tipoPerfil: row.tipo_perfil,
-        nombre: row.nombre,
-        sexo: row.sexo,
-        edad: row.edad,
-        barrio: row.barrio,
-        contacto: row.contacto,
-        problematica: row.problematica,
-        subproblematica: row.subproblematica,
-        aspectosPositivos: row.aspectos_positivos || [],
-        nombreComercio: row.nombre_comercio,
-        ubicacionComercio: row.ubicacion_comercio,
-        impactoObra: row.impacto_obra,
-        consecuenciaComercial: row.consecuencia_comercial,
-        tituloProyecto: row.titulo_proyecto,
-        ejeIdea: row.eje_idea,
-        porQueProyecto: row.por_que_proyecto,
-        detalle: row.detalle,
-        lat: row.lat,
-        lng: row.lng,
-        archivoPath: row.archivo_path,
-        archivoNombreOriginal: row.archivo_nombre_original
-    };
-}
-
-async function loadDataStore() {
-    if (supabaseClient) {
-        try {
-            const { data, error } = await supabaseClient.from('registros_vecinales').select('*').order('id');
-            if (error) throw error;
-            dataStore = (data || []).map(mapDbRowToRecord);
-            return;
-        } catch (err) {
-            console.error('Error cargando datos de Supabase, se muestran datos de ejemplo:', err);
-            showToast("No se pudieron cargar los datos reales; mostrando ejemplo.", "error");
-        }
-    }
-    dataStore = DEMO_DATA.slice();
-}
-
-async function changeRecordStatus(id, newStatus) {
-    const item = dataStore.find(i => i.id === id);
-    if (!item) return;
-    item.estado = newStatus;
-
-    if (supabaseClient) {
-        try {
-            await supabaseClient.from('registros_vecinales').update({ estado: newStatus }).eq('id', id);
-        } catch (err) {
-            console.error('Error actualizando el estado en Supabase:', err);
-        }
-    }
-
-    applyAnalyticsFilters();
-    showToast(newStatus === 'valid' ? `Registro #${id} validado` : `Registro #${id} descartado`, newStatus === 'valid' ? 'success' : 'error');
-}
-
-/* ============ MAPA Y GRÁFICOS ============ */
-async function initDashboardAnalytics() {
-    await loadDataStore();
-
-    if (!analyticsMap) {
-        try {
-            analyticsMap = L.map('analyticsMapContainer').setView([-38.9516, -68.0591], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(analyticsMap);
-
-            try {
-                heatmapLayer = new HeatmapOverlay({ radius: 0.020, maxOpacity: .85, scaleRadius: true, useLocalExtrema: true, latField: 'lat', lngField: 'lng', valueField: 'count' });
-                heatmapLayer.addTo(analyticsMap);
-            } catch (err) {
-                console.error("No se pudo cargar el mapa de calor:", err);
-                heatmapLayer = null;
-            }
-            analyticsMarkersGroup = L.layerGroup().addTo(analyticsMap);
-        } catch (err) {
-            console.error("No se pudo inicializar el mapa del panel:", err);
-            analyticsMap = null; heatmapLayer = null; analyticsMarkersGroup = null;
-            const el = document.getElementById('analyticsMapContainer');
-            if (el) el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:180px;background:#f1f5f9;color:#64748b;font-size:0.85rem;text-align:center;padding:1rem;">No se pudo cargar el mapa.</div>';
-        }
-    }
-    if (analyticsMap) {
-        [100, 350, 800].forEach(ms => setTimeout(() => { if (analyticsMap) analyticsMap.invalidateSize(); }, ms));
-    }
-    applyAnalyticsFilters();
-}
-
-function applyAnalyticsFilters() {
-    const fEstado = document.getElementById('filterEstado').value;
-    const fPerfil = document.getElementById('filterPerfil').value;
-    const fBarrio = document.getElementById('filterBarrio').value;
-    const fProblematica = document.getElementById('filterProblematica').value;
-    const fSexo = document.getElementById('filterSexo').value;
-
-    let filtered = dataStore.filter(item => {
-        if (fEstado !== "TODOS" && item.estado !== fEstado) return false;
-        if (fPerfil !== "TODOS" && item.tipoPerfil !== fPerfil) return false;
-        if (fBarrio !== "TODOS" && item.barrio !== fBarrio) return false;
-        if (fProblematica !== "TODAS" && item.problematica !== fProblematica) return false;
-        if (fSexo !== "TODOS" && item.sexo !== fSexo) return false;
+    filteredRecords = allRecords.filter(r => {
+        if (estado !== 'TODOS' && r.estado !== estado) return false;
+        if (perfil !== 'TODOS' && r.tipo_perfil !== perfil) return false;
+        if (barrio !== 'TODOS' && r.barrio !== barrio) return false;
+        if (problematica !== 'TODAS' && r.problematica !== problematica) return false;
+        if (sexo !== 'TODOS' && r.sexo !== sexo) return false;
         return true;
     });
 
+    renderKPIs();
+    renderAuditTable();
+    renderCharts();
+    renderHeatmap();
+    generateIADiagnosis();
+}
+
+/* ================= RENDERS DE LA TABLA Y MODAL DE DETALLE ================= */
+function renderAuditTable() {
     const tbody = document.getElementById('auditTableBody');
-    tbody.innerHTML = "";
-    const recentRecords = dataStore.slice(-8).reverse();
-    if (recentRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Todavía no hay registros cargados.</td></tr>`;
-    } else {
-        recentRecords.forEach(item => {
-            const tr = document.createElement('tr');
-            let subContent = item.tituloProyecto || item.problematica;
-            if (item.aspectosPositivos && item.aspectosPositivos.length > 0) {
-                subContent = "<b>Positivo:</b> " + item.aspectosPositivos.join(", ");
-            }
-            if (item.archivoPath) {
-                const nombreArch = item.archivoNombreOriginal || '';
-                const ext = nombreArch.split('.').pop().toLowerCase();
-                const esImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext);
-                const esVideo = ['mp4', 'mov', 'webm', 'avi'].includes(ext);
-                const icono = esImagen ? 'fa-image' : esVideo ? 'fa-video' : 'fa-file-pdf';
-                const etiqueta = esImagen ? 'Ver foto' : esVideo ? 'Ver video' : 'Ver PDF';
-                subContent += ` <button type="button" class="btn-action-sm btn-adjunto" data-action="ver-adjunto" data-path="${item.archivoPath}"><i class="fas ${icono}"></i> ${etiqueta}</button>`;
-            }
-            tr.innerHTML = `
-                <td>#${item.id}</td>
-                <td><strong>${item.nombre}</strong><br><small>${item.tipoPerfil}</small></td>
-                <td>${item.barrio}<br><small>${item.contacto}</small></td>
-                <td>${subContent}</td>
-                <td><span class="status-badge ${item.estado === 'valid' ? 'status-valid' : 'status-spam'}">${item.estado.toUpperCase()}</span></td>
+    if (!tbody) return;
+
+    if (filteredRecords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay registros que coincidan con los filtros aplicados.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filteredRecords.map(r => {
+        const statusClass = r.estado === 'valid' ? 'status-valid' : 'status-spam';
+        const statusText = r.estado === 'valid' ? 'VALID' : (r.estado === 'spam' ? 'SPAM' : 'REVISIÓN');
+        
+        let detalleTexto = r.problematica || r.titulo_proyecto || '-';
+        if (r.aspectos_positivos && Array.isArray(r.aspectos_positivos) && r.aspectos_positivos.length > 0) {
+            detalleTexto = r.aspectos_positivos.join(', ');
+        }
+
+        return `
+            <tr onclick="openCitizenDetailModal('${r.id}')" title="Haz clic para ver el detalle completo">
+                <td>#${r.id.toString().slice(-4)}</td>
                 <td>
-                    <button class="btn-action-sm btn-approve" data-action="validar" data-id="${item.id}">Validar</button>
-                    <button class="btn-action-sm btn-discard" data-action="descartar" data-id="${item.id}">Descartar</button>
+                    <strong style="color: var(--primary); font-size: 0.95rem;">${escapeHtml(r.nombre || 'Anónimo')}</strong><br>
+                    <small style="color: var(--text-muted); font-weight: 600;">${escapeHtml(r.tipo_perfil || 'Vecino')}</small>
                 </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+                <td>
+                    ${escapeHtml(r.barrio || '-')}<br>
+                    <small style="color: var(--text-muted);">${escapeHtml(r.contacto || '-')}</small>
+                </td>
+                <td style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    ${escapeHtml(detalleTexto)}
+                </td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td onclick="event.stopPropagation();">
+                    <button type="button" class="btn-action-sm btn-approve" onclick="updateRecordStatus('${r.id}', 'valid')">Validar</button>
+                    <button type="button" class="btn-action-sm btn-discard" onclick="updateRecordStatus('${r.id}', 'spam')">Descartar</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
 
-    const totalCount = filtered.length;
-    document.getElementById('kpiTotal').innerText = totalCount;
+function openCitizenDetailModal(id) {
+    const r = allRecords.find(item => item.id == id);
+    if (!r) return;
 
-    const merchants = filtered.filter(i => i.tipoPerfil === "Comerciante / Dueño de Negocio");
-    const merchantSeverityRatio = totalCount > 0 ? Math.round((merchants.length / totalCount) * 100) : 0;
-    document.getElementById('kpiCommercialSeverity').innerText = merchantSeverityRatio + "%";
-    document.getElementById('kpiMerchantsCount').innerText = `${merchants.length} comercios afectados`;
+    selectedRegistroId = id;
 
-    const ideas = filtered.filter(i => i.tipoPerfil === "Propuesta / Idea Vecinal");
-    const ideasRatio = totalCount > 0 ? Math.round((ideas.length / totalCount) * 100) : 0;
-    document.getElementById('kpiIdeas').innerText = ideas.length;
-    document.getElementById('kpiIdeasRatio').innerText = `${ideasRatio}% del total de aportes`;
+    document.getElementById('modalCiudadanoNombre').textContent = r.nombre || 'Sin Nombre';
+    document.getElementById('modalCiudadanoPerfil').textContent = r.tipo_perfil || 'Vecino / Ciudadano';
+    document.getElementById('modalCiudadanoEdadSexo').textContent = `${r.edad || '-'} años · ${r.sexo || '-'}`;
+    document.getElementById('modalCiudadanoBarrio').textContent = r.barrio || '-';
+    document.getElementById('modalCiudadanoContacto').textContent = r.contacto || '-';
+    document.getElementById('modalCiudadanoCoords').textContent = `Lat: ${r.lat || '-'}, Lng: ${r.lng || '-'}`;
+    document.getElementById('modalCiudadanoDetalle').textContent = r.detalle || 'Sin descripción detallada.';
 
-    const positivos = filtered.filter(i => i.tipoPerfil === "Aporte Positivo Vecinal");
-    const positivosRatio = totalCount > 0 ? Math.round((positivos.length / totalCount) * 100) : 0;
-    document.getElementById('kpiPositivos').innerText = positivos.length;
-    document.getElementById('kpiPositivosRatio').innerText = `${positivosRatio}% valoraciones positivas`;
+    // Botón de WhatsApp Directo
+    const cleanPhone = (r.contacto || '').replace(/\D/g, '');
+    const wsMsg = encodeURIComponent(`Hola ${r.nombre || 'vecino'}, te contactamos desde Neuquén Escucha respecto a tu aporte registrado.`);
+    const btnWs = document.getElementById('btnWsDirect');
+    if (btnWs) btnWs.href = `https://wa.me/549${cleanPhone}?text=${wsMsg}`;
 
-    let topBarrio = "-";
-    if (totalCount > 0) {
-        const bCount = {};
-        filtered.forEach(i => bCount[i.barrio] = (bCount[i.barrio] || 0) + 1);
-        topBarrio = Object.keys(bCount).reduce((a, b) => bCount[a] > bCount[b] ? a : b);
-        document.getElementById('kpiBarrioTop').innerText = topBarrio;
-        document.getElementById('kpiBarrioTopCount').innerText = `${bCount[topBarrio]} incidentes en zona`;
+    // Sección Comercio
+    const boxComercio = document.getElementById('boxComercio');
+    if (r.nombre_comercio || r.ubicacion_comercio) {
+        boxComercio.style.display = 'block';
+        document.getElementById('modalComercioNombre').textContent = r.nombre_comercio || '-';
+        document.getElementById('modalComercioUbicacion').textContent = r.ubicacion_comercio || '-';
+        document.getElementById('modalComercioImpacto').textContent = r.impacto_obra || '-';
+        document.getElementById('modalComercioConsecuencia').textContent = r.consecuencia_comercial || '-';
     } else {
-        document.getElementById('kpiBarrioTop').innerText = "-";
-        document.getElementById('kpiBarrioTopCount').innerText = "0 incidentes";
+        boxComercio.style.display = 'none';
     }
 
-    document.getElementById('iaTextContainer').innerText = totalCount > 0
-        ? `Diagnóstico Neuquén IA: Se observa concentración crítica de reclamos en ${topBarrio}. La afectación comercial asciende al ${merchantSeverityRatio}%. Se recomienda planificar mesas de diálogo con frentistas e intensificar obras de pavimentación e iluminación LED prioritariamente en esta zona.`
-        : `Diagnóstico Neuquén IA: No hay registros que coincidan con los filtros seleccionados. Ajustá los filtros para ver el diagnóstico estratégico.`;
-
-    const heatPoints = filtered.map(item => ({ lat: item.lat, lng: item.lng, count: 1 }));
-    if (heatmapLayer) {
-        try { heatmapLayer.setData({ max: 3, data: heatPoints }); }
-        catch (err) { console.error("Error actualizando el mapa de calor:", err); }
+    // Sección Proyecto / Idea
+    const boxProyecto = document.getElementById('boxProyecto');
+    if (r.titulo_proyecto || r.eje_idea) {
+        boxProyecto.style.display = 'block';
+        document.getElementById('modalProyectoTitulo').textContent = r.titulo_proyecto || '-';
+        document.getElementById('modalProyectoEje').textContent = r.eje_idea || '-';
+        document.getElementById('modalProyectoPorQue').textContent = r.por_que_proyecto || '-';
+    } else {
+        boxProyecto.style.display = 'none';
     }
 
-    analyticsMarkersGroup && analyticsMarkersGroup.clearLayers();
-    if (analyticsMarkersGroup) {
-        filtered.forEach(item => {
-            let colorPin = '#134074';
-            if (item.tipoPerfil.includes('Comerciante')) colorPin = '#d90429';
-            if (item.tipoPerfil.includes('Idea')) colorPin = '#d97706';
-            if (item.tipoPerfil.includes('Positivo')) colorPin = '#16a34a';
+    // Visor Webview de Archivos Adjuntos (Fotos, Videos, PDFs)
+    const mediaContainer = document.getElementById('mediaViewerContainer');
+    const boxAdjuntos = document.getElementById('boxAdjuntos');
+    mediaContainer.innerHTML = '';
 
-            const marker = L.circleMarker([item.lat, item.lng], {
-                radius: item.tipoPerfil.includes('Idea') || item.tipoPerfil.includes('Positivo') ? 9 : 7,
-                fillColor: colorPin, color: '#fff', weight: 2, fillOpacity: 0.95
-            });
+    if (Array.isArray(r.archivos) && r.archivos.length > 0) {
+        boxAdjuntos.style.display = 'block';
+        r.archivos.forEach((fileObj, idx) => {
+            const fileUrl = typeof fileObj === 'string' ? fileObj : (fileObj.path || fileObj.url || '');
+            const fileName = typeof fileObj === 'object' && fileObj.nombre ? fileObj.nombre : `Adjunto_${idx+1}`;
+            const ext = fileUrl.split('.').pop().toLowerCase().split('?')[0];
 
-            let popup = `<b>${item.nombre}</b> (${item.tipoPerfil})<br><b>Barrio:</b> ${item.barrio}<br>`;
-            if (item.tipoPerfil.includes('Idea')) {
-                popup += `<b>Proyecto:</b> ${item.tituloProyecto}<br><b>Propuesta:</b> ${item.detalle}`;
-            } else if (item.tipoPerfil.includes('Positivo')) {
-                popup += `<b>Aspectos que le gustan:</b> ${(item.aspectosPositivos || []).join(', ')}<br><b>Comentario:</b> ${item.detalle}`;
+            let mediaHtml = '';
+            if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+                mediaHtml = `
+                    <div class="media-card">
+                        <div class="media-preview-box">
+                            <img src="${fileUrl}" alt="${fileName}">
+                        </div>
+                        <div class="media-actions">
+                            <span><i class="fas fa-image"></i> ${fileName}</span>
+                            <a href="${fileUrl}" target="_blank" download class="btn-download-file">
+                                <i class="fas fa-download"></i> Descargar Imagen
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (['mp4', 'webm', 'mov'].includes(ext)) {
+                mediaHtml = `
+                    <div class="media-card">
+                        <div class="media-preview-box">
+                            <video src="${fileUrl}" controls preload="metadata"></video>
+                        </div>
+                        <div class="media-actions">
+                            <span><i class="fas fa-video"></i> ${fileName}</span>
+                            <a href="${fileUrl}" target="_blank" download class="btn-download-file">
+                                <i class="fas fa-download"></i> Descargar Video
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else if (ext === 'pdf') {
+                mediaHtml = `
+                    <div class="media-card">
+                        <div class="media-preview-box">
+                            <iframe src="${fileUrl}"></iframe>
+                        </div>
+                        <div class="media-actions">
+                            <span><i class="fas fa-file-pdf"></i> ${fileName}</span>
+                            <a href="${fileUrl}" target="_blank" download class="btn-download-file">
+                                <i class="fas fa-file-pdf"></i> Descargar PDF
+                            </a>
+                        </div>
+                    </div>
+                `;
             } else {
-                popup += `<b>Área:</b> ${item.problematica}<br><b>Detalle:</b> ${item.detalle}`;
+                mediaHtml = `
+                    <div class="media-card">
+                        <div class="media-actions">
+                            <span><i class="fas fa-paperclip"></i> ${fileName}</span>
+                            <a href="${fileUrl}" target="_blank" download class="btn-download-file">
+                                <i class="fas fa-download"></i> Descargar Archivo
+                            </a>
+                        </div>
+                    </div>
+                `;
             }
-            if (item.archivoPath) {
-                popup += `<br><button type="button" class="btn-popup-adjunto" data-path="${item.archivoPath}"><i class="fas fa-paperclip"></i> Ver adjunto</button>`;
-            }
-            marker.bindPopup(popup);
-            if (item.archivoPath) {
-                marker.on('popupopen', () => {
-                    const btn = document.querySelector(`.btn-popup-adjunto[data-path="${CSS.escape(item.archivoPath)}"]`);
-                    if (btn) btn.addEventListener('click', () => verAdjunto(item.archivoPath));
-                });
-            }
-            analyticsMarkersGroup.addLayer(marker);
+            mediaContainer.innerHTML += mediaHtml;
+        });
+    } else {
+        boxAdjuntos.style.display = 'none';
+    }
+
+    document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetailModal() {
+    document.getElementById('detailModal').classList.remove('active');
+}
+
+function promptDeleteConfirmation() {
+    document.getElementById('confirmDeleteModal').classList.add('active');
+}
+
+function closeConfirmDeleteModal() {
+    document.getElementById('confirmDeleteModal').classList.remove('active');
+}
+
+async function executeDeleteCitizen() {
+    if (!selectedRegistroId) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from('registros_vecinales')
+            .delete()
+            .eq('id', selectedRegistroId);
+
+        if (error) throw error;
+
+        closeConfirmDeleteModal();
+        closeDetailModal();
+
+        showToast('Ciudadano y sus datos eliminados con éxito', 'success');
+        loadDashboardData();
+    } catch (err) {
+        console.error('Error al eliminar registro:', err);
+        showToast('No se pudo eliminar el registro', 'error');
+    }
+}
+
+async function updateRecordStatus(id, newStatus) {
+    try {
+        const { error } = await supabaseClient
+            .from('registros_vecinales')
+            .update({ estado: newStatus })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        showToast(`Registro #${id.toString().slice(-4)} actualizado a ${newStatus.toUpperCase()}`, 'success');
+        loadDashboardData();
+    } catch (err) {
+        console.error('Error actualizando estado:', err);
+        showToast('Error al actualizar el estado', 'error');
+    }
+}
+
+/* ================= RENDERS KPIS Y GRÁFICOS ================= */
+function renderKPIs() {
+    const total = filteredRecords.length;
+    document.getElementById('kpiTotal').textContent = total;
+
+    // Comerciantes
+    const merchants = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes('Comerciante'));
+    const merchantPct = total > 0 ? ((merchants.length / total) * 100).toFixed(1) : 0;
+    document.getElementById('kpiCommercialSeverity').textContent = `${merchantPct}%`;
+    document.getElementById('kpiMerchantsCount').textContent = `${merchants.length} comercios afectados`;
+
+    // Ideas
+    const ideas = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes('Idea'));
+    const ideasPct = total > 0 ? ((ideas.length / total) * 100).toFixed(1) : 0;
+    document.getElementById('kpiIdeas').textContent = ideas.length;
+    document.getElementById('kpiIdeasRatio').textContent = `${ideasPct}% del total de aportes`;
+
+    // Positivos
+    const positivos = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes('Positivo'));
+    const posPct = total > 0 ? ((positivos.length / total) * 100).toFixed(1) : 0;
+    document.getElementById('kpiPositivos').textContent = positivos.length;
+    document.getElementById('kpiPositivosRatio').textContent = `${posPct}% valoraciones positivas`;
+
+    // Barrio Top
+    const barrioCounts = {};
+    filteredRecords.forEach(r => {
+        if (r.barrio) barrioCounts[r.barrio] = (barrioCounts[r.barrio] || 0) + 1;
+    });
+    let topBarrio = '-';
+    let maxCount = 0;
+    for (const [b, c] of Object.entries(barrioCounts)) {
+        if (c > maxCount) {
+            maxCount = c;
+            topBarrio = b;
+        }
+    }
+    document.getElementById('kpiBarrioTop').textContent = topBarrio;
+    document.getElementById('kpiBarrioTopCount').textContent = `${maxCount} registros en zona`;
+}
+
+function renderCharts() {
+    // 1. Categorías
+    const catCounts = {};
+    filteredRecords.forEach(r => {
+        const cat = r.problematica || r.eje_idea || 'Sin Categoría';
+        catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+    const ctxCat = document.getElementById('chartCategories');
+    if (ctxCat) {
+        if (chartCategoriesInst) chartCategoriesInst.destroy();
+        chartCategoriesInst = new Chart(ctxCat, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(catCounts),
+                datasets: [{
+                    label: 'Registros',
+                    data: Object.values(catCounts),
+                    backgroundColor: '#134074'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
-    try { renderCategoryChart(filtered); } catch (err) { console.error("Error en gráfico de categorías:", err); }
-    try { renderPositivosChart(filtered); } catch (err) { console.error("Error en gráfico de positivos:", err); }
-    try { renderMerchantChart(filtered); } catch (err) { console.error("Error en gráfico de comercios:", err); }
-    try { renderDemographicsChart(filtered); } catch (err) { console.error("Error en gráfico de demografía:", err); }
-}
-
-function renderCategoryChart(data) {
-    const ctx = document.getElementById('chartCategories').getContext('2d');
-    const categories = Object.keys(subcategoriasDict);
-    const counts = categories.map(cat => data.filter(item => item.problematica === cat).length);
-    const ideasCount = data.filter(item => item.tipoPerfil === "Propuesta / Idea Vecinal").length;
-
-    if (chartCatInstance) chartCatInstance.destroy();
-    chartCatInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ["Calles", "Comercio", "Plazas", "Seguridad", "Servicios", "Transporte", "Educación", "Limpieza", "Proyectos Ideas"],
-            datasets: [{ data: [...counts, ideasCount], backgroundColor: ['#134074','#134074','#134074','#134074','#134074','#134074','#134074','#134074','#d97706'], borderRadius: 6 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-    });
-}
-
-function renderPositivosChart(data) {
-    const ctx = document.getElementById('chartPositivos').getContext('2d');
-    const posData = data.filter(i => i.tipoPerfil === "Aporte Positivo Vecinal");
+    // 2. Aspectos Positivos
     const posCounts = {};
-    posData.forEach(item => (item.aspectosPositivos || []).forEach(asp => posCounts[asp] = (posCounts[asp] || 0) + 1));
-    const labels = Object.keys(posCounts);
-    const counts = Object.values(posCounts);
-
-    if (chartPositivosInstance) chartPositivosInstance.destroy();
-    chartPositivosInstance = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: labels.length > 0 ? labels : ["Sin datos aún"], datasets: [{ label: 'Votos Positivos', data: counts.length > 0 ? counts : [0], backgroundColor: '#16a34a', borderRadius: 6 }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+    filteredRecords.forEach(r => {
+        if (Array.isArray(r.aspectos_positivos)) {
+            r.aspectos_positivos.forEach(p => {
+                posCounts[p] = (posCounts[p] || 0) + 1;
+            });
+        }
     });
+    const ctxPos = document.getElementById('chartPositivos');
+    if (ctxPos) {
+        if (chartPositivosInst) chartPositivosInst.destroy();
+        chartPositivosInst = new Chart(ctxPos, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(posCounts),
+                datasets: [{
+                    data: Object.values(posCounts),
+                    backgroundColor: ['#10b981', '#0284c7', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // 3. Impacto Comercial
+    const merchCounts = {};
+    filteredRecords.filter(r => r.impacto_obra).forEach(r => {
+        merchCounts[r.impacto_obra] = (merchCounts[r.impacto_obra] || 0) + 1;
+    });
+    const ctxMerch = document.getElementById('chartMerchants');
+    if (ctxMerch) {
+        if (chartMerchantsInst) chartMerchantsInst.destroy();
+        chartMerchantsInst = new Chart(ctxMerch, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(merchCounts),
+                datasets: [{
+                    data: Object.values(merchCounts),
+                    backgroundColor: ['#ef4444', '#f97316', '#eab308', '#06b6d4']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // 4. Demografía
+    const demoCounts = { '16-25': 0, '26-40': 0, '41-60': 0, '60+': 0 };
+    filteredRecords.forEach(r => {
+        const edad = r.edad || 0;
+        if (edad >= 16 && edad <= 25) demoCounts['16-25']++;
+        else if (edad >= 26 && edad <= 40) demoCounts['26-40']++;
+        else if (edad >= 41 && edad <= 60) demoCounts['41-60']++;
+        else if (edad > 60) demoCounts['60+']++;
+    });
+    const ctxDemo = document.getElementById('chartDemographics');
+    if (ctxDemo) {
+        if (chartDemographicsInst) chartDemographicsInst.destroy();
+        chartDemographicsInst = new Chart(ctxDemo, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(demoCounts),
+                datasets: [{
+                    label: 'Vecinos por Edad',
+                    data: Object.values(demoCounts),
+                    backgroundColor: '#0d9488'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
 }
 
-function renderMerchantChart(data) {
-    const ctx = document.getElementById('chartMerchants').getContext('2d');
-    const merchantsData = data.filter(i => i.tipoPerfil === "Comerciante / Dueño de Negocio");
-    const causes = ["Implementación de Bicisenda sin consulta", "Cambio de sentido de circulación de calle", "Cierre / Obra municipal prolongada sin previo aviso", "Prohibición / Remoción de estacionamiento", "Aumento desmedido de Tasas e Impuestos Municipales"];
-    const counts = causes.map(c => merchantsData.filter(i => i.impactoObra === c).length);
-    const hasData = counts.some(c => c > 0);
+function renderHeatmap() {
+    const container = document.getElementById('analyticsMapContainer');
+    if (!container) return;
 
-    if (chartMerchantInstance) chartMerchantInstance.destroy();
-    chartMerchantInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels: hasData ? ["Bicisenda", "Sentido Calle", "Obra Prolongada", "Estacionamiento", "Tasas Municipales"] : ["Sin datos aún"], datasets: [{ data: hasData ? counts : [1], backgroundColor: hasData ? ['#d90429', '#0b2545', '#134074', '#d97706', '#64748b'] : ['#e2e8f0'] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-    });
+    if (!heatmapMap) {
+        heatmapMap = L.map('analyticsMapContainer').setView([-38.9516, -68.0591], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(heatmapMap);
+
+        const config = {
+            "radius": 0.008,
+            "maxOpacity": .8,
+            "scaleRadius": true,
+            "useLocalExtrema": true,
+            latField: 'lat',
+            lngField: 'lng',
+            valueField: 'count'
+        };
+        heatmapLayer = new HeatmapOverlay(config);
+        heatmapMap.addLayer(heatmapLayer);
+    }
+
+    const points = filteredRecords
+        .filter(r => r.lat && r.lng)
+        .map(r => ({ lat: parseFloat(r.lat), lng: parseFloat(r.lng), count: 1 }));
+
+    heatmapLayer.setData({ max: 5, data: points });
 }
 
-function renderDemographicsChart(data) {
-    const ctx = document.getElementById('chartDemographics').getContext('2d');
-    const mCount = data.filter(i => i.sexo === "Masculino").length;
-    const fCount = data.filter(i => i.sexo === "Femenino").length;
-    const oCount = data.filter(i => i.sexo !== "Masculino" && i.sexo !== "Femenino").length;
-    const hasData = (mCount + fCount + oCount) > 0;
+function generateIADiagnosis() {
+    const iaBox = document.getElementById('iaTextContainer');
+    if (!iaBox) return;
 
-    if (chartDemoInstance) chartDemoInstance.destroy();
-    chartDemoInstance = new Chart(ctx, {
-        type: 'pie',
-        data: { labels: ["Masculino", "Femenino", "Otro / Prefiero no decir"], datasets: [{ data: hasData ? [mCount, fCount, oCount] : [1, 0, 0], backgroundColor: ['#0b2545', '#0d9488', '#94a3b8'] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-    });
-}
-
-/* ============ EXPORTACIÓN PDF Y POWERPOINT ============ */
-function exportPDFReport() {
-    if (typeof html2pdf === 'undefined') {
-        showToast("No se pudo cargar la librería de exportación a PDF (sin conexión).", "error");
+    if (filteredRecords.length === 0) {
+        iaBox.textContent = 'Sin datos suficientes para generar un diagnóstico.';
         return;
     }
+
+    const topBarrio = document.getElementById('kpiBarrioTop').textContent;
+    const total = filteredRecords.length;
+    const merchants = filteredRecords.filter(r => r.tipo_perfil && r.tipo_perfil.includes('Comerciante')).length;
+
+    iaBox.innerHTML = `Prioridad de intervención detectada en el barrio <strong>${topBarrio}</strong> con mayor concentración de reclamos. Se registra un <strong>${((merchants/total)*100).toFixed(1)}%</strong> de afectación directa sobre el sector comercial por obras o tasas. Se recomienda priorizar mesas de trabajo viales y proyectos participativos de espacio público en esta zona.`;
+}
+
+/* ================= EXPORTACIÓN PDF / PPTX ================= */
+function exportToPDF() {
     const element = document.getElementById('reportExportContainer');
-    const opt = { margin: [0.4, 0.4, 0.4, 0.4], filename: 'Reporte_Ejecutivo_Neuquen_Escucha.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } };
-    showToast("Generando PDF, un momento...", "info");
-    html2pdf().set(opt).from(element).save();
+    showToast('Generando reporte PDF...', 'info');
+    html2pdf().set({
+        margin: 10,
+        filename: 'Informe_Neuquen_Escucha.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    }).from(element).save().then(() => {
+        showToast('PDF descargado con éxito', 'success');
+    });
 }
 
-function exportPPTXReport() {
-    if (typeof PptxGenJS === 'undefined') {
-        showToast("No se pudo cargar la librería de exportación a PowerPoint (sin conexión).", "error");
-        return;
-    }
-    const pptx = new PptxGenJS();
-    pptx.author = "Neuquén Escucha";
-    pptx.company = "Ing. Rubén Fernández Seppi";
-    pptx.title = "Informe Ejecutivo de Diagnóstico Vecinal";
+function exportToPPTX() {
+    showToast('Generando presentación PowerPoint...', 'info');
+    let pptx = new PptxGenJS();
+    let slide = pptx.addSlide();
+    slide.addText("Neuquén Escucha - Reporte Ejecutivo", { x: 1, y: 1, fontSize: 24, bold: true, color: "0B2545" });
+    slide.addText(`Total de Registros Analizados: ${filteredRecords.length}`, { x: 1, y: 2, fontSize: 18, color: "134074" });
+    pptx.writeFile({ fileName: "Reporte_Neuquen_Escucha.pptx" }).then(() => {
+        showToast('PowerPoint descargado con éxito', 'success');
+    });
+}
 
-    let slide1 = pptx.addSlide();
-    slide1.background = { color: "0B2545" };
-    slide1.addText("Neuquén Escucha", { x: 1, y: 1.5, fontSize: 36, color: "FFFFFF", bold: true });
-    slide1.addText("Informe Ejecutivo de Reclamos Vecinales, Proyectos y Aportes Positivos", { x: 1, y: 2.3, fontSize: 18, color: "94A3B8" });
-    slide1.addText("Iniciativa impulsada por el Ing. Rubén Fernández Seppi", { x: 1, y: 3.5, fontSize: 14, color: "D97706", italic: true });
-
-    let slide2 = pptx.addSlide();
-    slide2.addText("Resumen de Indicadores Clave", { x: 0.8, y: 0.6, fontSize: 24, color: "0B2545", bold: true });
-    const total = document.getElementById('kpiTotal').innerText;
-    const severity = document.getElementById('kpiCommercialSeverity').innerText;
-    const ideas = document.getElementById('kpiIdeas').innerText;
-    const positivos = document.getElementById('kpiPositivos').innerText;
-
-    slide2.addTable([
-        [{ text: "Total Registros", options: { bold: true, fill: "F1F5F9" } }, { text: "Afectación Comercial", options: { bold: true, fill: "F1F5F9" } }, { text: "Proyectos Vecinales", options: { bold: true, fill: "F1F5F9" } }, { text: "Aportes Positivos", options: { bold: true, fill: "F1F5F9" } }],
-        [total, severity, ideas, positivos]
-    ], { x: 0.8, y: 1.5, w: 8.4, colW: [2.1, 2.1, 2.1, 2.1], border: { pt: "1", color: "CBD5E1" } });
-
-    pptx.writeFile({ filename: "Presentacion_Ejecutiva_Neuquen_Escucha.pptx" });
-    showToast("PowerPoint generado y descargado", "success");
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
