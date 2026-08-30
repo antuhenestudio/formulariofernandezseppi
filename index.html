@@ -111,22 +111,24 @@
             .video-gate-hint { font-size: 0.74rem; padding: 0.55rem 0.9rem; bottom: 14px; }
         }
 
+        /* ===== HERO BANNER: MARGEN INFERIOR REDUCIDO ===== */
         .hero-banner {
             text-align: center;
             max-width: 850px;
-            margin: 0 auto 1.4rem;
+            margin: 0 auto 0.8rem; /* Reducido de 1.4rem a 0.8rem */
         }
 
         .hero-banner h2 {
             font-size: 2.1rem;
             color: var(--primary);
             font-weight: 800;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.5rem;
         }
 
         .hero-banner p {
             font-size: 1rem;
             color: var(--text-muted);
+            margin-bottom: 0;
         }
 
         /* LIVE COUNTER BANNER */
@@ -136,8 +138,8 @@
             overflow-x: auto;
             gap: 0.6rem;
             max-width: 1100px;
-            margin: 0 auto 1.6rem;
-            padding: 0.2rem 0.1rem 0.5rem;
+            margin: 0 auto 0.6rem; /* Reducido de 1.6rem a 0.6rem */
+            padding: 0.2rem 0.1rem 0.3rem;
             scrollbar-width: thin;
             justify-content: center;
         }
@@ -190,7 +192,7 @@
             white-space: nowrap;
         }
 
-        /* ===== PROFILE SELECTOR: PÍLDORA CHICO Y FLUIDO ===== */
+        /* ===== PROFILE SELECTOR: PÍLDORA CHICO Y COMPACTO ===== */
         .profile-selector {
             display: flex;
             flex-wrap: wrap;
@@ -198,7 +200,7 @@
             align-items: center;
             gap: 0.5rem;
             max-width: 850px;
-            margin: 0 auto 1.8rem;
+            margin: 0.8rem auto 1.4rem; /* Margen superior e inferior ajustados */
             padding: 0 10px;
         }
 
@@ -557,12 +559,17 @@
         }
 
         @media (max-width: 480px) {
+            .hero-banner {
+                margin-bottom: 0.5rem;
+            }
             .profile-selector {
                 gap: 0.45rem;
+                margin-top: 0.5rem;
+                margin-bottom: 1.1rem;
             }
             .profile-btn {
-                padding: 0.52rem 0.85rem;
-                font-size: 0.78rem;
+                padding: 0.48rem 0.8rem;
+                font-size: 0.76rem;
             }
         }
     </style>
