@@ -163,11 +163,10 @@ function showMapLoadError(containerId) {
 }
 
 /* ============ VIDEO DE BIENVENIDA OBLIGATORIO (YouTube IFrame API) ============ */
-const GATE_VIDEO_ID = "GhmAAyCkHg4"; // https://youtube.com/shorts/GhmAAyCkHg4  — cambiar acá para poner otro video
+const GATE_VIDEO_ID = "GhmAAyCkHg4"; // https://youtube.com/shorts/GhmAAyCkHg4
 let gateYtPlayer = null;
 let gateYtInitialized = false;
 
-// Llamada automáticamente por la API de YouTube al terminar de cargar (window.onYouTubeIframeAPIReady)
 function onYouTubeIframeAPIReady() {
     gateYtInitialized = true;
     try {
@@ -175,10 +174,10 @@ function onYouTubeIframeAPIReady() {
             videoId: GATE_VIDEO_ID,
             playerVars: {
                 autoplay: 1,
-                mute: 1,          // arranca mudo: es la única forma que TODOS los navegadores permiten autoplay
+                mute: 1,
                 controls: 1,
                 rel: 0,
-                playsinline: 1,    // necesario para que autoplay funcione en iOS
+                playsinline: 1,
                 modestbranding: 1
             },
             events: {
@@ -195,10 +194,6 @@ function onYouTubeIframeAPIReady() {
 
 function onGateVideoReady(event) {
     event.target.playVideo();
-    // Intento automático de subir el volumen al 30%. La mayoría de los navegadores
-    // bloquean el audio en el autoplay sin gesto previo de la persona (política del
-    // navegador, no algo saltable desde el código) — si falla, mostramos un aviso
-    // para activarlo con un solo toque.
     setTimeout(() => {
         try { event.target.unMute(); event.target.setVolume(30); } catch (err) { /* noop */ }
         if (event.target.isMuted && event.target.isMuted()) {
@@ -229,14 +224,9 @@ function closeVideoGate() {
     }
 }
 
-/* ============ CONTADORES PÚBLICOS EN VIVO ============
-   Cada contador queda OCULTO hasta que la categoría llegue a 100 registros
-   reales o más. A partir de ahí se muestra y anima con el número real (ya no
-   se rellena con ningún valor artificial). */
+/* ============ CONTADORES PÚBLICOS EN VIVO ============ */
 const UMBRAL_VISIBILIDAD = 100;
 
-// idElem: el <span>/<div> del número. cardSelector: la tarjeta completa a
-// mostrar/ocultar (su contenedor .kpi-live-card).
 function animarContador(idElem, cardSelector, valorReal) {
     const elem = document.getElementById(idElem);
     const card = document.querySelector(cardSelector);
@@ -324,7 +314,6 @@ function validarRegistroPuro(datos) {
 }
 
 /* ============ MAPA DEL FORMULARIO ============ */
-// Ícono de pin en SVG puro (no depende de imágenes externas: siempre se ve).
 function buildPinIcon() {
     const svg = `
         <svg viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
@@ -468,9 +457,6 @@ function selectProfile(profileType, evt) {
     updateSubmitButtonState();
 }
 
-// Actualiza el aspecto del botón de enviar según dos cosas: el perfil elegido
-// (texto y color) y si el CAPTCHA ya está resuelto o no (bloqueado/candado vs
-// habilitado). Se llama al cambiar de perfil y al resolver/vencer el CAPTCHA.
 function updateSubmitButtonState() {
     const btnSubmit = document.getElementById('btnSubmitForm');
     const btnSubmitText = document.getElementById('btnSubmitText');
@@ -547,7 +533,6 @@ document.getElementById('citizenForm').addEventListener('submit', (e) => {
         return;
     }
 
-    // Verificación antispam por CAPTCHA (reemplaza la verificación anterior por WhatsApp).
     if (!turnstileToken) {
         showFormError("Por favor completá la verificación (el casillero de \"No soy un robot\") antes de enviar.");
         const captchaEl = document.getElementById('turnstileWidget');
@@ -603,15 +588,24 @@ document.getElementById('citizenForm').addEventListener('submit', (e) => {
     finalizeSubmission();
 });
 
-// Guarda el registro en Supabase (si está configurado) y resetea el formulario.
+// Guarda el registro en Supabase y resetea el formulario con animación de carga.
 async function finalizeSubmission() {
     if (!pendingPayload) return;
 
-    const archivos = await subirTodosLosAdjuntos();
-    if (archivos === null) return; // hubo un error subiendo alguno; ya se avisó, no seguimos
+    // Activar Overlay de Carga (Blur + Motion Graphics)
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.add('active');
 
-    if (supabaseClient) {
-        try {
+    let archivos = [];
+    try {
+        archivos = await subirTodosLosAdjuntos();
+        if (archivos === null) {
+            // Error subiendo adjunto; ocultar overlay y cancelar
+            if (overlay) overlay.classList.remove('active');
+            return;
+        }
+
+        if (supabaseClient) {
             const { error } = await supabaseClient.from('registros_vecinales').insert([{
                 tipo_perfil: pendingPayload.tipoPerfil,
                 nombre: pendingPayload.nombre,
@@ -635,28 +629,36 @@ async function finalizeSubmission() {
                 estado: pendingPayload.estado,
                 archivos: archivos
             }]);
-            // No pedimos ".select()" de vuelta a propósito: el público (sin login)
-            // solo tiene permiso de INSERTAR por seguridad, no de leer — pedir el
-            // registro de vuelta chocaría con esa regla y podía frenar el envío.
+
             if (error) {
                 console.error("Error al guardar en Supabase:", error);
                 showToast("No se pudo guardar en el servidor. Verificá tu conexión e intentá de nuevo.", "error");
-                return; // no mostramos "éxito" si en realidad no se guardó
+                if (overlay) overlay.classList.remove('active');
+                return;
             }
-        } catch (e) {
-            console.error("Error al guardar en Supabase:", e);
-            showToast("No se pudo guardar en el servidor. Verificá tu conexión e intentá de nuevo.", "error");
-            return;
         }
+    } catch (e) {
+        console.error("Error al procesar el envío:", e);
+        showToast("Ocurrió un error inesperado al procesar tu solicitud.", "error");
+        if (overlay) overlay.classList.remove('active');
+        return;
     }
 
-    pendingPayload.id = Date.now(); // id local solo para referencia en pantalla; el real lo asigna la base de datos
+    // Ocultar Overlay de Carga
+    if (overlay) overlay.classList.remove('active');
 
+    pendingPayload.id = Date.now();
     lastSubmittedRecord = pendingPayload;
     fetchPublicStats();
     showToast("Registro enviado correctamente", "success");
 
-    document.getElementById('successModal').style.display = 'flex';
+    // Abrir Modal de Confirmación
+    const successModal = document.getElementById('successModal');
+    if (successModal) {
+        successModal.classList.add('active');
+        successModal.style.display = 'flex';
+    }
+
     document.getElementById('citizenForm').reset();
     document.getElementById('subproblematica').innerHTML = '<option value="">-- Primero elige el área temática --</option>';
     document.getElementById('subproblematica').disabled = true;
@@ -666,18 +668,13 @@ async function finalizeSubmission() {
     selectProfile('ciudadano', { currentTarget: document.querySelector('.profile-btn[data-profile="ciudadano"]') });
     pendingPayload = null;
     turnstileToken = null;
-    updateSubmitButtonState(); // vuelve a mostrar el botón bloqueado hasta resolver el próximo CAPTCHA
+    updateSubmitButtonState();
     if (window.turnstile) { try { turnstile.reset(); } catch (err) { /* noop */ } }
     archivosSeleccionados = [];
     renderArchivosLista();
 }
 
-// Sube todos los adjuntos elegidos (hasta 5 fotos + 3 videos + 2 PDF) a Supabase
-// Storage. Devuelve un array [{path, nombre, tipo}, ...] para guardar en la
-// columna "archivos" del registro, o [] si no había ninguno. Si Supabase no
-// está configurado, avisa y sigue igual (el resto del reclamo se guarda sin
-// adjuntos). Si falla la subida de alguno, avisa y devuelve null para frenar
-// el envío (así la persona no pierde de vista que algo no se subió).
+// Sube todos los adjuntos elegidos a Supabase Storage
 async function subirTodosLosAdjuntos() {
     if (archivosSeleccionados.length === 0) return [];
 
@@ -690,17 +687,25 @@ async function subirTodosLosAdjuntos() {
     for (const item of archivosSeleccionados) {
         const nombreSeguro = item.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         const path = `${item.id}_${nombreSeguro}`;
+        
+        // Obtener URLs completas de los archivos subidos
         const { error } = await supabaseClient.storage.from('adjuntos-vecinales').upload(path, item.file);
         if (error) {
             console.error('Error subiendo adjunto:', item.file.name, error);
             showToast(`No se pudo subir "${item.file.name}". Quitalo o intentá de nuevo.`, "error");
             return null;
         }
-        resultados.push({ path, nombre: item.file.name, tipo: item.tipo });
+
+        const { data: publicUrlData } = supabaseClient.storage.from('adjuntos-vecinales').getPublicUrl(path);
+        resultados.push(publicUrlData.publicUrl);
     }
     return resultados;
 }
 
 function closeSuccessModal() {
-    document.getElementById('successModal').style.display = 'none';
+    const successModal = document.getElementById('successModal');
+    if (successModal) {
+        successModal.classList.remove('active');
+        successModal.style.display = 'none';
+    }
 }
