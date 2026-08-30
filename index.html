@@ -15,6 +15,7 @@
     <!-- Leaflet Map & Heatmap -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heatmap.js@2.0.5/build/heatmap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-heatmap@1.0.0/leaflet-heatmap.js"></script>
 
     <!-- Librerías Exportación (PDF y PowerPoint PPTX) -->
@@ -1590,16 +1591,16 @@
         const supabase = (SUPABASE_CONFIGURED && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
         const barriosNeuquen = [
-            "Alta Balsa", "Altos del Limay", "Área Centro Este", "Área Centro Oeste", "Bajo Balsa",
-            "Bardas Soleadas", "Barreneche", "Belgrano", "Bouquet Roldán", "Canal V", 
-            "Ciudad Industrial", "Confluencia Urbano", "Confluencia Rural", "Copol", "Cuenca XV", 
+            "Alta Balsa", "Alta Barda - Gamma", "Altos del Limay", "Aníbal Sapere", "Área Centro Este", "Área Centro Oeste", "Área Centro Sur", "Bajo Balsa",
+            "Bardas Soleadas", "Barreneche", "Barrio Nuevo", "Belgrano", "Bouquet Roldán", "Canal V", 
+            "Ciudad Industrial", "Colonia Rural Nueva Esperanza", "Confluencia Urbano", "Confluencia Rural", "Copol", "Cuenca XV", 
             "Cumelén", "Don Bosco II", "Don Bosco III", "El Progreso", "Esfuerzo", 
-            "Gran Neuquén Norte", "Gran Neuquén Sur", "Hibepa", "Huiliches", "Islas Malvinas", 
+            "Gran Neuquén Norte", "Gran Neuquén Sur", "Gregorio Álvarez", "Hibepa", "Huiliches", "Islas Malvinas", 
             "La Sirena", "Limay", "Loteo Social", "Mariano Moreno", "Melipal", 
-            "Mercantiles", "Militar", "Parque Industrial", "Rincón de Emilio", "Río Grande", 
+            "Mercantiles", "Militar", "Parque Industrial", "Provincias Unidas", "Rincón de Emilio", "Río Grande", 
             "San Lorenzo Norte", "San Lorenzo Sur", "Santa Genoveva", "Terrazas del Neuquén", 
             "Unión de Mayo", "Valentina Norte Rural", "Valentina Norte Urbana", 
-            "Valentina Sur Rural", "Valentina Sur Urbana", "Villa Florencia", "Villa María", "Villa Ceferino"
+            "Valentina Sur Rural", "Valentina Sur Urbana", "Villa Ceferino", "Villa Farrell", "Villa Florencia", "Villa María"
         ].sort();
 
         const subcategoriasDict = {
@@ -1701,7 +1702,15 @@
             "Unión de Mayo": [-38.9720, -68.0800],
             "Altos del Limay": [-38.9150, -68.0550],
             "Villa Florencia": [-38.9580, -68.1000],
-            "Villa María": [-38.9420, -68.0900]
+            "Villa María": [-38.9420, -68.0900],
+            "Aníbal Sapere": [-38.9600, -68.0450],
+            "Provincias Unidas": [-38.9300, -68.0700],
+            "Gregorio Álvarez": [-38.9580, -68.0520],
+            "Colonia Rural Nueva Esperanza": [-39.0200, -68.1800],
+            "Área Centro Sur": [-38.9560, -68.0620],
+            "Barrio Nuevo": [-38.9400, -68.1000],
+            "Villa Farrell": [-38.9450, -68.0850],
+            "Alta Barda - Gamma": [-38.9280, -68.0930]
         };
 
         const profileExplainerTexts = {
@@ -1743,6 +1752,15 @@
         let generatedCode = "";
         let pendingPayload = null;
         let currentProfile = "ciudadano";
+
+        // Fuerza los íconos por defecto de Leaflet a la CDN (evita marcadores rotos/invisibles)
+        if (window.L) {
+            L.Icon.Default.mergeOptions({
+                iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+            });
+        }
 
         // MAPS & CHARTS INSTANCES
         let pickerMap = null, pickerMarker = null;
@@ -1865,8 +1883,11 @@
 
         function initPickerMap() {
             const defaultLat = -38.9516, defaultLng = -68.0591;
-            pickerMap = L.map('pickerMap').setView([defaultLat, defaultLng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(pickerMap);
+            pickerMap = L.map('pickerMap', { attributionControl: true }).setView([defaultLat, defaultLng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(pickerMap);
 
             pickerMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(pickerMap);
             pickerMarker.on('dragend', function () {
@@ -1878,8 +1899,9 @@
                 updateGeoFields(e.latlng.lat, e.latlng.lng);
             });
 
-            // Asegura que el mapa se dibuje bien apenas está visible (evita tiles rotos)
-            setTimeout(() => pickerMap.invalidateSize(), 300);
+            // Reintentos de refresco de tamaño: el contenedor puede medir 0px si el navegador
+            // todavía no terminó de aplicar estilos/fuentes cuando el mapa se creó.
+            [100, 350, 800, 1500].forEach(ms => setTimeout(() => { if (pickerMap) pickerMap.invalidateSize(); }, ms));
             window.addEventListener('resize', () => { if (pickerMap) pickerMap.invalidateSize(); });
         }
 
@@ -2281,16 +2303,24 @@
         function initDashboardAnalytics() {
             if (!analyticsMap) {
                 analyticsMap = L.map('analyticsMapContainer').setView([-38.9516, -68.0591], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(analyticsMap);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(analyticsMap);
 
-                heatmapLayer = new HeatmapOverlay({
-                    "radius": 0.020, "maxOpacity": .85, "scaleRadius": true, "useLocalExtrema": true,
-                    latField: 'lat', lngField: 'lng', valueField: 'count'
-                });
-                heatmapLayer.addTo(analyticsMap);
+                try {
+                    heatmapLayer = new HeatmapOverlay({
+                        "radius": 0.020, "maxOpacity": .85, "scaleRadius": true, "useLocalExtrema": true,
+                        latField: 'lat', lngField: 'lng', valueField: 'count'
+                    });
+                    heatmapLayer.addTo(analyticsMap);
+                } catch (err) {
+                    console.error("No se pudo cargar el mapa de calor:", err);
+                    heatmapLayer = null;
+                }
                 analyticsMarkersGroup = L.layerGroup().addTo(analyticsMap);
             }
-            setTimeout(() => analyticsMap.invalidateSize(), 100);
+            [100, 350, 800, 1500].forEach(ms => setTimeout(() => { if (analyticsMap) analyticsMap.invalidateSize(); }, ms));
             applyAnalyticsFilters();
         }
 
@@ -2382,7 +2412,10 @@
 
             // Mapa
             const heatPoints = filtered.map(item => ({ lat: item.lat, lng: item.lng, count: 1 }));
-            heatmapLayer.setData({ max: 3, data: heatPoints });
+            if (heatmapLayer) {
+                try { heatmapLayer.setData({ max: 3, data: heatPoints }); }
+                catch (err) { console.error("Error actualizando el mapa de calor:", err); }
+            }
 
             analyticsMarkersGroup.clearLayers();
             filtered.forEach(item => {
