@@ -61,13 +61,30 @@ Supabase es gratis para este volumen de uso (plan Free: hasta 500MB de base de d
 | `admin` | ✅ | ✅ | ❌ |
 | `super_admin` | ✅ | ✅ | ✅ (solo desde SQL Editor) |
 
-## 3. Verificación por edad y comprobantes (ya vienen configurados)
+## 3. Verificación antispam por CAPTCHA (falta un paso tuyo)
 
-- **Regla de verificación:** las personas de **40 años o más** cargan su reclamo directo. Las **menores de 40** pasan primero por una verificación antispam vía WhatsApp (reciben un código de 4 dígitos y lo confirman en el sitio). Esto reduce cargas falsas del segmento más propenso a usar formularios de forma automatizada/maliciosa, sin ponerle una fricción extra a los vecinos mayores. El número se cambia en `assets/citizen.js`, buscando `EDAD_MINIMA_SIN_VERIFICACION`.
-- **Comprobante:** al terminar de cargar, aparece un botón "Recibir comprobante por WhatsApp" que abre WhatsApp con un mensaje ya armado (resumen del reclamo) para que la persona se lo envíe a sí misma como constancia. No tiene costo ni depende de ningún servicio de terceros — usa el enlace estándar `wa.me`.
-- Si en el futuro querés notificaciones por **SMS real** (por ejemplo con Twilio) o **email transaccional** (por ejemplo con Resend, que tiene plan gratis), es una capa aparte que se agrega llamando a una Edge Function de Supabase desde `finalizeSubmission()` en `citizen.js` — avisame si querés que lo armemos, ambos tienen algún costo o límite gratuito mensual a diferencia de WhatsApp.
+El formulario usa **Cloudflare Turnstile** (gratis, sin pedir teléfono, sin cuenta de pago) para evitar cargas automatizadas/falsas. El botón de enviar aparece **bloqueado con candado** hasta que la persona resuelve el casillero de verificación — recién ahí se habilita.
 
-## 4. El video de bienvenida obligatorio
+Por ahora está usando la *site key* de prueba oficial de Cloudflare (`1x00000000000000000000AA`), que siempre muestra un aviso de "Solo para pruebas" — hay que reemplazarla por la tuya real:
+
+1. Entrá a [dash.cloudflare.com](https://dash.cloudflare.com) (gratis, no pide tarjeta), creá una cuenta si no tenés.
+2. En el menú, buscá **Turnstile** → **Add site**. Poné el dominio de tu sitio (`antuhenestudio.github.io` o tu dominio propio si tenés uno), modo **Managed**.
+3. Te va a dar una **Site Key**. Copiala.
+4. En `index.html`, buscá esta línea (cerca del botón de enviar) y reemplazá el valor de ejemplo por tu Site Key real:
+   ```html
+   <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" ...>
+   ```
+5. Subí el cambio a GitHub. Listo — a partir de ahí el CAPTCHA es real.
+
+**Sobre la regla de edad anterior:** antes había una regla que saltaba la verificación a partir de los 40 años (cuando la verificación era por WhatsApp, más incómoda). Con CAPTCHA — mucho más simple, un solo click — ya no hace falta esa excepción: **todos** pasan por la misma verificación, sin importar la edad.
+
+## 4. Adjuntar fotos, videos y PDF
+
+Cada reclamo puede incluir hasta **5 fotos, 3 videos y 2 PDF** (15MB máximo por archivo). Se van agregando de a uno: la persona elige un archivo, se suma a una lista con su nombre y tamaño (con botón para quitarlo si se equivocó), y puede repetir hasta llegar al límite de cada tipo. Los límites se pueden cambiar en `assets/citizen.js`, buscando `LIMITES_ADJUNTOS`.
+
+Los archivos se suben a Supabase Storage al enviar el formulario, y quedan visibles solo desde el panel admin (botón "Ver foto"/"Ver video"/"Ver PDF" en la tabla, y en el popup de cada punto del mapa) — nunca son públicos.
+
+## 5. El video de bienvenida obligatorio
 
 En `assets/citizen.js`, buscá esta línea para cambiar el video:
 ```js
@@ -75,7 +92,7 @@ const GATE_VIDEO_ID = "GhmAAyCkHg4"; // el ID es la parte final de la URL de You
 ```
 Aparece como un popup ajustado a la pantalla apenas se entra al sitio, con volumen al 30% (cuando el navegador lo permite — algunos exigen un toque para activar el sonido, es una política de los navegadores, no del código). Tiene botón de cerrar (X) en todo momento, y hay un límite de seguridad de 7 segundos: si YouTube no llega a cargar, se habilita el acceso al sitio igual.
 
-## 5. Publicar en GitHub Pages
+## 6. Publicar en GitHub Pages
 
 1. Subí todo este repositorio a GitHub.
 2. En el repositorio: **Settings → Pages → Branch**: elegí `main` (o la rama que uses) y carpeta `/ (root)`.
@@ -84,7 +101,7 @@ Aparece como un popup ajustado a la pantalla apenas se entra al sitio, con volum
 
 **Importante — esto no reemplaza la seguridad real:** que la URL no tenga un link visible solo evita que un visitante casual la encuentre por accidente; no es una barrera real (alguien podría adivinarla, encontrarla en el historial del navegador, en una captura, etc.). La protección de verdad sigue siendo el login con usuario y contraseña de Supabase Auth que ya tiene el panel — eso es lo que impide que alguien sin credenciales válidas vea los datos, aunque llegue a la URL.
 
-## 6. Evitar que Supabase pause el proyecto por falta de uso
+## 7. Evitar que Supabase pause el proyecto por falta de uso
 
 El plan gratuito de Supabase **pausa el proyecto después de 7 días sin ninguna llamada a la API** (no borra los datos, pero el sitio deja de responder hasta reactivarlo manualmente desde el dashboard). Este repositorio incluye un workflow de GitHub Actions (`.github/workflows/keep-alive.yml`) que hace una consulta mínima cada 3-4 días para que esto nunca pase, sin costo extra.
 
@@ -97,6 +114,6 @@ Para activarlo (una sola vez):
 
 Si en algún momento el proyecto crece y necesita estar siempre disponible sin depender de este workaround (por ejemplo, si empieza a recibir tráfico real de forma sostenida), la alternativa definitiva es pasar al plan **Pro de Supabase (USD 25/mes)**, que no pausa proyectos y suma backups diarios.
 
-## 7. Barrios, categorías y subproblemáticas
+## 8. Barrios, categorías y subproblemáticas
 
 Todo vive en `assets/shared.js`, en las constantes `barriosNeuquen`, `subcategoriasDict` y `barrioCoords`. Agregar un barrio o una subproblemática nueva es agregar una línea ahí — se refleja automáticamente en el formulario público y en los filtros del panel, sin tocar ningún otro archivo.
