@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Diagnóstico y Participación Ciudadana | Neuquén</title>
-    <!-- FontAwesome Icons -->
+    <title>Neuquén Escucha | Plataforma de Diagnóstico y Participación Ciudadana</title>
+    <!-- Icons & External Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Advanced Visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Leaflet JS & Heatmap plugin for Spatial Intelligence -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-heatmap@1.0.0/leaflet-heatmap.js"></script>
-    <!-- Supabase JS Client library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=TU_RECAPTCHA_SITE_KEY"></script>
 
     <style>
         :root {
@@ -24,8 +21,8 @@
             --card-bg: #ffffff;
             --text-dark: #0f172a;
             --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --radius: 12px;
+            --border-color: #cbd5e1;
+            --radius: 16px;
             --shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -46,7 +43,6 @@
             flex-direction: column;
         }
 
-        /* Top Header Navigation */
         header {
             background: var(--primary);
             color: #fff;
@@ -69,18 +65,18 @@
         .brand-icon {
             background: var(--accent);
             color: #fff;
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         .brand-text h1 {
-            font-size: 1.15rem;
-            font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 800;
             letter-spacing: -0.02em;
         }
 
@@ -93,7 +89,7 @@
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.6rem 1.2rem;
+            padding: 0.6rem 1.4rem;
             border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 600;
@@ -117,7 +113,6 @@
             width: 100%;
         }
 
-        /* View Containers */
         .view-section {
             display: none;
             animation: fadeIn 0.4s ease-out forwards;
@@ -132,10 +127,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Citizen Form Section Styles */
         .hero-banner {
             text-align: center;
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto 2.5rem;
         }
 
@@ -151,13 +145,50 @@
             color: var(--text-muted);
         }
 
+        .profile-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-btn {
+            background: #fff;
+            border: 2px solid var(--border-color);
+            padding: 0.9rem 1.8rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .profile-btn:hover {
+            border-color: var(--secondary);
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .profile-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(11, 37, 69, 0.25);
+        }
+
         .form-card {
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 2.5rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
         }
 
@@ -178,16 +209,16 @@
         }
 
         label {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.9rem;
             color: var(--text-dark);
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 0.8rem 1rem;
+            padding: 0.85rem 1.1rem;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.95rem;
             background: #fff;
             color: var(--text-dark);
@@ -197,16 +228,36 @@
 
         input:focus, select:focus, textarea:focus {
             border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.1);
+            box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
+        }
+
+        /* Anti-Bot Honeypot Field */
+        .website-field-hp {
+            display: none !important;
+            visibility: hidden !important;
+            position: absolute !important;
+            left: -9999px !important;
+        }
+
+        .notice-jurisdiction {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 0.9rem 1.1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #1e40af;
+            display: none;
+            margin-top: 0.4rem;
+            line-height: 1.4;
         }
 
         .btn-submit {
             background: var(--accent);
             color: #fff;
             border: none;
-            padding: 1rem 2rem;
+            padding: 1.1rem 2.2rem;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 800;
             border-radius: 50px;
             cursor: pointer;
             transition: var(--transition);
@@ -215,7 +266,7 @@
             justify-content: center;
             gap: 0.6rem;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .btn-submit:hover {
@@ -224,15 +275,15 @@
             box-shadow: 0 8px 20px rgba(217, 4, 41, 0.25);
         }
 
-        /* Modal Popup Styling */
+        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(5px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -243,7 +294,7 @@
         .modal-card {
             background: #fff;
             border-radius: var(--radius);
-            max-width: 500px;
+            max-width: 540px;
             width: 100%;
             padding: 2.5rem;
             text-align: center;
@@ -257,20 +308,20 @@
         }
 
         .modal-icon {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             background: #dcfce7;
             color: #16a34a;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin: 0 auto 1.5rem;
         }
 
         .modal-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: var(--primary);
             font-weight: 800;
             margin-bottom: 0.8rem;
@@ -279,14 +330,27 @@
         .modal-desc {
             color: var(--text-muted);
             font-size: 0.95rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .modal-invitation {
+            background: #f1f5f9;
+            border-left: 4px solid #25D366;
+            padding: 1.1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            text-align: left;
+            margin-bottom: 1.5rem;
+            line-height: 1.45;
         }
 
         .btn-whatsapp {
             background: #25D366;
             color: #fff;
             text-decoration: none;
-            padding: 0.9rem 1.8rem;
+            padding: 1rem 1.8rem;
             border-radius: 50px;
             font-weight: 700;
             display: inline-flex;
@@ -308,15 +372,15 @@
             border: none;
             color: var(--text-muted);
             font-weight: 600;
-            margin-top: 1rem;
+            margin-top: 1.2rem;
             cursor: pointer;
             font-size: 0.85rem;
         }
 
-        /* Login Screen */
+        /* Admin Dashboard UI */
         .login-card {
-            max-width: 420px;
-            margin: 4rem auto;
+            max-width: 440px;
+            margin: 3rem auto;
             background: #fff;
             padding: 2.5rem;
             border-radius: var(--radius);
@@ -324,21 +388,22 @@
             border: 1px solid var(--border-color);
         }
 
-        .login-card h3 {
-            font-size: 1.5rem;
+        .demo-credentials-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.88rem;
+            color: #1e40af;
+        }
+
+        .demo-credentials-box strong {
+            display: block;
+            margin-bottom: 0.3rem;
             color: var(--primary);
-            margin-bottom: 0.5rem;
-            text-align: center;
         }
 
-        .login-card p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        /* Executive Dashboard Styles */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -346,17 +411,6 @@
             margin-bottom: 2rem;
             flex-wrap: wrap;
             gap: 1rem;
-        }
-
-        .dashboard-title h2 {
-            font-size: 1.8rem;
-            color: var(--primary);
-            font-weight: 800;
-        }
-
-        .dashboard-title p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
         }
 
         .filter-bar {
@@ -387,9 +441,9 @@
         }
 
         .kpi-card .kpi-title {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
         }
 
@@ -397,7 +451,7 @@
             font-size: 1.8rem;
             font-weight: 800;
             color: var(--primary);
-            margin-top: 0.5rem;
+            margin-top: 0.4rem;
         }
 
         .charts-grid {
@@ -415,55 +469,27 @@
             box-shadow: var(--shadow);
         }
 
-        .chart-card.full-width {
-            grid-column: span 2;
-        }
+        .chart-card.full-width { grid-column: span 2; }
 
-        .chart-card h4 {
-            font-size: 1.1rem;
-            color: var(--primary);
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        #mapContainer { height: 420px; width: 100%; border-radius: 10px; }
 
-        #mapContainer {
-            height: 420px;
-            width: 100%;
-            border-radius: 8px;
-            z-index: 1;
-        }
-
-        /* Responsive Breakpoints */
         @media (max-width: 992px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            .chart-card.full-width {
-                grid-column: span 1;
-            }
+            .charts-grid { grid-template-columns: 1fr; }
+            .chart-card.full-width { grid-column: span 1; }
         }
 
         @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .form-group.full-width {
-                grid-column: span 1;
-            }
-            .hero-banner h2 {
-                font-size: 1.75rem;
-            }
-            .form-card {
-                padding: 1.5rem;
-            }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+            .hero-banner h2 { font-size: 1.75rem; }
+            .form-card { padding: 1.5rem; }
+            .profile-selector { flex-direction: column; }
+            .profile-btn { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Main Navigation Bar -->
     <header>
         <div class="brand">
             <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
@@ -483,15 +509,37 @@
         <section id="citizenView" class="view-section active">
             <div class="hero-banner">
                 <h2>Espacio de Escucha y Diagnóstico Ciudadano</h2>
-                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para relevar, procesar y proyectar soluciones reales a las problemáticas cotidianas de Neuquén.</p>
+                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes, haciendo valer sus derechos frente a las problemáticas de Neuquén.</p>
             </div>
 
+            <!-- Profile Selector Rounded Buttons -->
+            <div class="profile-selector">
+                <button type="button" class="profile-btn active" onclick="selectProfile('ciudadano')">
+                    <i class="fas fa-user-check"></i> Vecino / Ciudadano
+                </button>
+                <button type="button" class="profile-btn" onclick="selectProfile('comerciante')">
+                    <i class="fas fa-store"></i> Comerciante / Dueño de Negocio
+                </button>
+                <button type="button" class="profile-btn" onclick="selectProfile('joven')">
+                    <i class="fas fa-graduation-cap"></i> Joven (16 a 30 años)
+                </button>
+            </div>
+
+            <!-- DYNAMIC FORM CONTAINER -->
             <div class="form-card">
                 <form id="citizenForm">
+                    <input type="hidden" id="tipoPerfil" name="tipoPerfil" value="Vecino / Ciudadano">
+
+                    <!-- Anti-Bot Honeypot Field -->
+                    <div class="website-field-hp">
+                        <label for="website_hp">No llenar:</label>
+                        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off">
+                    </div>
+
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="nombre">Nombre y Apellido *</label>
-                            <input type="text" id="nombre" name="nombre" placeholder="Ej. Carlos Gutiérrez" required>
+                            <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Carlos Pérez" required>
                         </div>
 
                         <div class="form-group">
@@ -513,7 +561,6 @@
                             <label for="barrio">Barrio de Neuquén *</label>
                             <select id="barrio" name="barrio" required>
                                 <option value="">-- Selecciona tu barrio --</option>
-                                <!-- Populated dynamically with ALL official Neuquén neighborhoods -->
                             </select>
                         </div>
 
@@ -522,75 +569,131 @@
                             <input type="tel" id="contacto" name="contacto" placeholder="Ej. 2994123456" required>
                         </div>
 
-                        <div class="form-group">
+                        <!-- FIELDS SPECIFIC TO MERCHANTS -->
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="nombreComercio">Nombre Fantasía / Rubro del Comercio *</label>
+                            <input type="text" id="nombreComercio" name="nombreComercio" placeholder="Ej. Panadería San Martín / Calzados">
+                        </div>
+
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="ubicacionComercio">Dirección Exacta del Local *</label>
+                            <input type="text" id="ubicacionComercio" name="ubicacionComercio" placeholder="Ej. Av. Argentina 450 / San Martín y Jujuy">
+                        </div>
+
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="impactoObra">Causa Principal de Perjuicio Comercial *</label>
+                            <select id="impactoObra" name="impactoObra">
+                                <option value="">-- Seleccionar causa --</option>
+                                <option value="Implementación de Bicisenda sin consulta">Implementación de Bicisenda sin consulta</option>
+                                <option value="Cambio de sentido de circulación de calle">Cambio de sentido de circulación de calle</option>
+                                <option value="Cierre / Obra municipal prolongada sin previo aviso">Cierre / Obra municipal prolongada sin aviso</option>
+                                <option value="Prohibición / Remoción de estacionamiento">Prohibición / Remoción de estacionamiento</option>
+                                <option value="Aumento desmedido de Tasas e Impuestos Municipales">Aumento desmedido de Tasas e Impuestos</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="consecuenciaComercial">Consecuencia Sufrida *</label>
+                            <select id="consecuenciaComercial" name="consecuenciaComercial">
+                                <option value="">-- Seleccionar consecuencia --</option>
+                                <option value="Pérdida drástica de ventas y rentabilidad">Pérdida drástica de ventas y rentabilidad</option>
+                                <option value="Tuve que trasladar el negocio a otra ubicación">Tuve que trasladar el negocio a otra ubicación</option>
+                                <option value="Tuve que reducir personal">Tuve que reducir personal</option>
+                                <option value="Tuve que cerrar definitivamente el comercio">Tuve que cerrar definitivamente el comercio</option>
+                            </select>
+                        </div>
+
+                        <!-- GENERAL CATEGORY SELECTOR -->
+                        <div class="form-group general-field">
                             <label for="problematica">Área Temática Principal *</label>
                             <select id="problematica" name="problematica" onchange="loadSubcategories()" required>
-                                <option value="">-- Seleccionar área --</option>
-                                <option value="Calles y Tránsito">Calles, Baches y Tránsito</option>
-                                <option value="Plazas y Espacios Verdes">Plazas y Espacios Verdes</option>
-                                <option value="Alumbrado y Seguridad">Alumbrado y Entorno Seguro</option>
-                                <option value="Servicios Básicos">Servicios Básicos (Agua, Cloacas, Gas)</option>
-                                <option value="Limpieza y Residuos">Limpieza y Basurales Urbanos</option>
+                                <option value="">-- Seleccionar área temática --</option>
+                                <option value="Calles, Tránsito y Obras Civiles">Calles, Baches, Tránsito y Obras Civiles</option>
+                                <option value="Comercio, Obras Municipales Arbitrarias y Tasas">Comercio, Obras Municipales Arbitrarias y Tasas</option>
+                                <option value="Plazas, Espacios Públicos y Vías Verdes">Plazas, Espacios Públicos y Vías Verdes</option>
+                                <option value="Seguridad Urbana y Entorno Seguro">Seguridad Urbana y Entorno Seguro (Facultad Municipal/Provincial)</option>
+                                <option value="Servicios Básicos y Redes">Servicios Básicos (Agua, Cloacas, Gas, Drenaje Pluvial)</option>
+                                <option value="Transporte Público y Movilidad">Transporte Público, Colemóvil y Conectividad</option>
+                                <option value="Educación y Juventud">Educación, Escuelas y Oportunidades Juveniles</option>
+                                <option value="Limpieza, Recolección y Zonas Industriales">Limpieza, Basurales e Infraestructura Industrial</option>
+                                <option value="Libre Manifestación de Disconformidad">Manifiesto Abierto de Disconformidad General</option>
                             </select>
                         </div>
 
-                        <div class="form-group full-width">
-                            <label for="subproblematica">Subproblemática Específica *</label>
-                            <select id="subproblematica" name="subproblematica" required disabled>
+                        <div class="form-group full-width general-field">
+                            <label for="subproblematica">Subproblemática / Clasificación Específica *</label>
+                            <select id="subproblematica" name="subproblematica" onchange="checkJurisdictionNotice()" required disabled>
                                 <option value="">-- Primero elige el área temática --</option>
                             </select>
+
+                            <div id="jurisdictionNotice" class="notice-jurisdiction">
+                                <i class="fas fa-info-circle"></i> <strong>Aclaración de Competencia:</strong> Esta área (ej. Seguridad Policial, Educación Escolar) es de facultad primaria de la <strong>Provincia del Neuquén</strong>, aunque la Municipalidad debe coordinar, iluminar, desmalezar e influir activamente. Registramos tu reclamo para exigir la acción coordinada.
+                            </div>
                         </div>
 
                         <div class="form-group full-width">
-                            <label for="detalle">Descripción Detallada de la Situación *</label>
-                            <textarea id="detalle" name="detalle" rows="4" placeholder="Describa la ubicación exacta (esquina, calle), el grado de afectación o el tiempo que lleva sin respuesta..." required></textarea>
+                            <label for="detalle">Descripción Detallada de la Situación o Transgresión Sufrida *</label>
+                            <textarea id="detalle" name="detalle" rows="4" placeholder="Describa la situación, pérdidas sufridas, tiempo de la problemática o decisiones municipales tomadas sin consulta previa..." required></textarea>
                         </div>
                     </div>
 
                     <button type="submit" class="btn-submit" id="btnSubmitForm">
-                        <i class="fas fa-paper-plane"></i> Registrar mi Situación
+                        <i class="fas fa-paper-plane"></i> Registrar mi Situación / Reclamo
                     </button>
                 </form>
             </div>
         </section>
-
 
         <!-- ================= ADMIN LOGIN VIEW ================= -->
         <section id="loginView" class="view-section">
             <div class="login-card">
                 <h3>Acceso Restringido</h3>
-                <p>Panel de Inteligencia Territorial y Analítica de Reclamos</p>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 1rem; font-size: 0.85rem;">Panel de Inteligencia Territorial y Analítica de Reclamos</p>
+                
+                <div class="demo-credentials-box">
+                    <strong><i class="fas fa-key"></i> Credenciales de Acceso Demo:</strong>
+                    • <b>Usuario:</b> <code>admin@neuquen.gob.ar</code><br>
+                    • <b>Contraseña:</b> <code>admin123</code>
+                </div>
+
                 <form id="loginForm">
                     <div class="form-group" style="margin-bottom: 1.2rem;">
                         <label for="loginUser">Usuario / Email</label>
-                        <input type="text" id="loginUser" required placeholder="admin@neuquen.gob.ar">
+                        <input type="text" id="loginUser" value="admin@neuquen.gob.ar" required>
                     </div>
                     <div class="form-group" style="margin-bottom: 1.8rem;">
                         <label for="loginPass">Contraseña</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••">
+                        <input type="password" id="loginPass" value="admin123" required>
                     </div>
                     <button type="submit" class="btn-submit">
-                        <i class="fas fa-key"></i> Iniciar Sesión
+                        <i class="fas fa-chart-line"></i> Iniciar Sesión y Ver Gráficos
                     </button>
                 </form>
             </div>
         </section>
 
-
         <!-- ================= EXECUTIVE ANALYTICS DASHBOARD ================= -->
         <section id="dashboardView" class="view-section">
             <div class="dashboard-header">
-                <div class="dashboard-title">
+                <div>
                     <h2>Centro de Inteligencia Territorial Neuquén</h2>
-                    <p>Filtros avanzados, mapas de calor geotagged y segmentación demográfica.</p>
+                    <p>Filtros cruzados por perfil, barrios, problemáticas y mapas de calor en movimiento.</p>
                 </div>
                 <button onclick="logoutAdmin()" class="admin-nav-btn" style="background: var(--accent); border:none;">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
             </div>
 
-            <!-- Dynamic Multi-Variable Filters -->
             <div class="filter-bar">
+                <div class="form-group">
+                    <label>Perfil Carga</label>
+                    <select id="filterPerfil" onchange="applyAnalyticsFilters()">
+                        <option value="TODOS">Todos los perfiles</option>
+                        <option value="Vecino / Ciudadano">Vecino / Ciudadano</option>
+                        <option value="Comerciante / Dueño de Negocio">Comerciante</option>
+                        <option value="Joven (16 a 30 años)">Jóvenes</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Barrio</label>
                     <select id="filterBarrio" onchange="applyAnalyticsFilters()">
@@ -601,15 +704,10 @@
                     <label>Problemática</label>
                     <select id="filterProblematica" onchange="applyAnalyticsFilters()">
                         <option value="TODAS">Todas las áreas</option>
-                        <option value="Calles y Tránsito">Calles y Tránsito</option>
-                        <option value="Plazas y Espacios Verdes">Plazas y Espacios Verdes</option>
-                        <option value="Alumbrado y Seguridad">Alumbrado y Seguridad</option>
-                        <option value="Servicios Básicos">Servicios Básicos</option>
-                        <option value="Limpieza y Residuos">Limpieza y Residuos</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Segmento por Sexo</label>
+                    <label>Sexo</label>
                     <select id="filterSexo" onchange="applyAnalyticsFilters()">
                         <option value="TODOS">Todos</option>
                         <option value="Masculino">Masculino</option>
@@ -617,30 +715,20 @@
                         <option value="Otro">Otro</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Rango Etario</label>
-                    <select id="filterEdad" onchange="applyAnalyticsFilters()">
-                        <option value="TODOS">Todas las edades</option>
-                        <option value="16-29">16 - 29 años</option>
-                        <option value="30-50">30 - 50 años</option>
-                        <option value="51+">Mayores de 50 años</option>
-                    </select>
-                </div>
             </div>
 
-            <!-- Top Metric KPIs -->
             <div class="kpi-grid">
                 <div class="kpi-card">
-                    <div class="kpi-title">Total Casos Filtro</div>
+                    <div class="kpi-title">Total Registros</div>
                     <div class="kpi-value" id="kpiTotal">0</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Barrio Crítico</div>
-                    <div class="kpi-value" id="kpiBarrioTop" style="font-size: 1.2rem; color: var(--accent);">-</div>
+                    <div class="kpi-title">Comercios Perjudicados</div>
+                    <div class="kpi-value" id="kpiMerchants" style="color: var(--accent);">0</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-title">Temática Principal</div>
-                    <div class="kpi-value" id="kpiAreaTop" style="font-size: 1.2rem;">-</div>
+                    <div class="kpi-title">Barrio con Mayor Reclamo</div>
+                    <div class="kpi-value" id="kpiBarrioTop" style="font-size: 1.2rem;">-</div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-title">% Disconformidad Masculina</div>
@@ -648,10 +736,9 @@
                 </div>
             </div>
 
-            <!-- Interactive Analytics Charts Grid -->
             <div class="charts-grid">
                 <div class="chart-card full-width">
-                    <h4><i class="fas fa-map-marked-alt" style="color: var(--accent);"></i> Mapa de Calor Urbano (Concentración de Reclamos)</h4>
+                    <h4><i class="fas fa-map-marked-alt" style="color: var(--accent);"></i> Mapa de Calor Urbano (Concentración Georreferenciada de Conflictos)</h4>
                     <div id="mapContainer"></div>
                 </div>
 
@@ -661,8 +748,8 @@
                 </div>
 
                 <div class="chart-card">
-                    <h4><i class="fas fa-users-viewfinder"></i> Segmentación Demográfica por Sexo</h4>
-                    <canvas id="chartDemographics" height="250"></canvas>
+                    <h4><i class="fas fa-store-alt-slash" style="color: var(--accent);"></i> Causal de Impacto Comercial (Comerciantes)</h4>
+                    <canvas id="chartMerchants" height="250"></canvas>
                 </div>
             </div>
         </section>
@@ -675,9 +762,14 @@
             <div class="modal-icon">
                 <i class="fas fa-check"></i>
             </div>
-            <h3 class="modal-title">¡Registro Recibido!</h3>
-            <p class="modal-desc">Le agradecemos profundamente por compartir la situación de su barrio. Cada reporte ingresado nos permite construir un mapa real de necesidades para hacer valer los derechos de todos los ciudadanos neuquinos.</p>
+            <h3 class="modal-title">¡Registro Informado!</h3>
+            <p class="modal-desc">Su registro fue informado correctamente. Le agradecemos profundamente por haber compartido su situación con nosotros. Su aporte es fundamental para visibilizar las necesidades reales de los ciudadanos y exigir las respuestas que corresponden.</p>            
             
+            <div class="modal-invitation">
+                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.2rem; margin-right: 6px;"></i>
+                <strong>Le invitamos a unirse a nuestro canal de WhatsApp</strong> donde estaremos compartiendo información actualizada, formas de mejora comunitaria, avances sobre las problemáticas relevadas y los proyectos de trabajo para Neuquén.
+            </div>
+
             <a href="https://chat.whatsapp.com/IC92R6kQW9J9fT8v0k" target="_blank" class="btn-whatsapp">
                 <i class="fab fa-whatsapp" style="font-size: 1.3rem;"></i> Unirme al Canal de WhatsApp
             </a>
@@ -686,9 +778,8 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT & DATA CONTROLLER ================= -->
+    <!-- JAVASCRIPT & DATA CONTROLLER -->
     <script>
-        // OFFICIAL LIST OF NEUQUÉN CAPITAL NEIGHBORHOODS (BARRIOS)
         const barriosNeuquen = [
             "Alta Balsa", "Altos del Limay", "Área Centro Este", "Área Centro Oeste", "Bajo Balsa",
             "Bardas Soleadas", "Barreneche", "Belgrano", "Bouquet Roldán", "Canal V", 
@@ -702,16 +793,72 @@
             "Valentina Sur Rural", "Valentina Sur Urbana", "Villa Florencia", "Villa María", "Villa Ceferino"
         ].sort();
 
-        // SUBCATEGORIES DICTIONARY
         const subcategoriasDict = {
-            "Calles y Tránsito": ["Baches profundos / Falta de asfalto", "Falta de semáforos o cartelería", "Calles anegadas por lluvia", "Veredas e intersecciones peligrosas"],
-            "Plazas y Espacios Verdes": ["Plazas abandonadas / Pastizales", "Juegos infantiles rotos", "Falta de iluminación o riego", "Falta de mantenimiento integral"],
-            "Alumbrado y Seguridad": ["Luminarias quemadas / Calles oscuras", "Falta de cámaras urbanas", "Puntos ciegos inseguros"],
-            "Servicios Básicos": ["Pérdidas de agua potable", "Desbordes cloacales recurrentes", "Baja presión de agua", "Falta de red de gas"],
-            "Limpieza y Residuos": ["Microbasurales en esquinas/baldíos", "Poca frecuencia de recolección", "Falta de contenedores"]
+            "Calles, Tránsito y Obras Civiles": [
+                "Baches profundos / Asfalto deteriorado",
+                "Mal diseño / Instalación arbitraria de Bicisendas",
+                "Cambio de sentido de calles sin consulta previa",
+                "Obras públicas paralizadas o inconclusas",
+                "Falta de semáforos, badenes o señalización vial",
+                "Falta de pavimentación e integración urbana"
+            ],
+            "Comercio, Obras Municipales Arbitrarias y Tasas": [
+                "Caída drástica de ventas por obras de Bicisendas",
+                "Caída de ventas por cambio de sentido de calles",
+                "Pérdida de estacionamiento para clientes frente al local",
+                "Cierre o traslado forzado de local comercial",
+                "Aumentos desmedidos de Tasas de Licencia Comercial",
+                "Burocracia y trabas en habilitaciones comerciales"
+            ],
+            "Plazas, Espacios Públicos y Vías Verdes": [
+                "Plazas abandonadas / Pastizales sin mantenimiento",
+                "Juegos infantiles rotos o con riesgo físico",
+                "Falta de riego, arbolado y parquización",
+                "Poco mantenimiento en el Paseo Costero / Riberas",
+                "Invasión/Deterioro de espacios comunitarios"
+            ],
+            "Seguridad Urbana y Entorno Seguro": [
+                "Luminarias quemadas / Calles oscuras (Facultad Municipal)",
+                "Falta de cámaras urbanas municipales (Facultad Municipal)",
+                "Falta de patrullaje y personal policial (Competencia Provincial)",
+                "Presencia de puntos ciegos e inseguridad en paradas",
+                "Falta de desmalezamiento en terrenos baldíos"
+            ],
+            "Servicios Básicos y Redes": [
+                "Pérdidas continuas de agua potable (EPAS / Provincial)",
+                "Desbordes cloacales recurrentes en vía pública (EPAS / Provincial)",
+                "Falta de red de gas natural en el barrio",
+                "Colapso de pluviales y anegamiento por lluvias",
+                "Baja presión de agua en épocas estivales"
+            ],
+            "Transporte Público y Movilidad": [
+                "Baja frecuencia de líneas de colectivo (Colemóvil)",
+                "Falta de garitas / Paradas sin refugio ni iluminación",
+                "Costos elevados de la tarifa de transporte",
+                "Recorridos insuficientes que no entran al barrio",
+                "Inexistencia de taxis / remises en zonas periféricas"
+            ],
+            "Educación y Juventud": [
+                "Infraestructura escolar con problemas de gas/luz (Provincial)",
+                "Falta de vacantes en escuelas/jardines (Provincial)",
+                "Falta de espacios y centros de capacitación juvenil municipal",
+                "Ausencia de becas para estudiantes universitarios/terciarios",
+                "Escasa oferta cultural y deportiva gratuita para jóvenes"
+            ],
+            "Limpieza, Recolección y Zonas Industriales": [
+                "Microbasurales acumulados en esquinas o baldíos",
+                "Poca frecuencia en la recolección de residuos domésticos",
+                "Falta de contenedores volquetes en barrios periféricos",
+                "Abandono e infraestructura deficiente en Parque Industrial"
+            ],
+            "Libre Manifestación de Disconformidad": [
+                "Falta de consulta ciudadana para decisiones de la gestión",
+                "Gasto público municipal en propaganda en vez de obras",
+                "Falta de respuesta a reclamos presentados por mesa de entradas",
+                "Manifestación abierta por decisiones municipales arbitrarias"
+            ]
         };
 
-        // APPROXIMATE NEUQUÉN NEIGHBORHOOD COORDINATES FOR HEATMAP
         const barrioCoords = {
             "San Lorenzo Norte": [-38.9431, -68.1095],
             "San Lorenzo Sur": [-38.9520, -68.1110],
@@ -725,40 +872,67 @@
             "Belgrano": [-38.9620, -68.0550]
         };
 
-        // MOCK DATA STORE (Simulating Real Supabase Table Output)
+        // EXTENSIVE MOCK DATA STORE FOR STATISTICAL VISUALIZATION
         let mockDataStore = [
-            { id: 1, nombre: "Juan Pérez", sexo: "Masculino", edad: 38, barrio: "San Lorenzo Norte", problematica: "Calles y Tránsito", subproblematica: "Baches profundos / Falta de asfalto", detalle: "Calle Necochea destruida.", lat: -38.9431, lng: -68.1095 },
-            { id: 2, nombre: "Marcos Gómez", sexo: "Masculino", edad: 45, barrio: "San Lorenzo Norte", problematica: "Calles y Tránsito", subproblematica: "Calles anegadas por lluvia", detalle: "Se junta agua en la esquina.", lat: -38.9435, lng: -68.1088 },
-            { id: 3, nombre: "Esteban Quito", sexo: "Masculino", edad: 29, barrio: "San Lorenzo Norte", problematica: "Calles y Tránsito", subproblematica: "Baches profundos / Falta de asfalto", detalle: "Inimputable el pozo.", lat: -38.9428, lng: -68.1102 },
-            { id: 4, nombre: "Laura Ríos", sexo: "Femenino", edad: 31, barrio: "Área Centro Este", problematica: "Plazas y Espacios Verdes", subproblematica: "Juegos infantiles rotos", detalle: "Plaza Roca necesita arreglos.", lat: -38.9516, lng: -68.0591 },
-            { id: 5, nombre: "Pedro Morales", sexo: "Masculino", edad: 52, barrio: "Confluencia Urbano", problematica: "Servicios Básicos", subproblematica: "Pérdidas de agua potable", detalle: "Agua corriendo hace un mes.", lat: -38.9650, lng: -68.0380 },
-            { id: 6, nombre: "Roberto Fernández", sexo: "Masculino", edad: 34, barrio: "Cuenca XV", problematica: "Alumbrado y Seguridad", subproblematica: "Luminarias quemadas / Calles oscuras", detalle: "Todo a oscuras en la manzana 4.", lat: -38.9320, lng: -68.1250 }
+            { id: 1, tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Mariano Costa", sexo: "Masculino", edad: 46, barrio: "Área Centro Este", contacto: "299400001", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída drástica de ventas por obras de Bicisendas", nombreComercio: "Calzados Neuquén", ubicacionComercio: "Av. Argentina 320", impactoObra: "Implementación de Bicisenda sin consulta", consecuenciaComercial: "Pérdida drástica de ventas y rentabilidad", detalle: "Perdí el 60% de mis ventas por la bicisenda.", lat: -38.9516, lng: -68.0591 },
+            { id: 2, tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Roberto Rossi", sexo: "Masculino", edad: 52, barrio: "Área Centro Oeste", contacto: "299400002", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída de ventas por cambio de sentido de calles", nombreComercio: "Bazar Belgrano", ubicacionComercio: "Belgrano 450", impactoObra: "Cambio de sentido de circulación de calle", consecuenciaComercial: "Tuve que reducir personal", detalle: "Al cambiar el sentido nadie pasa por el local.", lat: -38.9510, lng: -68.0680 },
+            { id: 3, tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Claudio Morales", sexo: "Masculino", edad: 41, barrio: "Área Centro Este", contacto: "299400003", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Pérdida de estacionamiento para clientes frente al local", nombreComercio: "Repuestos Neuquén", ubicacionComercio: "San Martín 800", impactoObra: "Prohibición / Remoción de estacionamiento", consecuenciaComercial: "Tuve que trasladar el negocio a otra ubicación", detalle: "Los clientes no pueden parar a cargar repuestos.", lat: -38.9520, lng: -68.0600 },
+            { id: 4, tipoPerfil: "Vecino / Ciudadano", nombre: "Juan Pérez", sexo: "Masculino", edad: 38, barrio: "San Lorenzo Norte", contacto: "299400004", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "Calle Necochea completamente destruida.", lat: -38.9431, lng: -68.1095 },
+            { id: 5, tipoPerfil: "Vecino / Ciudadano", nombre: "Marcos Gómez", sexo: "Masculino", edad: 45, barrio: "San Lorenzo Norte", contacto: "299400005", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Cambio de sentido de calles sin consulta previa", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "Caos vehicular por cambios de sentido mal planeados.", lat: -38.9435, lng: -68.1088 },
+            { id: 6, tipoPerfil: "Vecino / Ciudadano", nombre: "Esteban Quito", sexo: "Masculino", edad: 29, barrio: "San Lorenzo Norte", contacto: "299400006", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "Pozos gigantescos cerca de la escuela.", lat: -38.9428, lng: -68.1102 },
+            { id: 7, tipoPerfil: "Vecino / Ciudadano", nombre: "Gustavo Silva", sexo: "Masculino", edad: 50, barrio: "San Lorenzo Sur", contacto: "299400007", problematica: "Seguridad Urbana y Entorno Seguro", subproblematica: "Luminarias quemadas / Calles oscuras (Facultad Municipal)", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "Tres manzanas completamente a oscuras.", lat: -38.9520, lng: -68.1110 },
+            { id: 8, tipoPerfil: "Joven (16 a 30 años)", nombre: "Lucas Varela", sexo: "Masculino", edad: 22, barrio: "Cuenca XV", contacto: "299400008", problematica: "Educación y Juventud", subproblematica: "Falta de espacios y centros de capacitación juvenil municipal", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "No hay talleres ni cursos técnicos en el barrio.", lat: -38.9320, lng: -68.1250 },
+            { id: 9, tipoPerfil: "Joven (16 a 30 años)", nombre: "Mateo Torres", sexo: "Masculino", edad: 19, barrio: "Cuenca XV", contacto: "299400009", problematica: "Transporte Público y Movilidad", subproblematica: "Baja frecuencia de líneas de colectivo (Colemóvil)", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "Tardamos más de una hora esperando el colectivo.", lat: -38.9325, lng: -68.1245 },
+            { id: 10, tipoPerfil: "Vecino / Ciudadano", nombre: "Laura Ríos", sexo: "Femenino", edad: 31, barrio: "Confluencia Urbano", contacto: "299400010", problematica: "Servicios Básicos y Redes", subproblematica: "Desbordes cloacales recurrentes en vía pública (EPAS / Provincial)", nombreComercio: "", ubicacionComercio: "", impactoObra: "", consecuenciaComercial: "", detalle: "Aguas servidas en la esquina desde hace semanas.", lat: -38.9650, lng: -68.0380 }
         ];
 
-        // GLOBAL CHARTS AND MAP REFS
         let leafletMap = null;
         let heatmapLayer = null;
         let chartCatInstance = null;
-        let chartDemoInstance = null;
+        let chartMerchantInstance = null;
 
-        // INITIALIZATION ON DOM LOADED
         document.addEventListener('DOMContentLoaded', () => {
             populateBarrioDropdowns();
+            populateFilterCategories();
         });
 
-        // POPULATE NEIGHBORHOOD DROPDOWNS
+        function selectProfile(profileType) {
+            document.querySelectorAll('.profile-btn').forEach(btn => btn.classList.remove('active'));
+            const merchantFields = document.querySelectorAll('.merchant-field');
+            const hiddenInput = document.getElementById('tipoPerfil');
+            const problematicaSelect = document.getElementById('problematica');
+
+            if (profileType === 'comerciante') {
+                event.currentTarget.classList.add('active');
+                hiddenInput.value = "Comerciante / Dueño de Negocio";
+                merchantFields.forEach(f => f.style.display = 'flex');
+                problematicaSelect.value = "Comercio, Obras Municipales Arbitrarias y Tasas";
+                loadSubcategories();
+            } else if (profileType === 'joven') {
+                event.currentTarget.classList.add('active');
+                hiddenInput.value = "Joven (16 a 30 años)";
+                merchantFields.forEach(f => f.style.display = 'none');
+                problematicaSelect.value = "Educación y Juventud";
+                loadSubcategories();
+            } else {
+                event.currentTarget.classList.add('active');
+                hiddenInput.value = "Vecino / Ciudadano";
+                merchantFields.forEach(f => f.style.display = 'none');
+                problematicaSelect.value = "";
+                loadSubcategories();
+            }
+        }
+
         function populateBarrioDropdowns() {
             const formSelect = document.getElementById('barrio');
             const filterSelect = document.getElementById('filterBarrio');
 
             barriosNeuquen.forEach(barrio => {
-                // Form Dropdown
                 const opt1 = document.createElement('option');
                 opt1.value = barrio;
                 opt1.textContent = barrio;
                 formSelect.appendChild(opt1);
 
-                // Filter Dropdown
                 const opt2 = document.createElement('option');
                 opt2.value = barrio;
                 opt2.textContent = barrio;
@@ -766,7 +940,16 @@
             });
         }
 
-        // DYNAMIC SUBCATEGORY SELECTION
+        function populateFilterCategories() {
+            const filterSelect = document.getElementById('filterProblematica');
+            Object.keys(subcategoriasDict).forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                filterSelect.appendChild(opt);
+            });
+        }
+
         function loadSubcategories() {
             const cat = document.getElementById('problematica').value;
             const subSelect = document.getElementById('subproblematica');
@@ -784,17 +967,37 @@
             } else {
                 subSelect.disabled = true;
             }
+            checkJurisdictionNotice();
         }
 
-        // CITIZEN FORM SUBMISSION
+        function checkJurisdictionNotice() {
+            const sub = document.getElementById('subproblematica').value;
+            const notice = document.getElementById('jurisdictionNotice');
+            if (sub.includes("(Provincial)") || sub.includes("(Competencia Provincial)") || sub.includes("EPAS")) {
+                notice.style.display = 'block';
+            } else {
+                notice.style.display = 'none';
+            }
+        }
+
+        // SUBMIT FORM WITH HONEYPOT CHECK
         document.getElementById('citizenForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
+            // Honeypot Bot Check
+            const hp = document.getElementById('website_hp').value;
+            if (hp !== "") {
+                console.warn("Bot detectado mediante Honeypot.");
+                document.getElementById('successModal').style.display = 'flex';
+                return;
+            }
+
             const barrioVal = document.getElementById('barrio').value;
             const coords = barrioCoords[barrioVal] || [-38.9516 + (Math.random()*0.02 - 0.01), -68.0591 + (Math.random()*0.02 - 0.01)];
 
             const newEntry = {
                 id: mockDataStore.length + 1,
+                tipoPerfil: document.getElementById('tipoPerfil').value,
                 nombre: document.getElementById('nombre').value,
                 sexo: document.getElementById('sexo').value,
                 edad: parseInt(document.getElementById('edad').value),
@@ -802,38 +1005,36 @@
                 contacto: document.getElementById('contacto').value,
                 problematica: document.getElementById('problematica').value,
                 subproblematica: document.getElementById('subproblematica').value,
+                nombreComercio: document.getElementById('nombreComercio') ? document.getElementById('nombreComercio').value : '',
+                ubicacionComercio: document.getElementById('ubicacionComercio') ? document.getElementById('ubicacionComercio').value : '',
+                impactoObra: document.getElementById('impactoObra') ? document.getElementById('impactoObra').value : '',
+                consecuenciaComercial: document.getElementById('consecuenciaComercial') ? document.getElementById('consecuenciaComercial').value : '',
                 detalle: document.getElementById('detalle').value,
                 lat: coords[0],
                 lng: coords[1]
             };
 
-            // Store entry
             mockDataStore.push(newEntry);
 
-            // Open Confirmation Modal
             document.getElementById('successModal').style.display = 'flex';
             document.getElementById('citizenForm').reset();
             document.getElementById('subproblematica').disabled = true;
+            selectProfile('ciudadano');
         });
 
         function closeModal() {
             document.getElementById('successModal').style.display = 'none';
         }
 
-        // NAVIGATION VIEW CONTROLLER
         function toggleAdminAccess() {
-            const citizenView = document.getElementById('citizenView');
             const loginView = document.getElementById('loginView');
             const dashboardView = document.getElementById('dashboardView');
 
             if (dashboardView.classList.contains('active')) {
-                // If logged in, logout
                 logoutAdmin();
             } else if (loginView.classList.contains('active')) {
-                // Return to citizen view
                 switchView('citizenView');
             } else {
-                // Go to login
                 switchView('loginView');
             }
         }
@@ -848,16 +1049,14 @@
             if (viewId === 'dashboardView') btnLabel.innerText = "Cerrar Sesión";
         }
 
-        // LOGIN AUTHENTICATION (AUTHENTICATED SECURE ACCESS)
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
 
-            // Secure mock credential check
             if ((u === "admin" || u === "admin@neuquen.gob.ar") && p === "admin123") {
                 switchView('dashboardView');
-                setTimeout(initDashboardAnalytics, 200); // Initialize Map & Charts
+                setTimeout(initDashboardAnalytics, 200);
             } else {
                 alert("Credenciales inválidas. Verifique usuario y contraseña.");
             }
@@ -867,19 +1066,16 @@
             switchView('citizenView');
         }
 
-        // INITIALIZE MAP & CHARTS
         function initDashboardAnalytics() {
             if (!leafletMap) {
-                // Leaflet Map Initialization centered in Neuquén
                 leafletMap = L.map('mapContainer').setView([-38.9516, -68.0591], 12);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 18,
                     attribution: '© OpenStreetMap'
                 }).addTo(leafletMap);
 
-                // Initialize Heatmap Configuration
                 const cfg = {
-                    "radius": 0.008,
+                    "radius": 0.012,
                     "maxOpacity": .8,
                     "scaleRadius": true,
                     "useLocalExtrema": true,
@@ -894,52 +1090,41 @@
             applyAnalyticsFilters();
         }
 
-        // APPLY FILTERS & UPDATE MAP / CHARTS / KPIs
         function applyAnalyticsFilters() {
+            const fPerfil = document.getElementById('filterPerfil').value;
             const fBarrio = document.getElementById('filterBarrio').value;
-            const fProblemática = document.getElementById('filterProblematica').value;
+            const fProblematica = document.getElementById('filterProblematica').value;
             const fSexo = document.getElementById('filterSexo').value;
-            const fEdad = document.getElementById('filterEdad').value;
 
             let filtered = mockDataStore.filter(item => {
+                if (fPerfil !== "TODOS" && item.tipoPerfil !== fPerfil) return false;
                 if (fBarrio !== "TODOS" && item.barrio !== fBarrio) return false;
-                if (fProblemática !== "TODAS" && item.problematica !== fProblemática) return false;
+                if (fProblematica !== "TODAS" && item.problematica !== fProblematica) return false;
                 if (fSexo !== "TODOS" && item.sexo !== fSexo) return false;
-                
-                if (fEdad === "16-29" && (item.edad < 16 || item.edad > 29)) return false;
-                if (fEdad === "30-50" && (item.edad < 30 || item.edad > 50)) return false;
-                if (fEdad === "51+" && item.edad < 51) return false;
-
                 return true;
             });
 
-            // 1. Update KPIs
+            // Update KPIs
             document.getElementById('kpiTotal').innerText = filtered.length;
+            
+            const merchantsCount = filtered.filter(i => i.tipoPerfil === "Comerciante / Dueño de Negocio").length;
+            document.getElementById('kpiMerchants').innerText = merchantsCount;
 
             if (filtered.length > 0) {
-                // Highest Barrio
                 const bCount = {};
                 filtered.forEach(i => bCount[i.barrio] = (bCount[i.barrio] || 0) + 1);
                 const topB = Object.keys(bCount).reduce((a, b) => bCount[a] > bCount[b] ? a : b);
                 document.getElementById('kpiBarrioTop').innerText = topB;
 
-                // Highest Area
-                const aCount = {};
-                filtered.forEach(i => aCount[i.problematica] = (aCount[i.problematica] || 0) + 1);
-                const topA = Object.keys(aCount).reduce((a, b) => aCount[a] > aCount[b] ? a : b);
-                document.getElementById('kpiAreaTop').innerText = topA.split(' ')[0];
-
-                // Male Disconformity Ratio
                 const males = filtered.filter(i => i.sexo === "Masculino").length;
                 const ratio = Math.round((males / filtered.length) * 100);
                 document.getElementById('kpiMaleRatio').innerText = ratio + "%";
             } else {
                 document.getElementById('kpiBarrioTop').innerText = "-";
-                document.getElementById('kpiAreaTop').innerText = "-";
                 document.getElementById('kpiMaleRatio').innerText = "0%";
             }
 
-            // 2. Update Heatmap Data
+            // Heatmap
             const heatPoints = filtered.map(item => ({
                 lat: item.lat,
                 lng: item.lng,
@@ -947,16 +1132,13 @@
             }));
             heatmapLayer.setData({ max: 3, data: heatPoints });
 
-            // 3. Update Chart.js Charts
             renderCategoryChart(filtered);
-            renderDemographicChart(filtered);
+            renderMerchantChart(filtered);
         }
 
-        // RENDER AREA CATEGORIES CHART
         function renderCategoryChart(data) {
             const ctx = document.getElementById('chartCategories').getContext('2d');
-            const categories = ["Calles y Tránsito", "Plazas y Espacios Verdes", "Alumbrado y Seguridad", "Servicios Básicos", "Limpieza y Residuos"];
-            
+            const categories = Object.keys(subcategoriasDict);
             const counts = categories.map(cat => data.filter(item => item.problematica === cat).length);
 
             if (chartCatInstance) chartCatInstance.destroy();
@@ -964,9 +1146,9 @@
             chartCatInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ["Calles", "Plazas", "Alumbrado", "Servicios", "Limpieza"],
+                    labels: ["Calles", "Comercio", "Plazas", "Seguridad", "Servicios", "Transporte", "Educación", "Limpieza", "Disconformidad"],
                     datasets: [{
-                        label: 'N° Reclamos',
+                        label: 'N° Registros',
                         data: counts,
                         backgroundColor: '#134074',
                         borderRadius: 6
@@ -980,23 +1162,29 @@
             });
         }
 
-        // RENDER DEMOGRAPHICS BY SEX CHART
-        function renderDemographicChart(data) {
-            const ctx = document.getElementById('chartDemographics').getContext('2d');
-            
-            const males = data.filter(i => i.sexo === "Masculino").length;
-            const females = data.filter(i => i.sexo === "Femenino").length;
-            const others = data.filter(i => i.sexo !== "Masculino" && i.sexo !== "Femenino").length;
+        function renderMerchantChart(data) {
+            const ctx = document.getElementById('chartMerchants').getContext('2d');
+            const merchantsData = data.filter(i => i.tipoPerfil === "Comerciante / Dueño de Negocio");
 
-            if (chartDemoInstance) chartDemoInstance.destroy();
+            const causes = [
+                "Implementación de Bicisenda sin consulta",
+                "Cambio de sentido de circulación de calle",
+                "Cierre / Obra municipal prolongada sin previo aviso",
+                "Prohibición / Remoción de estacionamiento",
+                "Aumento desmedido de Tasas e Impuestos Municipales"
+            ];
 
-            chartDemoInstance = new Chart(ctx, {
+            const counts = causes.map(c => merchantsData.filter(i => i.impactoObra === c).length);
+
+            if (chartMerchantInstance) chartMerchantInstance.destroy();
+
+            chartMerchantInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Masculino', 'Femenino', 'Otro'],
+                    labels: ["Bicisenda", "Sentido Calle", "Obra Prolongada", "Estacionamiento", "Tasas Municipales"],
                     datasets: [{
-                        data: [males, females, others],
-                        backgroundColor: ['#0b2545', '#d90429', '#94a3b8']
+                        data: counts,
+                        backgroundColor: ['#d90429', '#0b2545', '#134074', '#f59e0b', '#64748b']
                     }]
                 },
                 options: {
