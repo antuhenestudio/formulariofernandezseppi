@@ -9,7 +9,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/shared.css">
     <style>
-        /* Contenedor relativo para posicionamiento del link */
+        /* HEADER CON EFECTO BLUR TRANSPARENTE FIX Y STICKY */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(11, 37, 69, 0.82) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .brand-container {
             position: relative;
             display: inline-flex;
@@ -253,7 +263,6 @@
         <i class="fas fa-lock"></i> <strong>Tus datos son confidenciales.</strong> Se tratan conforme a la Ley N° 25.326 de Protección de Datos Personales (Argentina) y su Decreto Reglamentario N° 1558/2001, bajo control de la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública (AAIP)</a>.
     </footer>
 
-    <!-- Script para llevar la página arriba de todo al cargar -->
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
