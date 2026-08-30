@@ -111,11 +111,11 @@
             .video-gate-hint { font-size: 0.74rem; padding: 0.55rem 0.9rem; bottom: 14px; }
         }
 
-        /* ===== HERO BANNER: MARGEN INFERIOR REDUCIDO ===== */
+        /* ===== HERO BANNER ===== */
         .hero-banner {
             text-align: center;
             max-width: 850px;
-            margin: 0 auto 0.8rem; /* Reducido de 1.4rem a 0.8rem */
+            margin: 0 auto 0.8rem;
         }
 
         .hero-banner h2 {
@@ -129,6 +129,19 @@
             font-size: 1rem;
             color: var(--text-muted);
             margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        /* Estilo para el enlace a la biografía de Rubén */
+        .ruben-link {
+            color: #0284c7;
+            text-decoration: underline;
+            font-weight: 700;
+            transition: color 0.2s ease;
+        }
+
+        .ruben-link:hover {
+            color: var(--primary);
         }
 
         /* LIVE COUNTER BANNER */
@@ -138,7 +151,7 @@
             overflow-x: auto;
             gap: 0.6rem;
             max-width: 1100px;
-            margin: 0 auto 0.6rem; /* Reducido de 1.6rem a 0.6rem */
+            margin: 0 auto 0.6rem;
             padding: 0.2rem 0.1rem 0.3rem;
             scrollbar-width: thin;
             justify-content: center;
@@ -200,7 +213,7 @@
             align-items: center;
             gap: 0.5rem;
             max-width: 850px;
-            margin: 0.8rem auto 1.4rem; /* Margen superior e inferior ajustados */
+            margin: 0.8rem auto 1.4rem;
             padding: 0 10px;
         }
 
@@ -611,7 +624,7 @@
         <section id="citizenView" class="view-section active">
             <div class="hero-banner">
                 <h2>Espacio de Escucha y Participación Ciudadana</h2>
-                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
+                <p>Iniciativa impulsada por el <a href="rubenfernandezseppi/" class="ruben-link">Ing. Rubén Fernández Seppi</a> (Conocé más sobre él) para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
             <!-- LIVE COUNTER BANNER -->
