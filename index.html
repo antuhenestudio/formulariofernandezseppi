@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuquén Escucha | Diagnóstico Territorial y Proyectos Ciudadanos</title>
+    <title>Neuquén Escucha | Diagnóstico Territorial, Proyectos y Verificación de Datos</title>
     <!-- Icons & Styling Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -187,7 +187,6 @@
             box-shadow: 0 8px 20px rgba(11, 37, 69, 0.25);
         }
 
-        /* Highlighted Button for Ideas/Projects */
         .profile-btn.btn-idea-highlight {
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             border: 2px solid var(--gold);
@@ -277,7 +276,6 @@
             box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
         }
 
-        /* Interactive Picker Map */
         .geo-picker-container {
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -327,7 +325,6 @@
             font-family: monospace;
         }
 
-        /* Anti-Bot Honeypot Field */
         .website-field-hp {
             display: none !important;
             visibility: hidden !important;
@@ -381,7 +378,6 @@
             box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3);
         }
 
-        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -483,7 +479,6 @@
             font-size: 0.85rem;
         }
 
-        /* Admin Dashboard UI */
         .login-card {
             max-width: 440px;
             margin: 3rem auto;
@@ -526,10 +521,76 @@
             border: 1px solid var(--border-color);
             margin-bottom: 2rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 1rem;
             box-shadow: var(--shadow);
         }
+
+        .audit-panel {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .audit-panel h4 {
+            color: var(--primary);
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audit-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .audit-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .audit-table th, .audit-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .audit-table th {
+            background: #f8fafc;
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-valid { background: #dcfce7; color: #15803d; }
+        .status-suspicious { background: #fef3c7; color: #b45309; }
+        .status-spam { background: #fee2e2; color: #b91c1c; }
+
+        .btn-action-sm {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .btn-approve { background: #16a34a; color: #fff; }
+        .btn-approve:hover { background: #15803d; }
+        .btn-discard { background: var(--accent); color: #fff; }
+        .btn-discard:hover { background: #b00320; }
 
         .kpi-grid {
             display: grid;
@@ -615,10 +676,10 @@
         <section id="citizenView" class="view-section active">
             <div class="hero-banner">
                 <h2>Espacio de Escucha y Participación Ciudadana</h2>
-                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas o propondé tus proyectos para transformar Neuquén.</p>
+                <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
-            <!-- Profile Selector Rounded Buttons with Highlighted Ideas Option -->
+            <!-- Profile Selector Rounded Buttons -->
             <div class="profile-selector">
                 <button type="button" class="profile-btn active" onclick="selectProfile('ciudadano')">
                     <i class="fas fa-user-check"></i> Vecino / Ciudadano
@@ -676,13 +737,13 @@
                         </div>
 
                         <div class="form-group full-width">
-                            <label for="contacto">Teléfono de Contacto / WhatsApp *</label>
+                            <label for="contacto">Teléfono de Contacto / WhatsApp (Ej. 2994123456) *</label>
                             <input type="tel" id="contacto" name="contacto" placeholder="Ej. 2994123456" required>
                         </div>
 
                         <!-- GEOLOCATION PICKER MAP -->
                         <div class="form-group full-width">
-                            <label id="lblMapLocation"><i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Ubicación Exacta del Reclamo o Proyecto (Marcar punto) *</label>
+                            <label id="lblMapLocation"><i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Ubicación Exacta dentro de Neuquén (Marcar punto en el mapa) *</label>
                             <div class="geo-picker-container">
                                 <div id="pickerMap"></div>
                                 <div class="geo-controls-bar">
@@ -829,14 +890,24 @@
             <div class="dashboard-header">
                 <div>
                     <h2>Centro de Inteligencia Territorial Neuquén</h2>
-                    <p>Filtros cruzados por perfil, barrios, problemáticas, propuestas vecinales y mapas de calor geolocalizados.</p>
+                    <p>Filtros cruzados, auditoría de datos, proyectos vecinales y mapas de calor geolocalizados.</p>
                 </div>
                 <button onclick="logoutAdmin()" class="admin-nav-btn" style="background: var(--accent); border:none;">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
             </div>
 
+            <!-- FILTERS BAR -->
             <div class="filter-bar">
+                <div class="form-group">
+                    <label>Filtro Auditoría</label>
+                    <select id="filterEstado" onchange="applyAnalyticsFilters()">
+                        <option value="TODOS">Todos los Estados</option>
+                        <option value="valid" selected>Solo Validados (Modo Limpio)</option>
+                        <option value="suspicious">En Revisión / Sospechosos</option>
+                        <option value="spam">Descartados / Spam</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Perfil Carga</label>
                     <select id="filterPerfil" onchange="applyAnalyticsFilters()">
@@ -870,9 +941,31 @@
                 </div>
             </div>
 
+            <!-- AUDIT & CURATION PANEL -->
+            <div class="audit-panel">
+                <h4><i class="fas fa-user-shield" style="color: var(--secondary);"></i> Panel de Auditoría y Curación de Registros (Control de Calidad)</h4>
+                <div class="audit-table-wrapper">
+                    <table class="audit-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Perfil / Nombre</th>
+                                <th>Barrio / Teléfono</th>
+                                <th>Problemática / Título</th>
+                                <th>Estado Auditoría</th>
+                                <th>Acciones de Control</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="kpi-grid">
                 <div class="kpi-card">
-                    <div class="kpi-title">Total Registros</div>
+                    <div class="kpi-title">Total en Filtro</div>
                     <div class="kpi-value" id="kpiTotal">0</div>
                 </div>
                 <div class="kpi-card">
@@ -1026,11 +1119,11 @@
         };
 
         let mockDataStore = [
-            { id: 1, tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Mariano Costa", sexo: "Masculino", edad: 46, barrio: "Área Centro Este", contacto: "299400001", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída drástica de ventas por obras de Bicisendas", nombreComercio: "Calzados Neuquén", ubicacionComercio: "Av. Argentina 320", impactoObra: "Implementación de Bicisenda sin consulta", consecuenciaComercial: "Pérdida drástica de ventas y rentabilidad", detalle: "Perdí el 60% de mis ventas por la bicisenda.", lat: -38.9516, lng: -68.0591 },
-            { id: 2, tipoPerfil: "Propuesta / Idea Vecinal", nombre: "Dra. Elena Gómez", sexo: "Femenino", edad: 39, barrio: "San Lorenzo Norte", contacto: "299400099", problematica: "Propuesta de Proyecto Vecinal", subproblematica: "Infraestructura y Obras para el Barrio", tituloProyecto: "Paseo Deportivo y Corredor Seguro Necochea", ejeIdea: "Infraestructura y Obras para el Barrio", porQueProyecto: "Transformará una calle abandonada en un área de salud e integración.", detalle: "Crear una senda peatonal iluminada con aparatos de gimnasia al aire libre y vegetación nativa.", lat: -38.9431, lng: -68.1095 },
-            { id: 3, tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Roberto Rossi", sexo: "Masculino", edad: 52, barrio: "Área Centro Oeste", contacto: "299400002", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída de ventas por cambio de sentido de calles", nombreComercio: "Bazar Belgrano", ubicacionComercio: "Belgrano 450", impactoObra: "Cambio de sentido de circulación de calle", consecuenciaComercial: "Tuve que reducir personal", detalle: "Al cambiar el sentido nadie pasa por el local.", lat: -38.9510, lng: -68.0680 },
-            { id: 4, tipoPerfil: "Vecino / Ciudadano", nombre: "Juan Pérez", sexo: "Masculino", edad: 38, barrio: "San Lorenzo Norte", contacto: "299400004", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", detalle: "Calle Necochea completamente destruida.", lat: -38.9431, lng: -68.1095 },
-            { id: 5, tipoPerfil: "Joven (16 a 30 años)", nombre: "Lucas Varela", sexo: "Masculino", edad: 22, barrio: "Cuenca XV", contacto: "299400008", problematica: "Educación y Juventud", subproblematica: "Falta de espacios y centros de capacitación juvenil municipal", detalle: "No hay talleres ni cursos técnicos en el barrio.", lat: -38.9320, lng: -68.1250 }
+            { id: 1, estado: "valid", tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Mariano Costa", sexo: "Masculino", edad: 46, barrio: "Área Centro Este", contacto: "299400001", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída drástica de ventas por obras de Bicisendas", nombreComercio: "Calzados Neuquén", ubicacionComercio: "Av. Argentina 320", impactoObra: "Implementación de Bicisenda sin consulta", consecuenciaComercial: "Pérdida drástica de ventas y rentabilidad", detalle: "Perdí el 60% de mis ventas por la bicisenda.", lat: -38.9516, lng: -68.0591 },
+            { id: 2, estado: "valid", tipoPerfil: "Propuesta / Idea Vecinal", nombre: "Dra. Elena Gómez", sexo: "Femenino", edad: 39, barrio: "San Lorenzo Norte", contacto: "299400099", problematica: "Propuesta de Proyecto Vecinal", subproblematica: "Infraestructura y Obras para el Barrio", tituloProyecto: "Paseo Deportivo y Corredor Seguro Necochea", ejeIdea: "Infraestructura y Obras para el Barrio", porQueProyecto: "Transformará una calle abandonada en un área de salud e integración.", detalle: "Crear una senda peatonal iluminada con aparatos de gimnasia al aire libre.", lat: -38.9431, lng: -68.1095 },
+            { id: 3, estado: "valid", tipoPerfil: "Comerciante / Dueño de Negocio", nombre: "Roberto Rossi", sexo: "Masculino", edad: 52, barrio: "Área Centro Oeste", contacto: "299400002", problematica: "Comercio, Obras Municipales Arbitrarias y Tasas", subproblematica: "Caída de ventas por cambio de sentido de calles", nombreComercio: "Bazar Belgrano", ubicacionComercio: "Belgrano 450", impactoObra: "Cambio de sentido de circulación de calle", consecuenciaComercial: "Tuve que reducir personal", detalle: "Al cambiar el sentido nadie pasa por el local.", lat: -38.9510, lng: -68.0680 },
+            { id: 4, estado: "valid", tipoPerfil: "Vecino / Ciudadano", nombre: "Juan Pérez", sexo: "Masculino", edad: 38, barrio: "San Lorenzo Norte", contacto: "299400004", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", detalle: "Calle Necochea completamente destruida.", lat: -38.9431, lng: -68.1095 },
+            { id: 5, estado: "suspicious", tipoPerfil: "Vecino / Ciudadano", nombre: "Xxxxx Yyyyy", sexo: "Masculino", edad: 99, barrio: "Área Centro Este", contacto: "111111111", problematica: "Calles, Tránsito y Obras Civiles", subproblematica: "Baches profundos / Asfalto deteriorado", detalle: "Prueba de spam detectada por filtro.", lat: -38.9516, lng: -68.0591 }
         ];
 
         // MAPS & CHARTS REFERENCES
@@ -1048,6 +1141,29 @@
             initPickerMap();
         });
 
+        // VALIDATION & DATA INTEGRITY LOGIC
+        function validarRegistroPuro(datos) {
+            if (datos.nombre.trim().length < 3 || /^(.)\1+$/.test(datos.nombre)) {
+                alert("Por favor, ingrese un Nombre y Apellido real y válido.");
+                return false;
+            }
+
+            const regexTel = /^(?:(?:00)?54)?(?:9)?(?:299|11|298|2942)\d{6,8}$/;
+            const numLimpio = datos.contacto.replace(/[-\s()]/g, '');
+            if (!regexTel.test(numLimpio) && numLimpio.length < 8) {
+                alert("Por favor, ingrese un número de teléfono / WhatsApp válido de Argentina (ej. 2994123456).");
+                return false;
+            }
+
+            // Neuquén Capital Geographical Limits Check (-38.85 to -39.05 Lat, -67.95 to -68.25 Lng)
+            if (datos.lat > -38.85 || datos.lat < -39.05 || datos.lng > -67.95 || datos.lng < -68.25) {
+                alert("La ubicación marcada debe encontrarse dentro del ejido urbano de la Ciudad de Neuquén.");
+                return false;
+            }
+
+            return true;
+        }
+
         function initPickerMap() {
             const defaultLat = -38.9516;
             const defaultLng = -68.0591;
@@ -1057,6 +1173,11 @@
                 maxZoom: 18,
                 attribution: '© OpenStreetMap'
             }).addTo(pickerMap);
+
+            // Neuquén Capital Max Bounds Restraints
+            const southWest = L.latLng(-39.05, -68.25);
+            const northEast = L.latLng(-38.85, -67.95);
+            pickerMap.setMaxBounds(L.latLngBounds(southWest, northEast));
 
             pickerMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(pickerMap);
 
@@ -1120,7 +1241,6 @@
             const lblDetalle = document.getElementById('lblDetalle');
             const txtDetalle = document.getElementById('detalle');
 
-            // Reset mandatory settings
             problematicaSelect.required = true;
             subproblematicaSelect.required = true;
             btnSubmit.className = "btn-submit";
@@ -1139,7 +1259,7 @@
                 btnSubmitText.innerText = "Enviar Mi Idea / Proyecto Vecinal";
                 lblMapLocation.innerHTML = `<i class="fas fa-map-marker-alt" style="color: var(--gold);"></i> Ubicación Propuesta para el Proyecto (Marcar punto) *`;
                 lblDetalle.innerHTML = `<i class="fas fa-pencil-alt" style="color: var(--gold);"></i> Descripción de la Idea y Pasos para Realizarla *`;
-                txtDetalle.placeholder = "Explique brevemente cómo funcionaría el proyecto, qué materiales o recursos requeriría y el beneficio directo para el barrio...";
+                txtDetalle.placeholder = "Explique brevemente cómo funcionaría el proyecto, qué recursos requeriría y el beneficio directo para el barrio...";
 
             } else if (profileType === 'comerciante') {
                 event.currentTarget.classList.add('active');
@@ -1245,10 +1365,11 @@
             }
         }
 
-        // FORM SUBMIT CONTROLLER
+        // FORM SUBMIT WITH AUDIT INITIAL STATUS
         document.getElementById('citizenForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
+            // Honeypot Bot Check
             const hp = document.getElementById('website_hp').value;
             if (hp !== "") {
                 document.getElementById('successModal').style.display = 'flex';
@@ -1258,6 +1379,18 @@
             const tipo = document.getElementById('tipoPerfil').value;
             const lat = parseFloat(document.getElementById('geoLat').value);
             const lng = parseFloat(document.getElementById('geoLng').value);
+
+            const checkPayload = {
+                nombre: document.getElementById('nombre').value,
+                contacto: document.getElementById('contacto').value,
+                lat: lat,
+                lng: lng
+            };
+
+            // Frontend Data Validation Filter
+            if (!validarRegistroPuro(checkPayload)) {
+                return;
+            }
 
             let problematicaVal = document.getElementById('problematica').value;
             let subproblematicaVal = document.getElementById('subproblematica').value;
@@ -1269,12 +1402,13 @@
 
             const newEntry = {
                 id: mockDataStore.length + 1,
+                estado: "valid", // Default status
                 tipoPerfil: tipo,
-                nombre: document.getElementById('nombre').value,
+                nombre: checkPayload.nombre,
                 sexo: document.getElementById('sexo').value,
                 edad: parseInt(document.getElementById('edad').value),
                 barrio: document.getElementById('barrio').value,
-                contacto: document.getElementById('contacto').value,
+                contacto: checkPayload.contacto,
                 problematica: problematicaVal,
                 subproblematica: subproblematicaVal,
                 nombreComercio: document.getElementById('nombreComercio') ? document.getElementById('nombreComercio').value : '',
@@ -1291,7 +1425,6 @@
 
             mockDataStore.push(newEntry);
 
-            // Adjust Modal Message for Ideas
             if (tipo === "Propuesta / Idea Vecinal") {
                 document.getElementById('modalTitleText').innerText = "¡Proyecto Vecinal Recibido!";
                 document.getElementById('modalDescText').innerText = "Muchísimas gracias por aportar tu visión e ideas. Tu proyecto será evaluado por el equipo técnico del Ing. Rubén Fernández Seppi para integrarlo en la planificación estratégica del futuro de Neuquén.";
@@ -1376,18 +1509,52 @@
             applyAnalyticsFilters();
         }
 
+        function changeRecordStatus(id, newStatus) {
+            const item = mockDataStore.find(i => i.id === id);
+            if (item) {
+                item.estado = newStatus;
+                applyAnalyticsFilters();
+            }
+        }
+
         function applyAnalyticsFilters() {
+            const fEstado = document.getElementById('filterEstado').value;
             const fPerfil = document.getElementById('filterPerfil').value;
             const fBarrio = document.getElementById('filterBarrio').value;
             const fProblematica = document.getElementById('filterProblematica').value;
             const fSexo = document.getElementById('filterSexo').value;
 
             let filtered = mockDataStore.filter(item => {
+                if (fEstado !== "TODOS" && item.estado !== fEstado) return false;
                 if (fPerfil !== "TODOS" && item.tipoPerfil !== fPerfil) return false;
                 if (fBarrio !== "TODOS" && item.barrio !== fBarrio) return false;
                 if (fProblematica !== "TODAS" && item.problematica !== fProblematica) return false;
                 if (fSexo !== "TODOS" && item.sexo !== fSexo) return false;
                 return true;
+            });
+
+            // Populate Audit Table
+            const tbody = document.getElementById('auditTableBody');
+            tbody.innerHTML = "";
+
+            mockDataStore.slice(-10).reverse().forEach(item => {
+                const tr = document.createElement('tr');
+                let badgeClass = "status-valid";
+                if (item.estado === "suspicious") badgeClass = "status-suspicious";
+                if (item.estado === "spam") badgeClass = "status-spam";
+
+                tr.innerHTML = `
+                    <td>#${item.id}</td>
+                    <td><strong>${item.nombre}</strong><br><small>${item.tipoPerfil}</small></td>
+                    <td>${item.barrio}<br><small>${item.contacto}</small></td>
+                    <td>${item.tituloProyecto || item.problematica}</td>
+                    <td><span class="status-badge ${badgeClass}">${item.estado.toUpperCase()}</span></td>
+                    <td>
+                        <button class="btn-action-sm btn-approve" onclick="changeRecordStatus(${item.id}, 'valid')">Validar</button>
+                        <button class="btn-action-sm btn-discard" onclick="changeRecordStatus(${item.id}, 'spam')">Descartar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
 
             // KPIs
@@ -1407,7 +1574,7 @@
                 document.getElementById('kpiBarrioTop').innerText = "-";
             }
 
-            // Update Heatmap
+            // Heatmap
             const heatPoints = filtered.map(item => ({
                 lat: item.lat,
                 lng: item.lng,
@@ -1415,7 +1582,7 @@
             }));
             heatmapLayer.setData({ max: 3, data: heatPoints });
 
-            // Markers on Map
+            // Markers
             analyticsMarkersGroup.clearLayers();
             filtered.forEach(item => {
                 let colorPin = '#134074';
@@ -1432,7 +1599,7 @@
 
                 let popupContent = `
                     <div style="font-size:0.85rem;">
-                        <strong>${item.nombre}</strong> (${item.tipoPerfil})<br>
+                        <strong>${item.nombre}</strong> (${item.tipoPerfil}) - <span class="status-badge ${item.estado === 'valid' ? 'status-valid' : 'status-spam'}">${item.estado}</span><br>
                         <b>Barrio:</b> ${item.barrio}<br>
                 `;
 
