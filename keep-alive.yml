@@ -1,0 +1,47 @@
+name: Mantener Supabase activo
+
+# El plan gratuito de Supabase pausa el proyecto después de 7 días sin ninguna
+# llamada a la API. Este workflow hace una consulta mínima (la misma función
+# get_public_stats que usa index.html) cada 3 días, muy por debajo del límite,
+# para que el proyecto nunca llegue a pausarse por falta de uso real.
+#
+# CONFIGURACIÓN NECESARIA (una sola vez):
+#   1. En GitHub: Settings > Secrets and variables > Actions > New repository secret
+#   2. Creá dos secrets:
+#      - SUPABASE_URL       -> el mismo valor que pusiste en assets/shared.js
+#      - SUPABASE_ANON_KEY  -> el mismo valor que pusiste en assets/shared.js
+#   3. Listo. Podés forzar una ejecución de prueba desde la pestaña "Actions"
+#      del repositorio, botón "Run workflow".
+
+on:
+  schedule:
+    # Corre todos los lunes y jueves a las 09:00 UTC (06:00 en Argentina).
+    # Dos veces por semana da margen de sobra frente al límite de 7 días.
+    - cron: '0 9 * * 1,4'
+  workflow_dispatch: {} # permite ejecutarlo manualmente desde la pestaña Actions
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar get_public_stats para mantener el proyecto activo
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Faltan los secrets SUPABASE_URL y/o SUPABASE_ANON_KEY. Configuralos en Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          http_code=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/get_public_stats" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json")
+          echo "Respuesta HTTP: $http_code"
+          cat /tmp/response.json
+          if [ "$http_code" -ge 400 ]; then
+            echo "La consulta a Supabase falló. Revisá que las credenciales sigan siendo válidas."
+            exit 1
+          fi
+          echo "Supabase respondió correctamente — proyecto sigue activo."
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
