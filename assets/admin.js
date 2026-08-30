@@ -36,7 +36,7 @@ function initEventListeners() {
     on('loginForm', 'submit', handleAdminLogin);
     on('btnLogout', 'click', handleAdminLogout);
 
-    // Filtros generales y de fecha
+    // Filtros generales y temporales
     ['filterEstado', 'filterPerfil', 'filterBarrio', 'filterProblematica', 'filterSexo', 'filterFechaDesde', 'filterFechaHasta'].forEach(id => {
         on(id, 'change', applyFiltersAndRender);
     });
@@ -120,15 +120,21 @@ function showDashboardView() {
     document.getElementById('dashboardView').style.display = 'block';
 }
 
-/* ================= CARGA DE DATOS Y FILTROS TEMPORALES ================= */
+/* ================= CARGA DE DATOS SEGUROLINK & FILTROS TEMPORALES ================= */
 async function loadDashboardData() {
     try {
-        const { data, error } = await supabaseClient
+        // Realizamos la consulta por ID para evitar el fallo 400 en caso de inconvenientes con created_at
+        let { data, error } = await supabaseClient
             .from('registros_vecinales')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('id', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            console.warn('Fallo orden por ID, ejecutando consulta genérica:', error);
+            const fallback = await supabaseClient.from('registros_vecinales').select('*');
+            if (fallback.error) throw fallback.error;
+            data = fallback.data;
+        }
 
         allRecords = data || [];
         populateFilterDropdowns();
@@ -222,7 +228,7 @@ function applyFiltersAndRender() {
         if (problematica !== 'TODAS' && r.problematica !== problematica) return false;
         if (sexo !== 'TODOS' && r.sexo !== sexo) return false;
 
-        // Comparación por Fecha (created_at)
+        // Comparación por Fecha (created_at si está disponible)
         if (r.created_at) {
             const regFecha = r.created_at.split('T')[0];
             if (fechaDesde && regFecha < fechaDesde) return false;
