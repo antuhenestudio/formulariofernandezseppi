@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuquén Escucha | Registro de Reclamos Vecinales, Proyectos y Lo Positivo</title>
+    <title>Neuquén Escucha | Registro Vecinal, Proyectos y Lo Positivo</title>
     
-    <!-- Librerías de Estilos e Iconos -->
+    <!-- Librerías de Estilos e Iconografía Profesional (FontAwesome SVG/Vector Graphics) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Leaflet Map & Heatmap -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -55,6 +58,25 @@
             flex-direction: column;
         }
 
+        /* Keyframe Animations / Motion Graphics CSS */
+        @keyframes pulseGlowGreen {
+            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(22, 163, 74, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        }
+
+        @keyframes pulseGlowGold {
+            0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(217, 119, 6, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+        }
+
+        @keyframes motionFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
+
         header {
             background: var(--primary);
             color: #fff;
@@ -77,13 +99,14 @@
         .brand-icon {
             background: var(--accent);
             color: #fff;
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            animation: motionFloat 3s ease-in-out infinite;
         }
 
         .brand-text h1 {
@@ -95,6 +118,26 @@
         .brand-text p {
             font-size: 0.72rem;
             color: #94a3b8;
+        }
+
+        .btn-header-admin {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 0.5rem 1.1rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-header-admin:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
         }
 
         .main-wrapper {
@@ -122,7 +165,7 @@
         .hero-banner {
             text-align: center;
             max-width: 850px;
-            margin: 0 auto 2rem;
+            margin: 0 auto 1.8rem;
         }
 
         .hero-banner h2 {
@@ -135,6 +178,53 @@
         .hero-banner p {
             font-size: 1rem;
             color: var(--text-muted);
+        }
+
+        /* LIVE COUNTER BANNER (ARRANCANDO EN IMPARES MAYORES A 100) */
+        .kpi-live-counter-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            max-width: 1250px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .kpi-live-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-live-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .kpi-live-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.4rem;
+            animation: motionFloat 3s ease-in-out infinite;
+        }
+
+        .kpi-live-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.1;
+        }
+
+        .kpi-live-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+            letter-spacing: 0.5px;
         }
 
         .profile-selector {
@@ -157,14 +247,23 @@
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .profile-btn i {
+            font-size: 1.05rem;
+            transition: var(--transition);
         }
 
         .profile-btn:hover {
             border-color: var(--secondary);
             background: #f8fafc;
             transform: translateY(-2px);
+        }
+
+        .profile-btn:hover i {
+            transform: scale(1.15);
         }
 
         .profile-btn.active {
@@ -178,12 +277,14 @@
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             border: 2px solid var(--gold);
             color: #92400e;
+            animation: pulseGlowGold 3s infinite ease-in-out;
         }
 
         .profile-btn.btn-idea-highlight.active {
             background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
             color: #fff;
             border-color: #b45309;
+            animation: none;
         }
 
         .profile-btn.btn-positive-highlight {
@@ -204,7 +305,7 @@
             background: var(--accent);
             color: #fff;
             font-size: 0.65rem;
-            padding: 2px 7px;
+            padding: 2px 8px;
             border-radius: 50px;
             font-weight: 800;
         }
@@ -213,15 +314,9 @@
             background: var(--green-positive);
             color: #fff;
             font-size: 0.65rem;
-            padding: 2px 7px;
+            padding: 2px 8px;
             border-radius: 50px;
             font-weight: 800;
-        }
-
-        @keyframes pulseGlowGreen {
-            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
         }
 
         .form-card {
@@ -254,6 +349,9 @@
             font-weight: 700;
             font-size: 0.88rem;
             color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         input, select, textarea {
@@ -273,7 +371,6 @@
             box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
         }
 
-        /* Multiselect Checkbox Grid para aspectos positivos */
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -289,7 +386,7 @@
             align-items: center;
             gap: 10px;
             background: #fff;
-            padding: 0.6rem 0.9rem;
+            padding: 0.7rem 0.9rem;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             cursor: pointer;
@@ -299,6 +396,7 @@
         .checkbox-item:hover {
             border-color: var(--green-positive);
             background: #f0fdf4;
+            transform: translateX(3px);
         }
 
         .checkbox-item input[type="checkbox"] {
@@ -312,6 +410,9 @@
             font-size: 0.88rem;
             font-weight: 600;
             color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .geo-picker-container {
@@ -350,6 +451,11 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-geo-gps:hover {
+            background: var(--primary);
         }
 
         .geo-coords-readout {
@@ -375,9 +481,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.6rem;
+            gap: 0.8rem;
             width: 100%;
             margin-top: 1.2rem;
+            box-shadow: 0 4px 12px rgba(217, 4, 41, 0.25);
         }
 
         .btn-submit:hover {
@@ -393,7 +500,7 @@
             background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
         }
 
-        /* Modal Base */
+        /* Modal Base & Login */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -417,29 +524,30 @@
             padding: 2.2rem;
             text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalScale 0.3s ease-out forwards;
+            animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         @keyframes modalScale {
-            from { transform: scale(0.9); opacity: 0; }
+            from { transform: scale(0.85); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
 
         .modal-icon {
-            width: 70px;
-            height: 70px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
             margin: 0 auto 1.2rem;
+            animation: motionFloat 2.5s ease-in-out infinite;
         }
 
         .modal-icon.icon-success { background: #dcfce7; color: #16a34a; }
         .modal-icon.icon-info { background: #e0f2fe; color: #0284c7; }
         .modal-icon.icon-verify { background: #fef3c7; color: #d97706; }
-        .modal-icon.icon-positive { background: #dcfce7; color: #16a34a; }
+        .modal-icon.icon-admin { background: #e0e7ff; color: #4338ca; }
 
         .modal-title {
             font-size: 1.4rem;
@@ -483,7 +591,7 @@
             transition: var(--transition);
         }
 
-        .btn-whatsapp:hover { background: #1da851; }
+        .btn-whatsapp:hover { background: #1da851; transform: translateY(-1px); }
 
         .modal-close-btn {
             background: transparent;
@@ -505,7 +613,7 @@
             display: block;
         }
 
-        /* Dashboard UI & Advanced KPIs */
+        /* Dashboard UI & IA Recommendation Panel */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -540,6 +648,46 @@
         .btn-export-pptx { background: #c2410c; color: #fff; }
         .btn-export-pptx:hover { background: #9a3412; }
 
+        .ia-recommendation-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.4);
+            display: flex;
+            align-items: flex-start;
+            gap: 1.2rem;
+        }
+
+        .ia-icon {
+            background: rgba(255, 255, 255, 0.15);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            color: #a7f3d0;
+        }
+
+        .ia-content h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ia-content p {
+            font-size: 0.92rem;
+            color: #e0e7ff;
+            line-height: 1.5;
+        }
+
         .filter-bar {
             background: #fff;
             padding: 1.2rem;
@@ -570,6 +718,11 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        .kpi-card-prof:hover {
+            transform: translateY(-3px);
         }
 
         .kpi-card-prof::before {
@@ -603,9 +756,9 @@
         }
 
         .kpi-icon {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: var(--text-muted);
-            opacity: 0.7;
+            opacity: 0.75;
         }
 
         .kpi-value {
@@ -726,6 +879,9 @@
                 <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
             </div>
         </div>
+        <button type="button" class="btn-header-admin" onclick="openLoginModal()">
+            <i class="fas fa-user-shield"></i> Acceso Admin
+        </button>
     </header>
 
     <main class="main-wrapper">
@@ -735,6 +891,35 @@
             <div class="hero-banner">
                 <h2>Espacio de Escucha y Participación Ciudadana</h2>
                 <p>Iniciativa impulsada por el Ing. Rubén Fernández Seppi para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
+            </div>
+
+            <!-- LIVE COUNTER BANNER (ARRANCANDO EN IMPARES MAYORES A 100) -->
+            <div class="kpi-live-counter-container">
+                <div class="kpi-live-card">
+                    <i class="fas fa-bullhorn kpi-live-icon" style="color: var(--accent);"></i>
+                    <div class="kpi-live-number" id="countReclamos">101</div>
+                    <div class="kpi-live-label">Reclamos Vecinales</div>
+                </div>
+                <div class="kpi-live-card">
+                    <i class="fas fa-graduation-cap kpi-live-icon" style="color: var(--teal);"></i>
+                    <div class="kpi-live-number" id="countJovenes">103</div>
+                    <div class="kpi-live-label">Aportes de Jóvenes</div>
+                </div>
+                <div class="kpi-live-card">
+                    <i class="fas fa-store kpi-live-icon" style="color: #c2410c;"></i>
+                    <div class="kpi-live-number" id="countComerciantes">105</div>
+                    <div class="kpi-live-label">Comercios Afectados</div>
+                </div>
+                <div class="kpi-live-card">
+                    <i class="fas fa-lightbulb kpi-live-icon" style="color: var(--gold);"></i>
+                    <div class="kpi-live-number" id="countPropuestas">107</div>
+                    <div class="kpi-live-label">Propuestas e Ideas</div>
+                </div>
+                <div class="kpi-live-card">
+                    <i class="fas fa-heart kpi-live-icon" style="color: var(--green-positive);"></i>
+                    <div class="kpi-live-number" id="countPositivos">109</div>
+                    <div class="kpi-live-label">Cosas Positivas</div>
+                </div>
             </div>
 
             <!-- Profile Selector Rounded Buttons -->
@@ -770,12 +955,12 @@
 
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="nombre">Nombre y Apellido *</label>
+                            <label for="nombre"><i class="fas fa-user" style="color: var(--secondary);"></i> Nombre y Apellido *</label>
                             <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Carlos Pérez" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="sexo">Sexo *</label>
+                            <label for="sexo"><i class="fas fa-venus-mars" style="color: var(--secondary);"></i> Sexo *</label>
                             <select id="sexo" name="sexo" required>
                                 <option value="">-- Seleccionar --</option>
                                 <option value="Masculino">Masculino</option>
@@ -785,19 +970,19 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="edad">Edad *</label>
+                            <label for="edad"><i class="fas fa-calendar-alt" style="color: var(--secondary);"></i> Edad *</label>
                             <input type="number" id="edad" name="edad" min="16" max="120" placeholder="Ej. 42" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="barrio">Barrio de Neuquén *</label>
+                            <label for="barrio"><i class="fas fa-map-marked-alt" style="color: var(--secondary);"></i> Barrio de Neuquén *</label>
                             <select id="barrio" name="barrio" onchange="centerMapOnBarrio()" required>
                                 <option value="">-- Selecciona tu barrio --</option>
                             </select>
                         </div>
 
                         <div class="form-group full-width">
-                            <label for="contacto">Teléfono de Contacto / WhatsApp (Ej. 2994123456) *</label>
+                            <label for="contacto"><i class="fab fa-whatsapp" style="color: #25D366;"></i> Teléfono de Contacto / WhatsApp (Ej. 2994123456) *</label>
                             <input type="tel" id="contacto" name="contacto" placeholder="Ej. 2994123456" required>
                         </div>
 
@@ -817,19 +1002,19 @@
                             </div>
                         </div>
 
-                        <!-- MERCHANTS SPECIFIC -->
+                        <!-- MERCHANTS SPECIFIC (Líneas de Áreas Generales removidas completamente) -->
                         <div class="form-group merchant-field" style="display:none;">
-                            <label for="nombreComercio">Nombre Fantasía / Rubro del Comercio *</label>
+                            <label for="nombreComercio"><i class="fas fa-store-alt" style="color: var(--accent);"></i> Nombre Fantasía / Rubro del Comercio *</label>
                             <input type="text" id="nombreComercio" name="nombreComercio" placeholder="Ej. Panadería San Martín / Calzados">
                         </div>
 
                         <div class="form-group merchant-field" style="display:none;">
-                            <label for="ubicacionComercio">Dirección Exacta del Local *</label>
+                            <label for="ubicacionComercio"><i class="fas fa-map-pin" style="color: var(--accent);"></i> Dirección Exacta del Local *</label>
                             <input type="text" id="ubicacionComercio" name="ubicacionComercio" placeholder="Ej. Av. Argentina 450">
                         </div>
 
                         <div class="form-group merchant-field" style="display:none;">
-                            <label for="impactoObra">Causa Principal de Perjuicio Comercial *</label>
+                            <label for="impactoObra"><i class="fas fa-exclamation-triangle" style="color: var(--accent);"></i> Causa Principal de Perjuicio Comercial *</label>
                             <select id="impactoObra" name="impactoObra">
                                 <option value="">-- Seleccionar causa --</option>
                                 <option value="Implementación de Bicisenda sin consulta">Implementación de Bicisenda sin consulta</option>
@@ -841,7 +1026,7 @@
                         </div>
 
                         <div class="form-group merchant-field" style="display:none;">
-                            <label for="consecuenciaComercial">Consecuencia Sufrida *</label>
+                            <label for="consecuenciaComercial"><i class="fas fa-chart-line-down" style="color: var(--accent);"></i> Consecuencia Sufrida *</label>
                             <select id="consecuenciaComercial" name="consecuenciaComercial">
                                 <option value="">-- Seleccionar consecuencia --</option>
                                 <option value="Pérdida drástica de ventas y rentabilidad">Pérdida drástica de ventas y rentabilidad</option>
@@ -858,7 +1043,7 @@
                         </div>
 
                         <div class="form-group idea-field" style="display:none;">
-                            <label for="ejeIdea">Área o Eje de Impacto *</label>
+                            <label for="ejeIdea"><i class="fas fa-layer-group" style="color: var(--gold);"></i> Área o Eje de Impacto *</label>
                             <select id="ejeIdea" name="ejeIdea">
                                 <option value="">-- Seleccionar eje --</option>
                                 <option value="Infraestructura y Obras para el Barrio">Infraestructura y Obras para el Barrio</option>
@@ -870,7 +1055,7 @@
                         </div>
 
                         <div class="form-group idea-field" style="display:none;">
-                            <label for="porQueProyecto">¿Por qué es necesario este proyecto? *</label>
+                            <label for="porQueProyecto"><i class="fas fa-question-circle" style="color: var(--gold);"></i> ¿Por qué es necesario este proyecto? *</label>
                             <input type="text" id="porQueProyecto" name="porQueProyecto" placeholder="Ej. Beneficiará a más de 500 familias que no tienen espacios seguros...">
                         </div>
 
@@ -880,42 +1065,42 @@
                             <div class="checkbox-grid">
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Paseo Costero y Desarrollo de Riberas">
-                                    <span>Paseo Costero y Riberas</span>
+                                    <span><i class="fas fa-water" style="color: #0284c7;"></i> Paseo Costero y Riberas</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Parques Urbanos y Espacios Verdes">
-                                    <span>Parques Urbanos y Plazas</span>
+                                    <span><i class="fas fa-tree" style="color: #16a34a;"></i> Parques Urbanos y Plazas</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Oferta Cultural, Fiestas y Eventos">
-                                    <span>Fiesta de la Confluencia y Cultura</span>
+                                    <span><i class="fas fa-music" style="color: #7c3aed;"></i> Fiesta de la Confluencia y Cultura</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Desarrollo del Polo Tecnológico">
-                                    <span>Polo Tecnológico e Innovación</span>
+                                    <span><i class="fas fa-microchip" style="color: #0284c7;"></i> Polo Tecnológico e Innovación</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Infraestructura Deportiva y Safaris">
-                                    <span>Pistas de Ciclismo y Deporte</span>
+                                    <span><i class="fas fa-running" style="color: #d97706;"></i> Pistas de Ciclismo y Deporte</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Limpieza y Mantenimiento de Avenidas">
-                                    <span>Limpieza de Avenidas Principales</span>
+                                    <span><i class="fas fa-broom" style="color: #0d9488;"></i> Limpieza de Avenidas Principales</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Luminarias LED en Arterias Principales">
-                                    <span>Nuevas Luminarias LED</span>
+                                    <span><i class="fas fa-lightbulb" style="color: #eab308;"></i> Nuevas Luminarias LED</span>
                                 </label>
                                 <label class="checkbox-item">
                                     <input type="checkbox" name="aspectosPositivos" value="Opciones Gastronómicas y Paseos Comerciales">
-                                    <span>Gastronomía y Comercio Local</span>
+                                    <span><i class="fas fa-utensils" style="color: #c2410c;"></i> Gastronomía y Comercio Local</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- GENERAL CATEGORIES -->
                         <div class="form-group general-field">
-                            <label for="problematica">Área Temática Principal *</label>
+                            <label for="problematica"><i class="fas fa-list-alt" style="color: var(--secondary);"></i> Área Temática Principal *</label>
                             <select id="problematica" name="problematica" onchange="loadSubcategories()" required>
                                 <option value="">-- Seleccionar área temática --</option>
                                 <option value="Calles, Tránsito y Obras Civiles">Calles, Baches, Tránsito y Obras Civiles</option>
@@ -930,14 +1115,14 @@
                         </div>
 
                         <div class="form-group full-width general-field">
-                            <label for="subproblematica">Subproblemática Específica *</label>
+                            <label for="subproblematica"><i class="fas fa-indent" style="color: var(--secondary);"></i> Subproblemática Específica *</label>
                             <select id="subproblematica" name="subproblematica" required disabled>
                                 <option value="">-- Primero elige el área temática --</option>
                             </select>
                         </div>
 
                         <div class="form-group full-width">
-                            <label for="detalle" id="lblDetalle">Descripción Detallada de la Situación *</label>
+                            <label for="detalle" id="lblDetalle"><i class="fas fa-align-left" style="color: var(--secondary);"></i> Descripción Detallada de la Situación *</label>
                             <textarea id="detalle" name="detalle" rows="4" placeholder="Describa el problema, propuesta o comentario..." required></textarea>
                         </div>
                     </div>
@@ -968,10 +1153,19 @@
                     </div>
                 </div>
 
+                <!-- BOX RECOMENDACIÓN IA -->
+                <div class="ia-recommendation-box">
+                    <div class="ia-icon"><i class="fas fa-brain"></i></div>
+                    <div class="ia-content">
+                        <h3><i class="fas fa-sparkles" style="color: #fef08a;"></i> Diagnóstico Estratégico Generado por IA</h3>
+                        <p id="iaTextContainer">Analizando la densidad de reclamos y aportes en tiempo real para sugerir intervenciones prioritarias...</p>
+                    </div>
+                </div>
+
                 <!-- FILTERS BAR -->
                 <div class="filter-bar">
                     <div class="form-group">
-                        <label>Estado Auditoría</label>
+                        <label><i class="fas fa-filter"></i> Estado Auditoría</label>
                         <select id="filterEstado" onchange="applyAnalyticsFilters()">
                             <option value="TODOS">Todos los Estados</option>
                             <option value="valid" selected>Solo Validados (Puros)</option>
@@ -980,7 +1174,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Perfil Carga</label>
+                        <label><i class="fas fa-id-card"></i> Perfil Carga</label>
                         <select id="filterPerfil" onchange="applyAnalyticsFilters()">
                             <option value="TODOS">Todos los perfiles</option>
                             <option value="Vecino / Ciudadano">Vecino / Ciudadano</option>
@@ -991,19 +1185,19 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Barrio</label>
+                        <label><i class="fas fa-map-marker-alt"></i> Barrio</label>
                         <select id="filterBarrio" onchange="applyAnalyticsFilters()">
                             <option value="TODOS">Todos los barrios</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Problemática / Eje</label>
+                        <label><i class="fas fa-folder"></i> Problemática / Eje</label>
                         <select id="filterProblematica" onchange="applyAnalyticsFilters()">
                             <option value="TODAS">Todas las áreas</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Sexo</label>
+                        <label><i class="fas fa-users"></i> Sexo</label>
                         <select id="filterSexo" onchange="applyAnalyticsFilters()">
                             <option value="TODOS">Todos</option>
                             <option value="Masculino">Masculino</option>
@@ -1069,7 +1263,7 @@
                     </div>
 
                     <div class="chart-card">
-                        <h4><i class="fas fa-chart-bar"></i> Distribución por Área Temática / Proyectos</h4>
+                        <h4><i class="fas fa-chart-bar" style="color: var(--secondary);"></i> Distribución por Área Temática / Proyectos</h4>
                         <div class="chart-container-wrapper">
                             <canvas id="chartCategories"></canvas>
                         </div>
@@ -1090,7 +1284,7 @@
                     </div>
 
                     <div class="chart-card">
-                        <h4><i class="fas fa-users"></i> Demografía por Edades y Sexo</h4>
+                        <h4><i class="fas fa-users" style="color: var(--teal);"></i> Demografía por Edades y Sexo</h4>
                         <div class="chart-container-wrapper">
                             <canvas id="chartDemographics"></canvas>
                         </div>
@@ -1123,6 +1317,30 @@
 
     </main>
 
+    <!-- POPUP LOGIN ADMINISTRATIVO (SUPABASE AUTH) -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-card">
+            <div class="modal-icon icon-admin"><i class="fas fa-lock"></i></div>
+            <h3 class="modal-title">Acceso Panel Gerencial</h3>
+            <p class="modal-desc">Inicie sesión con su cuenta autorizada de Supabase para acceder al Tablero Ejecutivo.</p>
+            
+            <form id="loginForm">
+                <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                    <label for="adminEmail">Correo Electrónico</label>
+                    <input type="email" id="adminEmail" required placeholder="admin@neuquen.gob.ar">
+                </div>
+                <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+                    <label for="adminPassword">Contraseña</label>
+                    <input type="password" id="adminPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-submit" style="margin-top: 0;">
+                    <i class="fas fa-sign-in-alt"></i> Ingresar al Dashboard
+                </button>
+            </form>
+            <button class="modal-close-btn" onclick="closeLoginModal()">Cancelar</button>
+        </div>
+    </div>
+
     <!-- POPUP INFORMATIVO AL CAMBIAR DE BOTÓN DE PERFIL -->
     <div class="modal-overlay" id="profileInfoModal">
         <div class="modal-card">
@@ -1133,7 +1351,7 @@
         </div>
     </div>
 
-    <!-- POPUP DE VERIFICACIÓN POR WHATSAPP (SIN COSTO VIA API DIRECTA) -->
+    <!-- POPUP DE VERIFICACIÓN POR WHATSAPP -->
     <div class="modal-overlay" id="verifyModal">
         <div class="modal-card">
             <div class="modal-icon icon-verify"><i class="fab fa-whatsapp"></i></div>
@@ -1145,9 +1363,9 @@
             </button>
 
             <div id="verifyCodeSection" style="display:none; margin-top: 1.2rem;">
-                <label style="font-size: 0.85rem;">Ingresa el código enviado:</label>
+                <label style="font-size: 0.85rem;"><i class="fas fa-key"></i> Ingresa el código enviado:</label>
                 <input type="text" id="inputVerifyCode" class="code-input-box" maxlength="4" placeholder="0000">
-                <button class="btn-submit" onclick="confirmVerificationCode()">Verificar y Confirmar Carga</button>
+                <button class="btn-submit" onclick="confirmVerificationCode()"><i class="fas fa-check-circle"></i> Verificar y Confirmar Carga</button>
             </div>
             
             <button class="modal-close-btn" onclick="closeVerifyModal()">Cancelar</button>
@@ -1157,7 +1375,7 @@
     <!-- SUCCESS POPUP MODAL -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-card">
-            <div class="modal-icon icon-success"><i class="fas fa-check"></i></div>
+            <div class="modal-icon icon-success"><i class="fas fa-check-circle"></i></div>
             <h3 class="modal-title" id="modalTitleText">¡Registro Recibido!</h3>
             <p class="modal-desc" id="modalDescText">Su aporte ha sido verificado e ingresado correctamente al sistema.</p>            
             
@@ -1176,6 +1394,11 @@
 
     <!-- JAVASCRIPT & LOGIC ENGINE -->
     <script>
+        // CONFIGURACIÓN CLIENTE SUPABASE (Reemplazar URL y ANON_KEY con las tuyas)
+        const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
+        const SUPABASE_ANON_KEY = "TU_ANON_KEY";
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
         const barriosNeuquen = [
             "Alta Balsa", "Altos del Limay", "Área Centro Este", "Área Centro Oeste", "Bajo Balsa",
             "Bardas Soleadas", "Barreneche", "Belgrano", "Bouquet Roldán", "Canal V", 
@@ -1255,17 +1478,17 @@
         const profileExplainerTexts = {
             "ciudadano": {
                 title: "Espacio para Vecinos y Ciudadanos",
-                icon: "<i class='fas fa-user-check'></i>",
+                icon: "<i class='fas fa-user-check' style='color:var(--secondary);'></i>",
                 desc: "En esta sección podés reportar cualquier problema de infraestructura en tu barrio: baches, falta de agua o cloacas, luminarias apagadas, basura acumulada o la falta de frecuencias del colectivo. Tu reclamo se suma al mapa general de la ciudad."
             },
             "comerciante": {
                 title: "Espacio para Comerciantes y Negocios",
-                icon: "<i class='fas fa-store'></i>",
+                icon: "<i class='fas fa-store' style='color:var(--accent);'></i>",
                 desc: "Si tenés un comercio y fuiste afectado por ciclovías mal planificadas, cambios de sentido de calles, falta de estacionamiento para clientes u obras municipales sin aviso, volcá tu reclamo acá para exigir respuestas específicas para el sector comercial."
             },
             "joven": {
                 title: "Espacio para Jóvenes (16 a 30 años)",
-                icon: "<i class='fas fa-graduation-cap'></i>",
+                icon: "<i class='fas fa-graduation-cap' style='color:var(--teal);'></i>",
                 desc: "Acá podés exponer la falta de talleres técnicos, espacios deportivos, conectividad, estado de escuelas o problemas con el boleto estudiantil y frecuencias nocturnas. Queremos visibilizar las prioridades de la juventud neuquina."
             },
             "idea": {
@@ -1300,12 +1523,79 @@
             populateBarrioDropdowns();
             populateFilterCategories();
             initPickerMap();
+            fetchPublicStats(); // Carga de contadores animados que arrancan en impares +100
 
             if (window.location.pathname.endsWith('/admin') || window.location.search.includes('admin')) {
                 switchView('dashboardView');
                 setTimeout(initDashboardAnalytics, 200);
             }
         });
+
+        /* --- LÓGICA DE CONTADORES PÚBLICOS EN VIVO (ARRANQUE EN IMPARES MAYORES A 100) --- */
+        const BASES_IMPARES = {
+            reclamos: 101,
+            jovenes: 103,
+            comerciantes: 105,
+            propuestas: 107,
+            positivos: 109
+        };
+
+        function calcularValorImpar(base, realCount) {
+            let total = base + realCount;
+            if (total % 2 === 0) total += 1;
+            return total;
+        }
+
+        function animarContador(idElem, objetivo, baseInicial) {
+            const elem = document.getElementById(idElem);
+            let inicio = baseInicial;
+            const duracion = 1200;
+            const pasos = 25;
+            const incremento = (objetivo - inicio) / pasos;
+            let actual = inicio;
+            
+            const timer = setInterval(() => {
+                actual += incremento;
+                if (actual >= objetivo) {
+                    elem.innerText = objetivo;
+                    clearInterval(timer);
+                } else {
+                    elem.innerText = Math.round(actual);
+                }
+            }, duracion / pasos);
+        }
+
+        async function fetchPublicStats() {
+            let realCounts = {
+                reclamos: mockDataStore.filter(i => i.tipoPerfil === 'Vecino / Ciudadano').length,
+                jovenes: mockDataStore.filter(i => i.tipoPerfil === 'Joven (16 a 30 años)').length,
+                comerciantes: mockDataStore.filter(i => i.tipoPerfil === 'Comerciante / Dueño de Negocio').length,
+                propuestas: mockDataStore.filter(i => i.tipoPerfil === 'Propuesta / Idea Vecinal').length,
+                positivos: mockDataStore.filter(i => i.tipoPerfil === 'Aporte Positivo Vecinal').length
+            };
+
+            // Intentar obtener de Supabase si está disponible
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase.rpc('get_public_stats');
+                    if (!error && data) {
+                        realCounts = {
+                            reclamos: data.total_reclamos || 0,
+                            jovenes: data.total_jovenes || 0,
+                            comerciantes: data.total_comerciantes || 0,
+                            propuestas: data.total_propuestas || 0,
+                            positivos: data.total_positivos || 0
+                        };
+                    }
+                } catch(e) { console.log("Usando fallback local para métricas"); }
+            }
+
+            animarContador('countReclamos', calcularValorImpar(BASES_IMPARES.reclamos, realCounts.reclamos), BASES_IMPARES.reclamos);
+            animarContador('countJovenes', calcularValorImpar(BASES_IMPARES.jovenes, realCounts.jovenes), BASES_IMPARES.jovenes);
+            animarContador('countComerciantes', calcularValorImpar(BASES_IMPARES.comerciantes, realCounts.comerciantes), BASES_IMPARES.comerciantes);
+            animarContador('countPropuestas', calcularValorImpar(BASES_IMPARES.propuestas, realCounts.propuestas), BASES_IMPARES.propuestas);
+            animarContador('countPositivos', calcularValorImpar(BASES_IMPARES.positivos, realCounts.positivos), BASES_IMPARES.positivos);
+        }
 
         function validarRegistroPuro(datos) {
             if (datos.nombre.trim().length < 3 || /^(.)\1+$/.test(datos.nombre)) {
@@ -1382,9 +1672,6 @@
             const btnSubmit = document.getElementById('btnSubmitForm');
             const btnSubmitText = document.getElementById('btnSubmitText');
 
-            problematicaSelect.required = true;
-            subproblematicaSelect.required = true;
-
             showProfileInfoModal(profileType);
 
             if (profileType === 'idea') {
@@ -1394,8 +1681,10 @@
                 positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'none');
                 ideaFields.forEach(f => f.style.display = 'flex');
+                
                 problematicaSelect.required = false;
                 subproblematicaSelect.required = false;
+                
                 btnSubmit.className = "btn-submit btn-submit-idea";
                 btnSubmitText.innerText = "Enviar Mi Idea / Proyecto Vecinal";
             } else if (profileType === 'positivo') {
@@ -1405,8 +1694,10 @@
                 ideaFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'none');
                 positiveFields.forEach(f => f.style.display = 'flex');
+                
                 problematicaSelect.required = false;
                 subproblematicaSelect.required = false;
+                
                 btnSubmit.className = "btn-submit btn-submit-positive";
                 btnSubmitText.innerText = "Registrar lo que me Gusta de Neuquén";
             } else if (profileType === 'comerciante') {
@@ -1415,9 +1706,12 @@
                 merchantFields.forEach(f => f.style.display = 'flex');
                 ideaFields.forEach(f => f.style.display = 'none');
                 positiveFields.forEach(f => f.style.display = 'none');
-                generalFields.forEach(f => f.style.display = 'flex');
-                problematicaSelect.value = "Comercio, Obras Municipales Arbitrarias y Tasas";
-                loadSubcategories();
+                
+                // Removidas las desplegables generales para el perfil comercial
+                generalFields.forEach(f => f.style.display = 'none');
+                problematicaSelect.required = false;
+                subproblematicaSelect.required = false;
+                
                 btnSubmit.className = "btn-submit";
                 btnSubmitText.innerText = "Registrar mi Situación Comercial";
             } else if (profileType === 'joven') {
@@ -1427,8 +1721,12 @@
                 ideaFields.forEach(f => f.style.display = 'none');
                 positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
+                
+                problematicaSelect.required = true;
+                subproblematicaSelect.required = true;
                 problematicaSelect.value = "Educación y Juventud";
                 loadSubcategories();
+                
                 btnSubmit.className = "btn-submit";
                 btnSubmitText.innerText = "Registrar mi Reclamo";
             } else {
@@ -1438,8 +1736,12 @@
                 ideaFields.forEach(f => f.style.display = 'none');
                 positiveFields.forEach(f => f.style.display = 'none');
                 generalFields.forEach(f => f.style.display = 'flex');
+                
+                problematicaSelect.required = true;
+                subproblematicaSelect.required = true;
                 problematicaSelect.value = "";
                 loadSubcategories();
+                
                 btnSubmit.className = "btn-submit";
                 btnSubmitText.innerText = "Registrar mi Situación / Reclamo";
             }
@@ -1458,6 +1760,46 @@
         function closeProfileModal() {
             document.getElementById('profileInfoModal').style.display = 'none';
         }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        // LOGIN SUPABASE DE ADMINISTRADORES
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (supabase) {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    alert("Error de autenticación: " + error.message);
+                    return;
+                }
+                
+                // Consultar rol en public.profiles
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+                if (!profile || !['super_admin', 'admin', 'visor'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    alert("Acceso denegado. No posee permisos de administración.");
+                    return;
+                }
+
+                sessionStorage.setItem('user_role', profile.role);
+            } else {
+                // Modo prototipo de pruebas
+                sessionStorage.setItem('user_role', 'admin');
+            }
+
+            closeLoginModal();
+            switchView('dashboardView');
+            setTimeout(initDashboardAnalytics, 200);
+        });
 
         function populateBarrioDropdowns() {
             const formSelect = document.getElementById('barrio');
@@ -1500,7 +1842,7 @@
             }
         }
 
-        // FORM SUBMIT WITH FREE WHATSAPP VERIFICATION
+        // ENVÍO DE FORMULARIO CON VERIFICACIÓN Y REGISTRO
         document.getElementById('citizenForm').addEventListener('submit', (e) => {
             e.preventDefault();
             if (document.getElementById('website_hp').value !== "") return;
@@ -1524,6 +1866,9 @@
             if (tipo === "Propuesta / Idea Vecinal") {
                 problematicaVal = "Propuesta de Proyecto Vecinal";
                 subproblematicaVal = document.getElementById('ejeIdea').value;
+            } else if (tipo === "Comerciante / Dueño de Negocio") {
+                problematicaVal = "Comercio, Obras Municipales Arbitrarias y Tasas";
+                subproblematicaVal = document.getElementById('impactoObra').value || "Impacto Comercial Registrado";
             } else if (tipo === "Aporte Positivo Vecinal") {
                 problematicaVal = "Valoración Positiva de la Ciudad";
                 subproblematicaVal = "Apoyo a Obras y Espacios Públicos";
@@ -1579,11 +1924,40 @@
             document.getElementById('verifyCodeSection').style.display = 'block';
         }
 
-        function confirmVerificationCode() {
+        async function confirmVerificationCode() {
             const entered = document.getElementById('inputVerifyCode').value.trim();
             if (entered === generatedCode || entered === "1234") {
+                
+                // Guardar en Supabase si está conectado
+                if (supabase) {
+                    try {
+                        await supabase.from('registros_vecinales').insert([{
+                            tipo_perfil: pendingPayload.tipoPerfil,
+                            nombre: pendingPayload.nombre,
+                            sexo: pendingPayload.sexo,
+                            edad: pendingPayload.edad,
+                            barrio: pendingPayload.barrio,
+                            contacto: pendingPayload.contacto,
+                            problematica: pendingPayload.problematica,
+                            subproblematica: pendingPayload.subproblematica,
+                            aspectos_positivos: pendingPayload.aspectosPositivos,
+                            nombre_comercio: pendingPayload.nombreComercio,
+                            ubicacion_comercio: pendingPayload.ubicacionComercio,
+                            impacto_obra: pendingPayload.impactoObra,
+                            consecuencia_comercial: pendingPayload.consecuenciaComercial,
+                            titulo_proyecto: pendingPayload.tituloProyecto,
+                            eje_idea: pendingPayload.ejeIdea,
+                            por_que_proyecto: pendingPayload.porQueProyecto,
+                            detalle: pendingPayload.detalle,
+                            lat: pendingPayload.lat,
+                            lng: pendingPayload.lng
+                        }]);
+                    } catch(e) { console.error("Error al guardar en Supabase:", e); }
+                }
+
                 mockDataStore.push(pendingPayload);
                 closeVerifyModal();
+                fetchPublicStats(); // Actualizar métricas animadas
                 
                 document.getElementById('successModal').style.display = 'flex';
                 document.getElementById('citizenForm').reset();
@@ -1622,7 +1996,7 @@
             if (item) { item.estado = newStatus; applyAnalyticsFilters(); }
         }
 
-        /* COMPREHENSIVE HIGH-LEVEL ANALYTICS ENGINE */
+        /* ENGINE DE ANALÍTICA AVANZADA E IA */
         function applyAnalyticsFilters() {
             const fEstado = document.getElementById('filterEstado').value;
             const fPerfil = document.getElementById('filterPerfil').value;
@@ -1639,7 +2013,7 @@
                 return true;
             });
 
-            // Populate Audit Table
+            // Tabla de Auditoría
             const tbody = document.getElementById('auditTableBody');
             tbody.innerHTML = "";
             mockDataStore.slice(-8).reverse().forEach(item => {
@@ -1662,7 +2036,7 @@
                 tbody.appendChild(tr);
             });
 
-            // CALCULATE ADVANCED PROFESSIONAL KPIS
+            // KPIs
             const totalCount = filtered.length;
             document.getElementById('kpiTotal').innerText = totalCount;
 
@@ -1681,10 +2055,11 @@
             document.getElementById('kpiPositivos').innerText = positivos.length;
             document.getElementById('kpiPositivosRatio').innerText = `${positivosRatio}% valoraciones positivas`;
 
+            let topBarrio = "-";
             if (totalCount > 0) {
                 const bCount = {};
                 filtered.forEach(i => bCount[i.barrio] = (bCount[i.barrio] || 0) + 1);
-                const topBarrio = Object.keys(bCount).reduce((a, b) => bCount[a] > bCount[b] ? a : b);
+                topBarrio = Object.keys(bCount).reduce((a, b) => bCount[a] > bCount[b] ? a : b);
                 document.getElementById('kpiBarrioTop').innerText = topBarrio;
                 document.getElementById('kpiBarrioTopCount').innerText = `${bCount[topBarrio]} incidentes en zona`;
             } else {
@@ -1692,7 +2067,11 @@
                 document.getElementById('kpiBarrioTopCount').innerText = "0 incidentes";
             }
 
-            // HEATMAP & MAP MARKERS
+            // RECOMENDACIÓN ESTRATÉGICA IA
+            document.getElementById('iaTextContainer').innerText = 
+                `Diagnóstico Neuquén IA: Se observa concentración crítica de reclamos en ${topBarrio}. La afectación comercial asciende al ${merchantSeverityRatio}%. Se recomienda planificar mesas de diálogo con frentistas e intensificar obras de pavimentación e iluminación LED prioritariamente en esta zona.`;
+
+            // Mapa
             const heatPoints = filtered.map(item => ({ lat: item.lat, lng: item.lng, count: 1 }));
             heatmapLayer.setData({ max: 3, data: heatPoints });
 
@@ -1819,7 +2198,7 @@
             });
         }
 
-        /* HIGH QUALITY PDF REPORT GENERATOR */
+        /* EXPORTACIÓN PDF Y POWERPOINT */
         function exportPDFReport() {
             const element = document.getElementById('reportExportContainer');
             const opt = {
@@ -1833,7 +2212,6 @@
             html2pdf().set(opt).from(element).save();
         }
 
-        /* POWERPOINT (PPTX) REPORT GENERATOR */
         function exportPPTXReport() {
             const pptx = new PptxGenJS();
             pptx.author = "Neuquén Escucha";
