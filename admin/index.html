@@ -755,6 +755,27 @@
                         <div class="kpi-subtitle" id="kpiBarrioTopCount">0 incidentes en zona</div>
                     </div>
                 </div>
+                <!-- FILTROS DE FECHA / PERÍODO -->
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Desde</label>
+                    <input type="date" id="filterFechaDesde" class="form-control-sm">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-check"></i> Hasta</label>
+                    <input type="date" id="filterFechaHasta" class="form-control-sm">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Período Rápido</label>
+                    <select id="filterPeriodoRapido">
+                        <option value="TODOS" selected>Todo el histórico</option>
+                        <option value="HOY">Hoy</option>
+                        <option value="7_DIAS">Últimos 7 días</option>
+                        <option value="30_DIAS">Últimos 30 días</option>
+                        <option value="ESTE_MES">Este mes</option>
+                        <option value="MES_ANTERIOR">Mes anterior</option>
+                        <option value="ESTE_ANO">Este año</option>
+                    </select>
+                </div>
 
                 <!-- CHARTS GRID -->
                 <div class="charts-grid">
