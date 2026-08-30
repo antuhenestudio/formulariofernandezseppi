@@ -23,6 +23,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
+    <!-- YouTube IFrame API para el video de bienvenida obligatorio -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <style>
         :root {
             --primary: #0b2545;
@@ -58,6 +61,104 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Ocultar la barra de scroll visible (en PC y celular), sin quitar el scroll en sí */
+        html, body {
+            scrollbar-width: none;      /* Firefox */
+            -ms-overflow-style: none;   /* Edge / IE viejos */
+        }
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;              /* Chrome, Safari, Edge nuevo */
+            width: 0;
+            height: 0;
+        }
+
+        body.video-gate-active {
+            overflow: hidden;
+        }
+
+        /* ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== */
+        .video-gate-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-gate-overlay.hidden {
+            display: none;
+        }
+
+        .video-gate-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.4);
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 5002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .video-gate-close:hover { background: rgba(255,255,255,0.3); }
+
+        .video-gate-player-wrap {
+            position: relative;
+            height: 100%;
+            max-height: 100vh;
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            max-width: 100vw;
+        }
+
+        #youtubeGatePlayer {
+            width: 100%;
+            height: 100%;
+        }
+
+        #youtubeGatePlayer iframe {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .video-gate-hint {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 0.7rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 5002;
+            white-space: nowrap;
+            animation: pulseGlowGold 2s infinite ease-in-out;
+        }
+
+        @media (max-width: 480px) {
+            .video-gate-close { top: 12px; right: 12px; width: 38px; height: 38px; font-size: 1rem; }
+            .video-gate-hint { font-size: 0.78rem; padding: 0.6rem 1rem; bottom: 20px; }
         }
 
         /* Keyframe Animations / Motion Graphics CSS */
@@ -458,6 +559,20 @@
             height: 260px;
             width: 100%;
             z-index: 1;
+        }
+
+        /* Marcador arrastrable hecho en CSS puro (sin imágenes externas), para que
+           siempre se vea aunque falle la carga de los íconos PNG por defecto de Leaflet. */
+        .custom-pin-icon {
+            width: 32px;
+            height: 32px;
+            display: block;
+        }
+
+        .custom-pin-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35));
         }
 
         .geo-controls-bar {
@@ -1078,7 +1193,20 @@
         }
     </style>
 </head>
-<body>
+<body class="video-gate-active">
+
+    <!-- ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== -->
+    <div class="video-gate-overlay" id="videoGateOverlay">
+        <button type="button" class="video-gate-close" id="btnSkipVideo" aria-label="Cerrar video">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="video-gate-player-wrap">
+            <div id="youtubeGatePlayer"></div>
+        </div>
+        <div class="video-gate-hint" id="videoGateSoundHint">
+            <i class="fas fa-volume-up"></i> Tocá para activar el sonido
+        </div>
+    </div>
 
     <!-- Contenedor de popups de confirmación (toasts) -->
     <div id="toastContainer" aria-live="polite"></div>
@@ -1870,6 +1998,15 @@
             try { setFieldsRequired('ciudadano'); } catch (err) { console.error('Error configurando campos requeridos:', err); }
             try { initEventListeners(); } catch (err) { console.error('Error conectando botones:', err); }
 
+            // Salvaguarda: si la API de YouTube no llega a cargar (sin conexión, bloqueada, etc.)
+            // no dejamos a la persona atrapada sin poder usar el sitio.
+            setTimeout(() => {
+                if (!gateYtInitialized) {
+                    console.warn('El video de bienvenida no cargó a tiempo; se habilita el acceso al sitio.');
+                    closeVideoGate();
+                }
+            }, 7000);
+
             if (window.location.pathname.endsWith('/admin') || window.location.search.includes('admin')) {
                 switchView('dashboardView');
                 setTimeout(initDashboardAnalytics, 200);
@@ -1897,6 +2034,8 @@
             on('btnConfirmVerifyCode', 'click', confirmVerificationCode);
             on('btnCloseVerifyModal', 'click', closeVerifyModal);
             on('btnCloseSuccessModal', 'click', closeSuccessModal);
+            on('btnSkipVideo', 'click', closeVideoGate);
+            on('videoGateSoundHint', 'click', activateGateSound);
 
             document.querySelectorAll('.profile-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => selectProfile(btn.dataset.profile, e));
@@ -1931,6 +2070,79 @@
             const el = document.getElementById(containerId);
             if (el) {
                 el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:180px;background:#f1f5f9;color:#64748b;font-size:0.85rem;text-align:center;padding:1rem;">No se pudo cargar el mapa (sin conexión a los servidores de mapas). Podés seguir completando el resto del formulario; tu barrio ya ubica aproximadamente la zona.</div>';
+            }
+        }
+
+        /* --- VIDEO DE BIENVENIDA OBLIGATORIO (YouTube IFrame API) --- */
+        const GATE_VIDEO_ID = "GhmAAyCkHg4"; // https://youtube.com/shorts/GhmAAyCkHg4
+        let gateYtPlayer = null;
+        let gateYtInitialized = false;
+
+        // Llamado automáticamente por la API de YouTube cuando termina de cargar (window.onYouTubeIframeAPIReady)
+        function onYouTubeIframeAPIReady() {
+            gateYtInitialized = true;
+            try {
+                gateYtPlayer = new YT.Player('youtubeGatePlayer', {
+                    videoId: GATE_VIDEO_ID,
+                    playerVars: {
+                        autoplay: 1,
+                        mute: 1,           // arranca mudo: es la única forma que TODOS los navegadores permiten autoplay
+                        controls: 1,
+                        rel: 0,
+                        playsinline: 1,     // necesario para que autoplay funcione en iOS
+                        modestbranding: 1
+                    },
+                    events: {
+                        onReady: onGateVideoReady,
+                        onStateChange: onGateVideoStateChange,
+                        onError: () => closeVideoGate()  // si el video no puede reproducirse, no bloqueamos al usuario
+                    }
+                });
+            } catch (err) {
+                console.error('No se pudo inicializar el video de bienvenida:', err);
+                closeVideoGate();
+            }
+        }
+
+        function onGateVideoReady(event) {
+            event.target.playVideo();
+            // Intento automático de subir el volumen al 30%. La mayoría de los navegadores
+            // bloquean el audio en el autoplay sin que la persona haya interactuado antes con
+            // la página (política de autoplay del navegador, no algo que se pueda saltear desde
+            // el código) — por eso, si el intento automático no funciona, mostramos un aviso
+            // para activarlo con un solo toque.
+            setTimeout(() => {
+                try {
+                    event.target.unMute();
+                    event.target.setVolume(30);
+                } catch (err) { /* noop */ }
+                if (event.target.isMuted && event.target.isMuted()) {
+                    const hint = document.getElementById('videoGateSoundHint');
+                    if (hint) hint.style.display = 'flex';
+                }
+            }, 500);
+        }
+
+        function onGateVideoStateChange(event) {
+            if (window.YT && event.data === YT.PlayerState.ENDED) {
+                closeVideoGate();
+            }
+        }
+
+        function activateGateSound() {
+            if (gateYtPlayer) {
+                try { gateYtPlayer.unMute(); gateYtPlayer.setVolume(30); } catch (err) { /* noop */ }
+            }
+            const hint = document.getElementById('videoGateSoundHint');
+            if (hint) hint.style.display = 'none';
+        }
+
+        function closeVideoGate() {
+            const overlay = document.getElementById('videoGateOverlay');
+            if (overlay) overlay.classList.add('hidden');
+            document.body.classList.remove('video-gate-active');
+            if (gateYtPlayer && typeof gateYtPlayer.stopVideo === 'function') {
+                try { gateYtPlayer.stopVideo(); } catch (err) { /* noop */ }
             }
         }
 
@@ -2060,6 +2272,23 @@
             return true;
         }
 
+        // Ícono de pin dibujado en SVG puro (no depende de ninguna imagen externa,
+        // así el punto siempre se ve, incluso si la CDN de imágenes de Leaflet falla).
+        function buildPinIcon() {
+            const svg = `
+                <svg viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#d90429"/>
+                    <circle cx="12" cy="12" r="5.5" fill="#ffffff"/>
+                </svg>`;
+            return L.divIcon({
+                className: 'custom-pin-icon',
+                html: svg,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -30]
+            });
+        }
+
         function initPickerMap() {
             const defaultLat = -38.9516, defaultLng = -68.0591;
             pickerMap = L.map('pickerMap', { attributionControl: true }).setView([defaultLat, defaultLng], 13);
@@ -2068,7 +2297,7 @@
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(pickerMap);
 
-            pickerMarker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(pickerMap);
+            pickerMarker = L.marker([defaultLat, defaultLng], { draggable: true, icon: buildPinIcon() }).addTo(pickerMap);
             pickerMarker.on('dragend', function () {
                 const pos = pickerMarker.getLatLng();
                 updateGeoFields(pos.lat, pos.lng);
