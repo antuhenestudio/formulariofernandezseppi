@@ -60,7 +60,7 @@
             color: var(--primary);
             font-size: 1.3rem;
             font-weight: 800;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -72,41 +72,60 @@
 
         .about-card p {
             color: var(--text-dark);
-            line-height: 1.75;
-            margin-bottom: 0.9rem;
-            text-align: justify;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+            text-align: left;
         }
 
         .about-card p:last-child { margin-bottom: 0; }
 
+        /* Estilo optimizado de Timeline/Trayectoria para móvil */
         .timeline {
             display: flex;
             flex-direction: column;
-            gap: 1.2rem;
+            gap: 1.5rem;
+            border-left: 3px solid #e2e8f0;
+            padding-left: 1.2rem;
+            margin-left: 0.5rem;
         }
 
         .timeline-item {
             display: flex;
-            gap: 1rem;
+            flex-direction: column;
             align-items: flex-start;
+            gap: 0.4rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.65rem;
+            top: 0.35rem;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--secondary);
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px var(--secondary);
         }
 
         .timeline-year {
             background: var(--secondary);
             color: #fff;
-            font-weight: 800;
-            font-size: 0.82rem;
-            padding: 0.35rem 0.7rem;
-            border-radius: 50px;
-            flex-shrink: 0;
-            white-space: nowrap;
+            font-weight: 700;
+            font-size: 0.78rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            display: inline-block;
+            letter-spacing: 0.3px;
         }
 
         .timeline-desc {
             color: var(--text-dark);
             line-height: 1.6;
-            padding-top: 0.15rem;
-            text-align: justify;
+            text-align: left;
+            font-size: 0.95rem;
         }
 
         .about-cta {
@@ -127,7 +146,16 @@
             .about-hero { padding: 2.2rem 5% 3.5rem; }
             .about-hero h1 { font-size: 1.5rem; }
             .about-photo { width: 130px; height: 130px; }
-            .about-card { padding: 1.4rem; }
+            .about-card { padding: 1.2rem; }
+            
+            .timeline {
+                padding-left: 1rem;
+                margin-left: 0.2rem;
+                gap: 1.2rem;
+            }
+            .timeline-item::before {
+                left: -1.45rem;
+            }
         }
     </style>
 </head>
@@ -167,19 +195,19 @@
             <div class="timeline">
                 <div class="timeline-item">
                     <span class="timeline-year">1990 - Presente</span>
-                    <span class="timeline-desc"><strong>Liderazgo y Gestión de Ingeniería:</strong> Como Socio Gerente de <strong>Seppi y Asociados</strong> y <strong>FERSE SRL</strong>, he liderado obras civiles, asesoramientos estratégicos y proyectos de ingeniería para el sector energético e industrial.</span>
+                    <div class="timeline-desc"><strong>Liderazgo y Gestión de Ingeniería:</strong> Como Socio Gerente de <strong>Seppi y Asociados</strong> y <strong>FERSE SRL</strong>, he liderado obras civiles, asesoramientos estratégicos y proyectos de ingeniería para el sector energético e industrial.</div>
                 </div>
                 <div class="timeline-item">
                     <span class="timeline-year">2005 - 2010</span>
-                    <span class="timeline-desc"><strong>Formación Académica Ejecutiva:</strong> Posgrado en <strong>Máster en Gestión Empresaria</strong> por la Universidad Nacional del Comahue, complementando el título de grado en <strong>Ingeniería Civil</strong>.</span>
+                    <div class="timeline-desc"><strong>Formación Académica Ejecutiva:</strong> Posgrado en <strong>Máster en Gestión Empresaria</strong> por la Universidad Nacional del Comahue, complementando el título de grado en <strong>Ingeniería Civil</strong>.</div>
                 </div>
                 <div class="timeline-item">
                     <span class="timeline-year">Gestión Actual</span>
-                    <span class="timeline-desc"><strong>Compromiso con el Desarrollo Pyme:</strong> Presidente del <strong>Clúster Pymes Neuquinas</strong>, Vicepresidente de Confluencia Rep. y miembro activo de <strong>MONAPY</strong>, impulsando la cadena de valor regional en torno a Vaca Muerta.</span>
+                    <div class="timeline-desc"><strong>Compromiso con el Desarrollo Pyme:</strong> Presidente del <strong>Clúster Pymes Neuquinas</strong>, Vicepresidente de Confluencia Rep. y miembro activo de <strong>MONAPY</strong>, impulsando la cadena de valor regional en torno a Vaca Muerta.</div>
                 </div>
                 <div class="timeline-item">
                     <span class="timeline-year">2024</span>
-                    <span class="timeline-desc"><strong>Difusión Cultural y Literatura:</strong> Autor de las obras <em>"De Neuquén a Rusia – El viaje de las mil sensaciones"</em> y <em>"América y nuestras almas al desnudo"</em>, presentadas en la Feria Internacional del Libro.</span>
+                    <div class="timeline-desc"><strong>Difusión Cultural y Literatura:</strong> Autor de las obras <em>"De Neuquén a Rusia – El viaje de las mil sensaciones"</em> y <em>"América y nuestras almas al desnudo"</em>, presentadas en la Feria Internacional del Libro.</div>
                 </div>
             </div>
         </div>
