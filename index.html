@@ -21,6 +21,20 @@
             overflow: hidden;
         }
 
+        /* Estilo para el título cliqueable */
+        .brand-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .brand-link:hover {
+            opacity: 0.9;
+        }
+
         /* ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== */
         .video-gate-overlay {
             position: fixed;
@@ -606,13 +620,16 @@
     <div id="toastContainer" aria-live="polite"></div>
 
     <header>
-        <div class="brand">
-            <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
-            <div class="brand-text">
-                <h1>Neuquén Escucha</h1>
-                <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
+        <!-- Título envuelto en enlace hacia el Inicio -->
+        <a href="index.html" class="brand-link">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="brand-text">
+                    <h1>Neuquén Escucha</h1>
+                    <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
+                </div>
             </div>
-        </div>
+        </a>
         <div class="header-actions">
             <a href="https://whatsapp.com/channel/0029VbDdkkpC6ZvrCmLGiR2h" target="_blank" rel="noopener" class="btn-header-whatsapp">
                 <i class="fab fa-whatsapp"></i> <span>Canal de WhatsApp</span>
@@ -944,5 +961,13 @@
 
     <script src="assets/shared.js"></script>
     <script src="assets/citizen.js"></script>
+
+    <!-- Script para asegurar que al cargar la página empiece siempre arriba de todo -->
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+    </script>
 </body>
 </html>
