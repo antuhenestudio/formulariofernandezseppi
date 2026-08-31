@@ -1,867 +1,778 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
-    <meta name="description" content="Canal participativo de Neuquén. Registrá problemáticas comunitarias, comerciales o viales, destacá aspectos positivos y proponé proyectos para tu barrio.">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://tu-dominio.com/"> <meta property="og:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
-    <meta property="og:description" content="Sumá tu aporte, reclamo o idea para transformar la ciudad. Canal directo de participación y analítica territorial.">
-    <meta property="og:image" content="https://lh3.googleusercontent.com/d/1FLL99HAFye-3YBnJPM_hCaeqvqOgciQG">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:locale" content="es_AR">
-    
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://tu-dominio.com/">
-    <meta name="twitter:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
-    <meta name="twitter:description" content="Sumá tu aporte, reclamo o idea para transformar la ciudad. Canal directo de participación y analítica territorial.">
-    <meta name="twitter:image" content="https://lh3.googleusercontent.com/d/1FLL99HAFye-3YBnJPM_hCaeqvqOgciQG">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuquén Escucha | Registro Vecinal, Proyectos y Lo Positivo</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b2545'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='%23d90429'%3EN%3C/text%3E%3C/svg%3E">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
-    <link rel="stylesheet" href="assets/shared.css">
-    <style>
-        body.video-gate-active { overflow: hidden; }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: rgba(11, 37, 69, 0.82) !important;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .brand-link {
-            text-decoration: none;
-            color: inherit;
-            display: inline-flex;
-            align-items: center;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-
-        .brand-link:hover { opacity: 0.85; }
-
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(11, 37, 69, 0.88);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .loading-overlay.active { opacity: 1; pointer-events: auto; }
-
-        .loading-card {
-            text-align: center;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.2rem;
-            padding: 2.5rem;
-            max-width: 420px;
-            width: 90%;
-        }
-
-        .motion-spinner-container {
-            position: relative;
-            width: 90px;
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .motion-spinner-ring {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent, #d90429);
-            border-right-color: #0284c7;
-            animation: spinMotion 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-        }
-
-        .motion-spinner-icon {
-            font-size: 2.2rem;
-            color: #ffffff;
-            animation: pulseIcon 1.5s ease-in-out infinite alternate;
-        }
-
-        @keyframes spinMotion { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes pulseIcon { 0% { transform: scale(0.85); opacity: 0.7; } 100% { transform: scale(1.15); opacity: 1; } }
-
-        .loading-card h3 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.2px; margin: 0; color: #ffffff; }
-        .loading-card p { font-size: 0.92rem; color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.5; }
-
-        .loading-dots span { animation: blinkDots 1.4s infinite; }
-        .loading-dots span:nth-child(2) { animation-delay: .2s; }
-        .loading-dots span:nth-child(3) { animation-delay: .4s; }
-
-        @keyframes blinkDots { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
-
-        .video-gate-overlay {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(11, 37, 69, 0.85);
-            backdrop-filter: blur(4px);
-            z-index: 5000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .video-gate-overlay.hidden { display: none; }
-
-        .video-gate-popup {
-            position: relative;
-            background: #000;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px -10px rgba(0,0,0,0.6);
-            height: min(88vh, 780px);
-            aspect-ratio: 9 / 16;
-            max-width: 92vw;
-            width: auto;
-            animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .video-gate-close {
-            position: absolute;
-            top: 10px; right: 10px;
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.55);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.4);
-            font-size: 1rem;
-            cursor: pointer;
-            z-index: 5002;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .video-gate-close:hover { background: rgba(0,0,0,0.8); }
-
-        #youtubeGatePlayer { width: 100%; height: 100%; }
-        #youtubeGatePlayer iframe { width: 100% !important; height: 100% !important; }
-
-        .video-gate-hint {
-            position: absolute;
-            bottom: 20px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: #fff;
-            padding: 0.65rem 1.1rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            z-index: 5002;
-            white-space: nowrap;
-            animation: pulseGlowGold 2s infinite ease-in-out;
-        }
-
-        @media (max-width: 480px) {
-            .video-gate-overlay { padding: 12px; }
-            .video-gate-popup { height: min(90vh, 700px); max-width: 96vw; border-radius: 14px; }
-            .video-gate-close { top: 8px; right: 8px; width: 34px; height: 34px; font-size: 0.9rem; }
-            .video-gate-hint { font-size: 0.74rem; padding: 0.55rem 0.9rem; bottom: 14px; }
-        }
-
-        .hero-banner { text-align: center; max-width: 850px; margin: 0 auto 0.8rem; }
-        .hero-banner h2 { font-size: 2.1rem; color: var(--primary); font-weight: 800; margin-bottom: 0.5rem; }
-        .hero-banner p { font-size: 1rem; color: var(--text-muted); margin-bottom: 0; line-height: 1.5; }
-
-        .ruben-link { color: #0284c7; text-decoration: underline; font-weight: 700; transition: color 0.2s ease; }
-        .ruben-link:hover { color: var(--primary); }
-
-        .kpi-live-counter-container {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 0.6rem;
-            max-width: 1100px;
-            margin: 0 auto 0.6rem;
-            padding: 0.2rem 0.1rem 0.3rem;
-            scrollbar-width: thin;
-            justify-content: center;
-        }
-
-        .kpi-live-card {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 0.5rem 0.85rem;
-            text-align: left;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-            transition: transform 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
-            flex: 0 0 auto;
-            min-width: 150px;
-        }
-
-        .kpi-live-card:hover { transform: translateY(-2px); }
-
-        .kpi-live-icon {
-            font-size: 1rem;
-            width: 30px; height: 30px;
-            border-radius: 8px;
-            background: var(--light-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .kpi-live-number { font-size: 1.15rem; font-weight: 800; color: var(--primary); line-height: 1; }
-        .kpi-live-label { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; letter-spacing: 0.3px; white-space: nowrap; }
-
-        .profile-selector {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-            max-width: 850px;
-            margin: 0.8rem auto 1.4rem;
-            padding: 0 10px;
-        }
-
-        .profile-btn {
-            background: #fff;
-            border: 1.5px solid var(--border-color);
-            padding: 0.45rem 0.85rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--primary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            white-space: nowrap;
-        }
-
-        .profile-btn i { font-size: 0.88rem; flex-shrink: 0; }
-
-        .profile-btn:hover {
-            border-color: var(--secondary);
-            background: #f8fafc;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-        }
-
-        .profile-btn.active {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(11, 37, 69, 0.25);
-        }
-
-        .profile-btn.active i { color: #fff !important; }
-
-        .profile-btn.btn-idea-highlight {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-            border: 1.5px solid var(--gold);
-            color: #92400e;
-        }
-
-        .profile-btn.btn-idea-highlight.active {
-            background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
-            color: #fff;
-            border-color: #b45309;
-        }
-
-        .profile-btn.btn-positive-highlight {
-            background: linear-gradient(135deg, #f0fdf4 0%, var(--green-light) 100%);
-            border: 1.5px solid var(--green-positive);
-            color: #14532d;
-        }
-
-        .profile-btn.btn-positive-highlight.active {
-            background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
-            color: #fff;
-            border-color: #15803d;
-        }
-
-        .badge-idea, .badge-positive {
-            font-size: 0.58rem;
-            padding: 1px 6px;
-            border-radius: 50px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            flex-shrink: 0;
-        }
-
-        .badge-idea { background: var(--accent); color: #fff; }
-        .badge-positive { background: var(--green-positive); color: #fff; }
-
-        .form-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 2.2rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            max-width: 950px;
-            margin: 0 auto;
-        }
-
-        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.3rem; }
-        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-        .form-group.full-width { grid-column: span 2; }
-
-        label { font-weight: 700; font-size: 0.88rem; color: var(--text-dark); display: flex; align-items: center; gap: 6px; }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 0.92rem;
-            background: #fff;
-            color: var(--text-dark);
-            outline: none;
-            transition: var(--transition);
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
-        }
-
-        .field-error {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.12) !important;
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 0.8rem;
-            background: #f8fafc;
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fff;
-            padding: 0.7rem 0.9rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .checkbox-item:hover { border-color: var(--green-positive); background: #f0fdf4; transform: translateX(3px); }
-
-        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green-positive); cursor: pointer; flex-shrink: 0; }
-        .checkbox-item span { font-size: 0.88rem; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
-
-        .geo-picker-container { border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-top: 0.4rem; }
-        #pickerMap { height: 260px; width: 100%; z-index: 1; }
-
-        .custom-pin-icon { width: 32px; height: 32px; display: block; }
-        .custom-pin-icon svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35)); }
-
-        .geo-controls-bar {
-            background: #f8fafc;
-            padding: 0.7rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .btn-geo-gps {
-            background: var(--secondary);
-            color: #fff;
-            border: none;
-            padding: 0.45rem 0.9rem;
-            border-radius: 50px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: var(--transition);
-        }
-
-        .btn-geo-gps:hover { background: var(--primary); }
-        .geo-coords-readout { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
-        .website-field-hp { display: none !important; }
-
-        input[type="file"] { padding: 0.6rem 0.8rem; cursor: pointer; }
-        .archivo-hint { font-size: 0.78rem; color: var(--text-muted); }
-
-        .archivo-contador {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-top: 0.3rem;
-        }
-
-        .archivo-contador span.limite-alcanzado { color: var(--accent); }
-
-        .archivos-lista { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.6rem; }
-
-        .archivo-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            border-radius: 8px;
-            padding: 0.5rem 0.8rem;
-            font-size: 0.85rem;
-            color: var(--text-dark);
-        }
-
-        .archivo-item .archivo-item-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        .archivo-item button {
-            margin-left: auto;
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-        }
-
-        .turnstile-wrap { display: flex; justify-content: center; margin-top: 1.4rem; }
-
-        .btn-submit.btn-submit-locked { background: #94a3b8; box-shadow: none; cursor: not-allowed; opacity: 0.85; }
-        .btn-submit.btn-submit-locked:hover { background: #94a3b8; transform: none; }
-        .btn-submit.btn-submit-idea { background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%); }
-        .btn-submit.btn-submit-positive { background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%); }
-
-        @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .form-group.full-width { grid-column: span 1; }
-            .form-card { padding: 1.3rem; }
-            .hero-banner h2 { font-size: 1.5rem; }
-        }
-
-        @media (max-width: 480px) {
-            .hero-banner { margin-bottom: 0.5rem; }
-            .profile-selector { gap: 0.45rem; margin-top: 0.5rem; margin-bottom: 1.1rem; }
-            .profile-btn { padding: 0.48rem 0.8rem; font-size: 0.76rem; }
-        }
-    </style>
+    <meta name="title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
+    <meta name="description" content="Canal participativo de Neuquén. Registrá problemáticas comunitarias, comerciales o viales, destacá aspectos positivos y proponé proyectos para tu barrio.">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tu-dominio.com/"> 
+    <meta property="og:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
+    <meta property="og:description" content="Sumá tu aporte, reclamo o idea para transformar la ciudad. Canal directo de participación y analítica territorial.">
+    <meta property="og:image" content="https://lh3.googleusercontent.com/d/1FLL99HAFye-3YBnJPM_hCaeqvqOgciQG">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="es_AR">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://tu-dominio.com/">
+    <meta name="twitter:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
+    <meta name="twitter:description" content="Sumá tu aporte, reclamo o idea para transformar la ciudad. Canal directo de participación y analítica territorial.">
+    <meta name="twitter:image" content="https://lh3.googleusercontent.com/d/1FLL99HAFye-3YBnJPM_hCaeqvqOgciQG">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuquén Escucha | Registro Vecinal, Proyectos y Lo Positivo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b2545'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='%23d90429'%3EN%3C/text%3E%3C/svg%3E">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <link rel="stylesheet" href="assets/shared.css">
+    <style>
+        body { overflow-x: hidden; }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(11, 37, 69, 0.82) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .brand-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .brand-link:hover { opacity: 0.85; }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 37, 69, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .loading-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .loading-card {
+            text-align: center;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 2.5rem;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .motion-spinner-container {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .motion-spinner-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent, #d90429);
+            border-right-color: #0284c7;
+            animation: spinMotion 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        .motion-spinner-icon {
+            font-size: 2.2rem;
+            color: #ffffff;
+            animation: pulseIcon 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes spinMotion { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulseIcon { 0% { transform: scale(0.85); opacity: 0.7; } 100% { transform: scale(1.15); opacity: 1; } }
+
+        .loading-card h3 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.2px; margin: 0; color: #ffffff; }
+        .loading-card p { font-size: 0.92rem; color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.5; }
+
+        .loading-dots span { animation: blinkDots 1.4s infinite; }
+        .loading-dots span:nth-child(2) { animation-delay: .2s; }
+        .loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+        @keyframes blinkDots { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
+
+        .hero-banner { text-align: center; max-width: 850px; margin: 0 auto 0.8rem; }
+        .hero-banner h2 { font-size: 2.1rem; color: var(--primary); font-weight: 800; margin-bottom: 0.5rem; }
+        .hero-banner p { font-size: 1rem; color: var(--text-muted); margin-bottom: 0; line-height: 1.5; }
+
+        .ruben-link { color: #0284c7; text-decoration: underline; font-weight: 700; transition: color 0.2s ease; }
+        .ruben-link:hover { color: var(--primary); }
+
+        .kpi-live-counter-container {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 0.6rem;
+            max-width: 1100px;
+            margin: 0 auto 0.6rem;
+            padding: 0.2rem 0.1rem 0.3rem;
+            scrollbar-width: thin;
+            justify-content: center;
+        }
+
+        .kpi-live-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.5rem 0.85rem;
+            text-align: left;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex: 0 0 auto;
+            min-width: 150px;
+        }
+
+        .kpi-live-card:hover { transform: translateY(-2px); }
+
+        .kpi-live-icon {
+            font-size: 1rem;
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-live-number { font-size: 1.15rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .kpi-live-label { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; letter-spacing: 0.3px; white-space: nowrap; }
+
+        .profile-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 850px;
+            margin: 0.8rem auto 1.4rem;
+            padding: 0 10px;
+        }
+
+        .profile-btn {
+            background: #fff;
+            border: 1.5px solid var(--border-color);
+            padding: 0.45rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            white-space: nowrap;
+        }
+
+        .profile-btn i { font-size: 0.88rem; flex-shrink: 0; }
+
+        .profile-btn:hover {
+            border-color: var(--secondary);
+            background: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .profile-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(11, 37, 69, 0.25);
+        }
+
+        .profile-btn.active i { color: #fff !important; }
+
+        .profile-btn.btn-idea-highlight {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1.5px solid var(--gold);
+            color: #92400e;
+        }
+
+        .profile-btn.btn-idea-highlight.active {
+            background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
+            color: #fff;
+            border-color: #b45309;
+        }
+
+        .profile-btn.btn-positive-highlight {
+            background: linear-gradient(135deg, #f0fdf4 0%, var(--green-light) 100%);
+            border: 1.5px solid var(--green-positive);
+            color: #14532d;
+        }
+
+        .profile-btn.btn-positive-highlight.active {
+            background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
+            color: #fff;
+            border-color: #15803d;
+        }
+
+        .badge-idea, .badge-positive {
+            font-size: 0.58rem;
+            padding: 1px 6px;
+            border-radius: 50px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+        }
+
+        .badge-idea { background: var(--accent); color: #fff; }
+        .badge-positive { background: var(--green-positive); color: #fff; }
+
+        .form-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 2.2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.3rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group.full-width { grid-column: span 2; }
+
+        label { font-weight: 700; font-size: 0.88rem; color: var(--text-dark); display: flex; align-items: center; gap: 6px; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.92rem;
+            background: #fff;
+            color: var(--text-dark);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(19, 64, 116, 0.12);
+        }
+
+        .field-error {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.12) !important;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.8rem;
+            background: #f8fafc;
+            padding: 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            padding: 0.7rem 0.9rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover { border-color: var(--green-positive); background: #f0fdf4; transform: translateX(3px); }
+
+        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green-positive); cursor: pointer; flex-shrink: 0; }
+        .checkbox-item span { font-size: 0.88rem; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+
+        .geo-picker-container { border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-top: 0.4rem; }
+        #pickerMap { height: 260px; width: 100%; z-index: 1; }
+
+        .custom-pin-icon { width: 32px; height: 32px; display: block; }
+        .custom-pin-icon svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35)); }
+
+        .geo-controls-bar {
+            background: #f8fafc;
+            padding: 0.7rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-geo-gps {
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            padding: 0.45rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-geo-gps:hover { background: var(--primary); }
+        .geo-coords-readout { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
+        .website-field-hp { display: none !important; }
+
+        input[type="file"] { padding: 0.6rem 0.8rem; cursor: pointer; }
+        .archivo-hint { font-size: 0.78rem; color: var(--text-muted); }
+
+        .archivo-contador {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-top: 0.3rem;
+        }
+
+        .archivo-contador span.limite-alcanzado { color: var(--accent); }
+
+        .archivos-lista { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.6rem; }
+
+        .archivo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+
+        .archivo-item .archivo-item-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .archivo-item button {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .turnstile-wrap { display: flex; justify-content: center; margin-top: 1.4rem; }
+
+        .btn-submit.btn-submit-locked { background: #94a3b8; box-shadow: none; cursor: not-allowed; opacity: 0.85; }
+        .btn-submit.btn-submit-locked:hover { background: #94a3b8; transform: none; }
+        .btn-submit.btn-submit-idea { background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%); }
+        .btn-submit.btn-submit-positive { background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%); }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+            .form-card { padding: 1.3rem; }
+            .hero-banner h2 { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-banner { margin-bottom: 0.5rem; }
+            .profile-selector { gap: 0.45rem; margin-top: 0.5rem; margin-bottom: 1.1rem; }
+            .profile-btn { padding: 0.48rem 0.8rem; font-size: 0.76rem; }
+        }
+    </style>
 </head>
-<body class="video-gate-active">
+<body>
 
-    <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
-        <div class="loading-card">
-            <div class="motion-spinner-container">
-                <div class="motion-spinner-ring"></div>
-                <div class="motion-spinner-icon"><i class="fas fa-bullhorn"></i></div>
-            </div>
-            <h3>Espere un momento<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></h3>
-            <p id="loadingMessageText">Estamos procesando y subiendo la información de forma segura...</p>
-        </div>
-    </div>
+    <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
+        <div class="loading-card">
+            <div class="motion-spinner-container">
+                <div class="motion-spinner-ring"></div>
+                <div class="motion-spinner-icon"><i class="fas fa-bullhorn"></i></div>
+            </div>
+            <h3>Espere un momento<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></h3>
+            <p id="loadingMessageText">Estamos procesando y subiendo la información de forma segura...</p>
+        </div>
+    </div>
 
-    <div class="video-gate-overlay" id="videoGateOverlay">
-        <div class="video-gate-popup">
-            <button type="button" class="video-gate-close" id="btnSkipVideo" aria-label="Cerrar video">
-                <i class="fas fa-times"></i>
-            </button>
-            <div id="youtubeGatePlayer"></div>
-            <div class="video-gate-hint" id="videoGateSoundHint">
-                <i class="fas fa-volume-up"></i> Tocá para activar el sonido
-            </div>
-        </div>
-    </div>
+    <div id="toastContainer" aria-live="polite"></div>
 
-    <div id="toastContainer" aria-live="polite"></div>
+    <header>
+        <a href="index.html" class="brand-link" title="Ir al Inicio">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="brand-text">
+                    <h1>Neuquén Escucha</h1>
+                    <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
+                </div>
+            </div>
+        </a>
+        <div class="header-actions">
+            <a href="https://whatsapp.com/channel/0029VbDdkkpC6ZvrCmLGiR2h" target="_blank" rel="noopener" class="btn-header-whatsapp">
+                <i class="fab fa-whatsapp"></i> <span>Canal de WhatsApp</span>
+            </a>
+        </div>
+    </header>
 
-    <header>
-        <a href="index.html" class="brand-link" title="Ir al Inicio">
-            <div class="brand">
-                <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
-                <div class="brand-text">
-                    <h1>Neuquén Escucha</h1>
-                    <p>Registro de Reclamos Vecinales, Proyectos y Lo Positivo</p>
-                </div>
-            </div>
-        </a>
-        <div class="header-actions">
-            <a href="https://whatsapp.com/channel/0029VbDdkkpC6ZvrCmLGiR2h" target="_blank" rel="noopener" class="btn-header-whatsapp">
-                <i class="fab fa-whatsapp"></i> <span>Canal de WhatsApp</span>
-            </a>
-        </div>
-    </header>
+    <main class="main-wrapper">
+        <section id="citizenView" class="view-section active">
+            <div class="hero-banner">
+                <h2>Espacio de Escucha y Participación Ciudadana</h2>
+                <p>Iniciativa impulsada por el <a href="rubenfernandezseppi/" class="ruben-link">Ing. Rubén Fernández Seppi</a> (Conocé más sobre él) para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
+            </div>
 
-    <main class="main-wrapper">
-        <section id="citizenView" class="view-section active">
-            <div class="hero-banner">
-                <h2>Espacio de Escucha y Participación Ciudadana</h2>
-                <p>Iniciativa impulsada por el <a href="rubenfernandezseppi/" class="ruben-link">Ing. Rubén Fernández Seppi</a> (Conocé más sobre él) para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
-            </div>
+            <div class="kpi-live-counter-container">
+                <div class="kpi-live-card" data-counter-card="reclamos" style="display:none;">
+                    <div class="kpi-live-icon"><i class="fas fa-bullhorn" style="color: var(--accent);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countReclamos">0</div>
+                        <div class="kpi-live-label">Reclamos</div>
+                    </div>
+                </div>
+                <div class="kpi-live-card" data-counter-card="jovenes" style="display:none;">
+                    <div class="kpi-live-icon"><i class="fas fa-graduation-cap" style="color: var(--teal);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countJovenes">0</div>
+                        <div class="kpi-live-label">Jóvenes</div>
+                    </div>
+                </div>
+                <div class="kpi-live-card" data-counter-card="comerciantes" style="display:none;">
+                    <div class="kpi-live-icon"><i class="fas fa-store" style="color: #c2410c;"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countComerciantes">0</div>
+                        <div class="kpi-live-label">Comercios</div>
+                    </div>
+                </div>
+                <div class="kpi-live-card" data-counter-card="propuestas" style="display:none;">
+                    <div class="kpi-live-icon"><i class="fas fa-lightbulb" style="color: var(--gold);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countPropuestas">0</div>
+                        <div class="kpi-live-label">Propuestas</div>
+                    </div>
+                </div>
+                <div class="kpi-live-card" data-counter-card="positivos" style="display:none;">
+                    <div class="kpi-live-icon"><i class="fas fa-heart" style="color: var(--green-positive);"></i></div>
+                    <div>
+                        <div class="kpi-live-number" id="countPositivos">0</div>
+                        <div class="kpi-live-label">Positivos</div>
+                    </div>
+                </div>
+            </div>
 
-            <div class="kpi-live-counter-container">
-                <div class="kpi-live-card" data-counter-card="reclamos" style="display:none;">
-                    <div class="kpi-live-icon"><i class="fas fa-bullhorn" style="color: var(--accent);"></i></div>
-                    <div>
-                        <div class="kpi-live-number" id="countReclamos">0</div>
-                        <div class="kpi-live-label">Reclamos</div>
-                    </div>
-                </div>
-                <div class="kpi-live-card" data-counter-card="jovenes" style="display:none;">
-                    <div class="kpi-live-icon"><i class="fas fa-graduation-cap" style="color: var(--teal);"></i></div>
-                    <div>
-                        <div class="kpi-live-number" id="countJovenes">0</div>
-                        <div class="kpi-live-label">Jóvenes</div>
-                    </div>
-                </div>
-                <div class="kpi-live-card" data-counter-card="comerciantes" style="display:none;">
-                    <div class="kpi-live-icon"><i class="fas fa-store" style="color: #c2410c;"></i></div>
-                    <div>
-                        <div class="kpi-live-number" id="countComerciantes">0</div>
-                        <div class="kpi-live-label">Comercios</div>
-                    </div>
-                </div>
-                <div class="kpi-live-card" data-counter-card="propuestas" style="display:none;">
-                    <div class="kpi-live-icon"><i class="fas fa-lightbulb" style="color: var(--gold);"></i></div>
-                    <div>
-                        <div class="kpi-live-number" id="countPropuestas">0</div>
-                        <div class="kpi-live-label">Propuestas</div>
-                    </div>
-                </div>
-                <div class="kpi-live-card" data-counter-card="positivos" style="display:none;">
-                    <div class="kpi-live-icon"><i class="fas fa-heart" style="color: var(--green-positive);"></i></div>
-                    <div>
-                        <div class="kpi-live-number" id="countPositivos">0</div>
-                        <div class="kpi-live-label">Positivos</div>
-                    </div>
-                </div>
-            </div>
+            <div class="profile-selector">
+                <button type="button" class="profile-btn active" data-profile="ciudadano">
+                    <i class="fas fa-user-check"></i> Vecino / Ciudadano
+                </button>
+                <button type="button" class="profile-btn" data-profile="comerciante">
+                    <i class="fas fa-store"></i> Comerciante / Dueño de Negocio
+                </button>
+                <button type="button" class="profile-btn" data-profile="joven">
+                    <i class="fas fa-graduation-cap"></i> Joven (16 a 30 años)
+                </button>
+                <button type="button" class="profile-btn btn-idea-highlight" data-profile="idea">
+                    <i class="fas fa-lightbulb" style="color: var(--gold);"></i> Proponer Idea o Proyecto <span class="badge-idea">Nuevo</span>
+                </button>
+                <button type="button" class="profile-btn btn-positive-highlight" data-profile="positivo">
+                    <i class="fas fa-heart" style="color: var(--green-positive);"></i> Lo Positivo de Neuquén <span class="badge-positive">Destacar</span>
+                </button>
+            </div>
 
-            <div class="profile-selector">
-                <button type="button" class="profile-btn active" data-profile="ciudadano">
-                    <i class="fas fa-user-check"></i> Vecino / Ciudadano
-                </button>
-                <button type="button" class="profile-btn" data-profile="comerciante">
-                    <i class="fas fa-store"></i> Comerciante / Dueño de Negocio
-                </button>
-                <button type="button" class="profile-btn" data-profile="joven">
-                    <i class="fas fa-graduation-cap"></i> Joven (16 a 30 años)
-                </button>
-                <button type="button" class="profile-btn btn-idea-highlight" data-profile="idea">
-                    <i class="fas fa-lightbulb" style="color: var(--gold);"></i> Proponer Idea o Proyecto <span class="badge-idea">Nuevo</span>
-                </button>
-                <button type="button" class="profile-btn btn-positive-highlight" data-profile="positivo">
-                    <i class="fas fa-heart" style="color: var(--green-positive);"></i> Lo Positivo de Neuquén <span class="badge-positive">Destacar</span>
-                </button>
-            </div>
+            <div class="form-card">
+                <form id="citizenForm" novalidate>
+                    <input type="hidden" id="tipoPerfil" name="tipoPerfil" value="Vecino / Ciudadano">
+                    <input type="hidden" id="geoLat" name="geoLat" value="-38.9516">
+                    <input type="hidden" id="geoLng" name="geoLng" value="-68.0591">
 
-            <div class="form-card">
-                <form id="citizenForm" novalidate>
-                    <input type="hidden" id="tipoPerfil" name="tipoPerfil" value="Vecino / Ciudadano">
-                    <input type="hidden" id="geoLat" name="geoLat" value="-38.9516">
-                    <input type="hidden" id="geoLng" name="geoLng" value="-68.0591">
+                    <div class="website-field-hp">
+                        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off">
+                    </div>
 
-                    <div class="website-field-hp">
-                        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off">
-                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombre"><i class="fas fa-user" style="color: var(--secondary);"></i> Nombre y Apellido *</label>
+                            <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Carlos Pérez" required>
+                        </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="nombre"><i class="fas fa-user" style="color: var(--secondary);"></i> Nombre y Apellido *</label>
-                            <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Carlos Pérez" required>
-                        </div>
+                        <div class="form-group">
+                            <label for="sexo"><i class="fas fa-venus-mars" style="color: var(--secondary);"></i> Sexo *</label>
+                            <select id="sexo" name="sexo" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                                <option value="Otro">Otro / Prefiero no decir</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group">
-                            <label for="sexo"><i class="fas fa-venus-mars" style="color: var(--secondary);"></i> Sexo *</label>
-                            <select id="sexo" name="sexo" required>
-                                <option value="">-- Seleccionar --</option>
-                                <option value="Masculino">Masculino</option>
-                                <option value="Femenino">Femenino</option>
-                                <option value="Otro">Otro / Prefiero no decir</option>
-                            </select>
-                        </div>
+                        <div class="form-group">
+                            <label for="edad"><i class="fas fa-calendar-alt" style="color: var(--secondary);"></i> Edad *</label>
+                            <input type="number" id="edad" name="edad" min="16" max="120" placeholder="Ej. 42" required>
+                        </div>
 
-                        <div class="form-group">
-                            <label for="edad"><i class="fas fa-calendar-alt" style="color: var(--secondary);"></i> Edad *</label>
-                            <input type="number" id="edad" name="edad" min="16" max="120" placeholder="Ej. 42" required>
-                        </div>
+                        <div class="form-group">
+                            <label for="barrio"><i class="fas fa-map-marked-alt" style="color: var(--secondary);"></i> Barrio de Neuquén *</label>
+                            <select id="barrio" name="barrio" required>
+                                <option value="">-- Selecciona tu barrio --</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group">
-                            <label for="barrio"><i class="fas fa-map-marked-alt" style="color: var(--secondary);"></i> Barrio de Neuquén *</label>
-                            <select id="barrio" name="barrio" required>
-                                <option value="">-- Selecciona tu barrio --</option>
-                            </select>
-                        </div>
+                        <div class="form-group full-width">
+                            <label for="contacto"><i class="fab fa-whatsapp" style="color: #25D366;"></i> Teléfono de Contacto / WhatsApp (Ej. 2994123456) *</label>
+                            <input type="tel" id="contacto" name="contacto" placeholder="Ej. 2994123456" required>
+                        </div>
 
-                        <div class="form-group full-width">
-                            <label for="contacto"><i class="fab fa-whatsapp" style="color: #25D366;"></i> Teléfono de Contacto / WhatsApp (Ej. 2994123456) *</label>
-                            <input type="tel" id="contacto" name="contacto" placeholder="Ej. 2994123456" required>
-                        </div>
+                        <div class="form-group full-width">
+                            <label id="lblMapLocation"><i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Ubicación Exacta dentro de Neuquén (Marcar punto) *</label>
+                            <div class="geo-picker-container">
+                                <div id="pickerMap"></div>
+                                <div class="geo-controls-bar">
+                                    <button type="button" class="btn-geo-gps" id="btnGpsLocation">
+                                        <i class="fas fa-crosshairs"></i> Usar mi ubicación actual (GPS)
+                                    </button>
+                                    <div class="geo-coords-readout" id="coordsReadout">
+                                        Lat: -38.95160, Lng: -68.05910
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        <div class="form-group full-width">
-                            <label id="lblMapLocation"><i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Ubicación Exacta dentro de Neuquén (Marcar punto) *</label>
-                            <div class="geo-picker-container">
-                                <div id="pickerMap"></div>
-                                <div class="geo-controls-bar">
-                                    <button type="button" class="btn-geo-gps" id="btnGpsLocation">
-                                        <i class="fas fa-crosshairs"></i> Usar mi ubicación actual (GPS)
-                                    </button>
-                                    <div class="geo-coords-readout" id="coordsReadout">
-                                        Lat: -38.95160, Lng: -68.05910
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="nombreComercio"><i class="fas fa-store-alt" style="color: var(--accent);"></i> Nombre Fantasía / Rubro del Comercio *</label>
+                            <input type="text" id="nombreComercio" name="nombreComercio" placeholder="Ej. Panadería San Martín / Calzados">
+                        </div>
 
-                        <div class="form-group merchant-field" style="display:none;">
-                            <label for="nombreComercio"><i class="fas fa-store-alt" style="color: var(--accent);"></i> Nombre Fantasía / Rubro del Comercio *</label>
-                            <input type="text" id="nombreComercio" name="nombreComercio" placeholder="Ej. Panadería San Martín / Calzados">
-                        </div>
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="ubicacionComercio"><i class="fas fa-map-pin" style="color: var(--accent);"></i> Dirección Exacta del Local *</label>
+                            <input type="text" id="ubicacionComercio" name="ubicacionComercio" placeholder="Ej. Av. Argentina 450">
+                        </div>
 
-                        <div class="form-group merchant-field" style="display:none;">
-                            <label for="ubicacionComercio"><i class="fas fa-map-pin" style="color: var(--accent);"></i> Dirección Exacta del Local *</label>
-                            <input type="text" id="ubicacionComercio" name="ubicacionComercio" placeholder="Ej. Av. Argentina 450">
-                        </div>
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="impactoObra"><i class="fas fa-exclamation-triangle" style="color: var(--accent);"></i> Causa Principal de Perjuicio Comercial *</label>
+                            <select id="impactoObra" name="impactoObra">
+                                <option value="">-- Seleccionar causa --</option>
+                                <option value="Implementación de Bicisenda sin consulta">Implementación de Bicisenda sin consulta</option>
+                                <option value="Cambio de sentido de circulación de calle">Cambio de sentido de circulación de calle</option>
+                                <option value="Cierre / Obra municipal prolongada sin previo aviso">Cierre / Obra municipal prolongada</option>
+                                <option value="Prohibición / Remoción de estacionamiento">Prohibición / Remoción de estacionamiento</option>
+                                <option value="Aumento desmedido de Tasas e Impuestos Municipales">Aumento desmedido de Tasas e Impuestos</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group merchant-field" style="display:none;">
-                            <label for="impactoObra"><i class="fas fa-exclamation-triangle" style="color: var(--accent);"></i> Causa Principal de Perjuicio Comercial *</label>
-                            <select id="impactoObra" name="impactoObra">
-                                <option value="">-- Seleccionar causa --</option>
-                                <option value="Implementación de Bicisenda sin consulta">Implementación de Bicisenda sin consulta</option>
-                                <option value="Cambio de sentido de circulación de calle">Cambio de sentido de circulación de calle</option>
-                                <option value="Cierre / Obra municipal prolongada sin previo aviso">Cierre / Obra municipal prolongada</option>
-                                <option value="Prohibición / Remoción de estacionamiento">Prohibición / Remoción de estacionamiento</option>
-                                <option value="Aumento desmedido de Tasas e Impuestos Municipales">Aumento desmedido de Tasas e Impuestos</option>
-                            </select>
-                        </div>
+                        <div class="form-group merchant-field" style="display:none;">
+                            <label for="consecuenciaComercial"><i class="fas fa-chart-line-down" style="color: var(--accent);"></i> Consecuencia Sufrida *</label>
+                            <select id="consecuenciaComercial" name="consecuenciaComercial">
+                                <option value="">-- Seleccionar consecuencia --</option>
+                                <option value="Pérdida drástica de ventas y rentabilidad">Pérdida drástica de ventas y rentabilidad</option>
+                                <option value="Tuve que trasladar el negocio a otra ubicación">Tuve que trasladar el negocio a otra ubicación</option>
+                                <option value="Tuve que reducir personal">Tuve que reducir personal</option>
+                                <option value="Tuve que cerrar definitivamente el comercio">Tuve que cerrar definitivamente el comercio</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group merchant-field" style="display:none;">
-                            <label for="consecuenciaComercial"><i class="fas fa-chart-line-down" style="color: var(--accent);"></i> Consecuencia Sufrida *</label>
-                            <select id="consecuenciaComercial" name="consecuenciaComercial">
-                                <option value="">-- Seleccionar consecuencia --</option>
-                                <option value="Pérdida drástica de ventas y rentabilidad">Pérdida drástica de ventas y rentabilidad</option>
-                                <option value="Tuve que trasladar el negocio a otra ubicación">Tuve que trasladar el negocio a otra ubicación</option>
-                                <option value="Tuve que reducir personal">Tuve que reducir personal</option>
-                                <option value="Tuve que cerrar definitivamente el comercio">Tuve que cerrar definitivamente el comercio</option>
-                            </select>
-                        </div>
+                        <div class="form-group idea-field full-width" style="display:none;">
+                            <label for="tituloProyecto"><i class="fas fa-heading" style="color: var(--gold);"></i> Título de la Idea o Proyecto *</label>
+                            <input type="text" id="tituloProyecto" name="tituloProyecto" placeholder="Ej. Corredor Verde y Deportivo en Av. del Trabajador">
+                        </div>
 
-                        <div class="form-group idea-field full-width" style="display:none;">
-                            <label for="tituloProyecto"><i class="fas fa-heading" style="color: var(--gold);"></i> Título de la Idea o Proyecto *</label>
-                            <input type="text" id="tituloProyecto" name="tituloProyecto" placeholder="Ej. Corredor Verde y Deportivo en Av. del Trabajador">
-                        </div>
+                        <div class="form-group idea-field" style="display:none;">
+                            <label for="ejeIdea"><i class="fas fa-layer-group" style="color: var(--gold);"></i> Área o Eje de Impacto *</label>
+                            <select id="ejeIdea" name="ejeIdea">
+                                <option value="">-- Seleccionar eje --</option>
+                                <option value="Infraestructura y Obras para el Barrio">Infraestructura y Obras para el Barrio</option>
+                                <option value="Espacios Verdes, Plazas y Recreación">Espacios Verdes, Plazas y Recreación</option>
+                                <option value="Seguridad Vial y Tránsito Inteligente">Seguridad Vial y Tránsito Inteligente</option>
+                                <option value="Desarrollo Económico e Impulso Comercial">Desarrollo Económico e Impulso Comercial</option>
+                                <option value="Juventud, Capacitación y Empleo">Juventud, Capacitación y Empleo</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group idea-field" style="display:none;">
-                            <label for="ejeIdea"><i class="fas fa-layer-group" style="color: var(--gold);"></i> Área o Eje de Impacto *</label>
-                            <select id="ejeIdea" name="ejeIdea">
-                                <option value="">-- Seleccionar eje --</option>
-                                <option value="Infraestructura y Obras para el Barrio">Infraestructura y Obras para el Barrio</option>
-                                <option value="Espacios Verdes, Plazas y Recreación">Espacios Verdes, Plazas y Recreación</option>
-                                <option value="Seguridad Vial y Tránsito Inteligente">Seguridad Vial y Tránsito Inteligente</option>
-                                <option value="Desarrollo Económico e Impulso Comercial">Desarrollo Económico e Impulso Comercial</option>
-                                <option value="Juventud, Capacitación y Empleo">Juventud, Capacitación y Empleo</option>
-                            </select>
-                        </div>
+                        <div class="form-group idea-field" style="display:none;">
+                            <label for="porQueProyecto"><i class="fas fa-question-circle" style="color: var(--gold);"></i> ¿Por qué es necesario este proyecto? *</label>
+                            <input type="text" id="porQueProyecto" name="porQueProyecto" placeholder="Ej. Beneficiará a más de 500 familias que no tienen espacios seguros...">
+                        </div>
 
-                        <div class="form-group idea-field" style="display:none;">
-                            <label for="porQueProyecto"><i class="fas fa-question-circle" style="color: var(--gold);"></i> ¿Por qué es necesario este proyecto? *</label>
-                            <input type="text" id="porQueProyecto" name="porQueProyecto" placeholder="Ej. Beneficiará a más de 500 familias que no tienen espacios seguros...">
-                        </div>
+                        <div class="form-group positive-field full-width" style="display:none;">
+                            <label><i class="fas fa-thumbs-up" style="color: var(--green-positive);"></i> ¿Qué aspectos positivos y proyectos valorás de la ciudad? (Podés marcar varios) *</label>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Paseo Costero y Desarrollo de Riberas">
+                                    <span><i class="fas fa-water" style="color: #0284c7;"></i> Paseo Costero y Riberas</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Parques Urbanos y Espacios Verdes">
+                                    <span><i class="fas fa-tree" style="color: #16a34a;"></i> Parques Urbanos y Plazas</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Oferta Cultural, Fiestas y Eventos">
+                                    <span><i class="fas fa-music" style="color: #7c3aed;"></i> Fiesta de la Confluencia y Cultura</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Desarrollo del Polo Tecnológico">
+                                    <span><i class="fas fa-microchip" style="color: #0284c7;"></i> Polo Tecnológico e Innovación</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Infraestructura Deportiva y Safaris">
+                                    <span><i class="fas fa-running" style="color: #d97706;"></i> Pistas de Ciclismo y Deporte</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Limpieza y Mantenimiento de Avenidas">
+                                    <span><i class="fas fa-broom" style="color: #0d9488;"></i> Limpieza de Avenidas Principales</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Luminarias LED en Arterias Principales">
+                                    <span><i class="fas fa-lightbulb" style="color: #eab308;"></i> Nuevas Luminarias LED</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aspectosPositivos" value="Opciones Gastronómicas y Paseos Comerciales">
+                                    <span><i class="fas fa-utensils" style="color: #c2410c;"></i> Gastronomía y Comercio Local</span>
+                                </label>
+                            </div>
+                        </div>
 
-                        <div class="form-group positive-field full-width" style="display:none;">
-                            <label><i class="fas fa-thumbs-up" style="color: var(--green-positive);"></i> ¿Qué aspectos positivos y proyectos valorás de la ciudad? (Podés marcar varios) *</label>
-                            <div class="checkbox-grid">
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Paseo Costero y Desarrollo de Riberas">
-                                    <span><i class="fas fa-water" style="color: #0284c7;"></i> Paseo Costero y Riberas</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Parques Urbanos y Espacios Verdes">
-                                    <span><i class="fas fa-tree" style="color: #16a34a;"></i> Parques Urbanos y Plazas</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Oferta Cultural, Fiestas y Eventos">
-                                    <span><i class="fas fa-music" style="color: #7c3aed;"></i> Fiesta de la Confluencia y Cultura</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Desarrollo del Polo Tecnológico">
-                                    <span><i class="fas fa-microchip" style="color: #0284c7;"></i> Polo Tecnológico e Innovación</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Infraestructura Deportiva y Safaris">
-                                    <span><i class="fas fa-running" style="color: #d97706;"></i> Pistas de Ciclismo y Deporte</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Limpieza y Mantenimiento de Avenidas">
-                                    <span><i class="fas fa-broom" style="color: #0d9488;"></i> Limpieza de Avenidas Principales</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Luminarias LED en Arterias Principales">
-                                    <span><i class="fas fa-lightbulb" style="color: #eab308;"></i> Nuevas Luminarias LED</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="aspectosPositivos" value="Opciones Gastronómicas y Paseos Comerciales">
-                                    <span><i class="fas fa-utensils" style="color: #c2410c;"></i> Gastronomía y Comercio Local</span>
-                                </label>
-                            </div>
-                        </div>
+                        <div class="form-group general-field">
+                            <label for="problematica"><i class="fas fa-list-alt" style="color: var(--secondary);"></i> Área Temática Principal *</label>
+                            <select id="problematica" name="problematica">
+                                <option value="">-- Seleccionar área temática --</option>
+                                <option value="Calles, Tránsito y Obras Civiles">Calles, Baches, Tránsito y Obras Civiles</option>
+                                <option value="Comercio, Obras Municipales Arbitrarias y Tasas">Comercio, Obras Municipales Arbitrarias y Tasas</option>
+                                <option value="Plazas, Espacios Públicos y Vías Verdes">Plazas, Espacios Públicos y Vías Verdes</option>
+                                <option value="Seguridad Urbana y Entorno Seguro">Seguridad Urbana y Entorno Seguro</option>
+                                <option value="Servicios Básicos y Redes">Servicios Básicos (Agua, Cloacas, Gas)</option>
+                                <option value="Transporte Público y Movilidad">Transporte Público, Colemóvil y Conectividad</option>
+                                <option value="Educación y Juventud">Educación, Escuelas y Oportunidades Juveniles</option>
+                                <option value="Limpieza, Recolección y Zonas Industriales">Limpieza, Basurales e Infraestructura Industrial</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group general-field">
-                            <label for="problematica"><i class="fas fa-list-alt" style="color: var(--secondary);"></i> Área Temática Principal *</label>
-                            <select id="problematica" name="problematica">
-                                <option value="">-- Seleccionar área temática --</option>
-                                <option value="Calles, Tránsito y Obras Civiles">Calles, Baches, Tránsito y Obras Civiles</option>
-                                <option value="Comercio, Obras Municipales Arbitrarias y Tasas">Comercio, Obras Municipales Arbitrarias y Tasas</option>
-                                <option value="Plazas, Espacios Públicos y Vías Verdes">Plazas, Espacios Públicos y Vías Verdes</option>
-                                <option value="Seguridad Urbana y Entorno Seguro">Seguridad Urbana y Entorno Seguro</option>
-                                <option value="Servicios Básicos y Redes">Servicios Básicos (Agua, Cloacas, Gas)</option>
-                                <option value="Transporte Público y Movilidad">Transporte Público, Colemóvil y Conectividad</option>
-                                <option value="Educación y Juventud">Educación, Escuelas y Oportunidades Juveniles</option>
-                                <option value="Limpieza, Recolección y Zonas Industriales">Limpieza, Basurales e Infraestructura Industrial</option>
-                            </select>
-                        </div>
+                        <div class="form-group full-width general-field">
+                            <label for="subproblematica"><i class="fas fa-indent" style="color: var(--secondary);"></i> Subproblemática Específica *</label>
+                            <select id="subproblematica" name="subproblematica" disabled>
+                                <option value="">-- Primero elige el área temática --</option>
+                            </select>
+                        </div>
 
-                        <div class="form-group full-width general-field">
-                            <label for="subproblematica"><i class="fas fa-indent" style="color: var(--secondary);"></i> Subproblemática Específica *</label>
-                            <select id="subproblematica" name="subproblematica" disabled>
-                                <option value="">-- Primero elige el área temática --</option>
-                            </select>
-                        </div>
+                        <div class="form-group full-width">
+                            <label for="detalle" id="lblDetalle"><i class="fas fa-align-left" style="color: var(--secondary);"></i> Descripción Detallada de la Situación *</label>
+                            <textarea id="detalle" name="detalle" rows="4" placeholder="Describa el problema, propuesta o comentario..." required></textarea>
+                        </div>
 
-                        <div class="form-group full-width">
-                            <label for="detalle" id="lblDetalle"><i class="fas fa-align-left" style="color: var(--secondary);"></i> Descripción Detallada de la Situación *</label>
-                            <textarea id="detalle" name="detalle" rows="4" placeholder="Describa el problema, propuesta o comentario..." required></textarea>
-                        </div>
+                        <div class="form-group full-width">
+                            <label for="archivoAdjunto"><i class="fas fa-paperclip" style="color: var(--secondary);"></i> Adjuntar fotos, videos o PDF (opcional)</label>
+                            <input type="file" id="archivoAdjunto" name="archivoAdjunto" accept="image/*,video/*,application/pdf">
+                            <div class="archivo-hint">Hasta 5 fotos, 3 videos y 2 PDF · 15MB máximo por archivo. Elegí uno y repetí para ir agregando más.</div>
+                            <div class="archivo-contador" id="archivoContador"></div>
+                            <div class="archivos-lista" id="archivosLista"></div>
+                        </div>
+                    </div>
 
-                        <div class="form-group full-width">
-                            <label for="archivoAdjunto"><i class="fas fa-paperclip" style="color: var(--secondary);"></i> Adjuntar fotos, videos o PDF (opcional)</label>
-                            <input type="file" id="archivoAdjunto" name="archivoAdjunto" accept="image/*,video/*,application/pdf">
-                            <div class="archivo-hint">Hasta 5 fotos, 3 videos y 2 PDF · 15MB máximo por archivo. Elegí uno y repetí para ir agregando más.</div>
-                            <div class="archivo-contador" id="archivoContador"></div>
-                            <div class="archivos-lista" id="archivosLista"></div>
-                        </div>
-                    </div>
+                    <div class="privacy-notice-box">
+                        <div class="privacy-title"><i class="fas fa-shield-alt"></i> Tus datos están protegidos</div>
+                        Tu nombre, teléfono y ubicación son <strong>estrictamente confidenciales</strong>: se usan únicamente para validar tu aporte y evitar cargas falsas, y no se publican ni se comparten con terceros. La información se trata conforme a la <strong>Ley N° 25.326 de Protección de Datos Personales</strong> y su Decreto Reglamentario N° 1558/2001, bajo el control de la Agencia de Acceso a la Información Pública (AAIP).
+                        <details>
+                            <summary>Ver más sobre tus derechos</summary>
+                            <div class="privacy-extra">
+                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiendo ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
+                            </div>
+                        </details>
+                    </div>
 
-                    <div class="privacy-notice-box">
-                        <div class="privacy-title"><i class="fas fa-shield-alt"></i> Tus datos están protegidos</div>
-                        Tu nombre, teléfono y ubicación son <strong>estrictamente confidenciales</strong>: se usan únicamente para validar tu aporte y evitar cargas falsas, y no se publican ni se comparten con terceros. La información se trata conforme a la <strong>Ley N° 25.326 de Protección de Datos Personales</strong> y su Decreto Reglamentario N° 1558/2001, bajo el control de la Agencia de Acceso a la Información Pública (AAIP).
-                        <details>
-                            <summary>Ver más sobre tus derechos</summary>
-                            <div class="privacy-extra">
-                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiendo ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
-                            </div>
-                        </details>
-                    </div>
+                    <div class="turnstile-wrap" id="turnstileWidget">
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAAEiQAf5pPLlhtns8" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"></div>
+                    </div>
 
-                    <div class="turnstile-wrap" id="turnstileWidget">
-                        <div class="cf-turnstile" data-sitekey="0x4AAAAAAEiQAf5pPLlhtns8" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired"></div>
-                    </div>
+                    <button type="submit" class="btn-submit btn-submit-locked" id="btnSubmitForm" disabled>
+                        <i class="fas fa-lock" id="btnSubmitIcon"></i> <span id="btnSubmitText">Resolvé la verificación para continuar</span>
+                    </button>
+                    <div class="form-error-msg" id="formErrorMsg"></div>
+                </form>
+            </div>
+        </section>
 
-                    <button type="submit" class="btn-submit btn-submit-locked" id="btnSubmitForm" disabled>
-                        <i class="fas fa-lock" id="btnSubmitIcon"></i> <span id="btnSubmitText">Resolvé la verificación para continuar</span>
-                    </button>
-                    <div class="form-error-msg" id="formErrorMsg"></div>
-                </form>
-            </div>
-        </section>
+    </main>
 
-    </main>
+    <div class="modal-overlay" id="profileInfoModal">
+        <div class="modal-card">
+            <div class="modal-icon icon-info" id="profileModalIcon"><i class="fas fa-info-circle"></i></div>
+            <h3 class="modal-title" id="profileModalTitle">Título del Perfil</h3>
+            <p class="modal-desc" id="profileModalDesc">Descripción detallada...</p>
+            <button class="btn-submit" id="btnCloseProfileModal" style="margin-top: 0;">¡Entendido, continuar!</button>
+        </div>
+    </div>
 
-    <div class="modal-overlay" id="profileInfoModal">
-        <div class="modal-card">
-            <div class="modal-icon icon-info" id="profileModalIcon"><i class="fas fa-info-circle"></i></div>
-            <h3 class="modal-title" id="profileModalTitle">Título del Perfil</h3>
-            <p class="modal-desc" id="profileModalDesc">Descripción detallada...</p>
-            <button class="btn-submit" id="btnCloseProfileModal" style="margin-top: 0;">¡Entendido, continuar!</button>
-        </div>
-    </div>
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card">
+            <div class="modal-icon icon-success"><i class="fas fa-check-circle"></i></div>
+            <h3 class="modal-title" id="modalTitleText">¡Registro Recibido!</h3>
+            <p class="modal-desc" id="modalDescText">Su aporte ha sido verificado e ingresado correctamente al sistema.</p>            
 
-    <div class="modal-overlay" id="successModal">
-        <div class="modal-card">
-            <div class="modal-icon icon-success"><i class="fas fa-check-circle"></i></div>
-            <h3 class="modal-title" id="modalTitleText">¡Registro Recibido!</h3>
-            <p class="modal-desc" id="modalDescText">Su aporte ha sido verificado e ingresado correctamente al sistema.</p>            
+            <div class="modal-invitation">
+                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.2rem; margin-right: 6px;"></i>
+                <strong>Súmate a nuestro canal de WhatsApp</strong> para seguir de cerca los diagnósticos y soluciones para Neuquén.
+            </div>
 
-            <div class="modal-invitation">
-                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.2rem; margin-right: 6px;"></i>
-                <strong>Súmate a nuestro canal de WhatsApp</strong> para seguir de cerca los diagnósticos y soluciones para Neuquén.
-            </div>
+            <a href="https://whatsapp.com/channel/0029VbDdkkpC6ZvrCmLGiR2h" target="_blank" class="btn-whatsapp">
+                <i class="fab fa-whatsapp"></i> Unirme al Canal de WhatsApp
+            </a>
+            
+            <button class="modal-close-btn" id="btnCloseSuccessModal">Cerrar esta ventana</button>
+        </div>
+    </div>
 
-            <a href="https://whatsapp.com/channel/0029VbDdkkpC6ZvrCmLGiR2h" target="_blank" class="btn-whatsapp">
-                <i class="fab fa-whatsapp"></i> Unirme al Canal de WhatsApp
-            </a>
-            
-            <button class="modal-close-btn" id="btnCloseSuccessModal">Cerrar esta ventana</button>
-        </div>
-    </div>
+    <footer class="privacy-footer">
+        <i class="fas fa-lock"></i> <strong>Tus datos son confidenciales.</strong> Se tratan conforme a la Ley N° 25.326 de Protección de Datos Personales (Argentina) y su Decreto Reglamentario N° 1558/2001, bajo control de la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública (AAIP)</a>. No se publican ni se venden a terceros.
+        <br>
+        <a href="rubenfernandezseppi/">Conocé a Rubén Fernández Seppi</a>
+        <br><br>
+        <small style="opacity: 0.8; font-size: 0.78rem;">
+            Desarrollado por <a href="https://wa.me/5492996732977" target="_blank" rel="noopener" style="color: #0284c7; font-weight: 700; text-decoration: underline;">AntüHene AI Studio</a>
+        </small>
+    </footer>
 
-    <footer class="privacy-footer">
-        <i class="fas fa-lock"></i> <strong>Tus datos son confidenciales.</strong> Se tratan conforme a la Ley N° 25.326 de Protección de Datos Personales (Argentina) y su Decreto Reglamentario N° 1558/2001, bajo control de la <a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública (AAIP)</a>. No se publican ni se venden a terceros.
-        <br>
-        <a href="rubenfernandezseppi/">Conocé a Rubén Fernández Seppi</a>
-        <br><br>
-        <small style="opacity: 0.8; font-size: 0.78rem;">
-            Desarrollado por <a href="https://wa.me/5492996732977" target="_blank" rel="noopener" style="color: #0284c7; font-weight: 700; text-decoration: underline;">AntüHene AI Studio</a>
-        </small>
-    </footer>
+    <script src="assets/shared.js"></script>
+    <script src="assets/citizen.js"></script>
 
-    <script src="assets/shared.js"></script>
-    <script src="assets/citizen.js"></script>
-
-    <script>
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-        }
-        window.scrollTo(0, 0);
-    </script>
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+    </script>
 </body>
 </html>
