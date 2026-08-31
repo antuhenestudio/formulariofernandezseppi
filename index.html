@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta name="title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
-    <meta name="description" content="Canal participativo de Neuquén. Registrá problemáticas viales, comerciales o comunitarias, destacá aspectos positivos y proponé proyectos para tu barrio.">
+    <meta name="description" content="Canal participativo de Neuquén. Registrá problemáticas comunitarias, comerciales o viales, destacá aspectos positivos y proponé proyectos para tu barrio.">
     
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tu-dominio.com/"> <meta property="og:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
@@ -23,7 +23,6 @@
     <title>Neuquén Escucha | Registro Vecinal, Proyectos y Lo Positivo</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b2545'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='%23d90429'%3EN%3C/text%3E%3C/svg%3E">
 
-    <!-- Librerías -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -31,14 +30,10 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-    <!-- Estilos: primero los compartidos, después los propios de esta página -->
     <link rel="stylesheet" href="assets/shared.css">
     <style>
-        body.video-gate-active {
-            overflow: hidden;
-        }
+        body.video-gate-active { overflow: hidden; }
 
-        /* ===== HEADER STICKY CON EFECTO BLUR TRANSPARENTE ===== */
         header {
             position: sticky;
             top: 0;
@@ -49,7 +44,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Estilo para el título cliqueable */
         .brand-link {
             text-decoration: none;
             color: inherit;
@@ -59,11 +53,8 @@
             transition: opacity 0.2s ease;
         }
 
-        .brand-link:hover {
-            opacity: 0.85;
-        }
+        .brand-link:hover { opacity: 0.85; }
 
-        /* ===== OVERLAY DE CARGA (BLUR AZUL OSCURO CON MOTION GRAPHICS) ===== */
         .loading-overlay {
             position: fixed;
             inset: 0;
@@ -81,10 +72,7 @@
             transition: opacity 0.3s ease-in-out;
         }
 
-        .loading-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .loading-overlay.active { opacity: 1; pointer-events: auto; }
 
         .loading-card {
             text-align: center;
@@ -98,7 +86,6 @@
             width: 90%;
         }
 
-        /* Motion Graphic Spinner */
         .motion-spinner-container {
             position: relative;
             width: 90px;
@@ -124,44 +111,18 @@
             animation: pulseIcon 1.5s ease-in-out infinite alternate;
         }
 
-        @keyframes spinMotion {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spinMotion { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulseIcon { 0% { transform: scale(0.85); opacity: 0.7; } 100% { transform: scale(1.15); opacity: 1; } }
 
-        @keyframes pulseIcon {
-            0% { transform: scale(0.85); opacity: 0.7; }
-            100% { transform: scale(1.15); opacity: 1; }
-        }
+        .loading-card h3 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.2px; margin: 0; color: #ffffff; }
+        .loading-card p { font-size: 0.92rem; color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.5; }
 
-        .loading-card h3 {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -0.2px;
-            margin: 0;
-            color: #ffffff;
-        }
-
-        .loading-card p {
-            font-size: 0.92rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin: 0;
-            line-height: 1.5;
-        }
-
-        .loading-dots span {
-            animation: blinkDots 1.4s infinite fill-mode: both;
-        }
+        .loading-dots span { animation: blinkDots 1.4s infinite; }
         .loading-dots span:nth-child(2) { animation-delay: .2s; }
         .loading-dots span:nth-child(3) { animation-delay: .4s; }
 
-        @keyframes blinkDots {
-            0% { opacity: .2; }
-            20% { opacity: 1; }
-            100% { opacity: .2; }
-        }
+        @keyframes blinkDots { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
 
-        /* ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== */
         .video-gate-overlay {
             position: fixed;
             inset: 0;
@@ -176,9 +137,7 @@
             padding: 24px;
         }
 
-        .video-gate-overlay.hidden {
-            display: none;
-        }
+        .video-gate-overlay.hidden { display: none; }
 
         .video-gate-popup {
             position: relative;
@@ -195,10 +154,8 @@
 
         .video-gate-close {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 38px;
-            height: 38px;
+            top: 10px; right: 10px;
+            width: 38px; height: 38px;
             border-radius: 50%;
             background: rgba(0,0,0,0.55);
             color: #fff;
@@ -214,20 +171,12 @@
 
         .video-gate-close:hover { background: rgba(0,0,0,0.8); }
 
-        #youtubeGatePlayer {
-            width: 100%;
-            height: 100%;
-        }
-
-        #youtubeGatePlayer iframe {
-            width: 100% !important;
-            height: 100% !important;
-        }
+        #youtubeGatePlayer { width: 100%; height: 100%; }
+        #youtubeGatePlayer iframe { width: 100% !important; height: 100% !important; }
 
         .video-gate-hint {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
+            bottom: 20px; left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.85);
             color: #fff;
@@ -251,40 +200,13 @@
             .video-gate-hint { font-size: 0.74rem; padding: 0.55rem 0.9rem; bottom: 14px; }
         }
 
-        /* ===== HERO BANNER ===== */
-        .hero-banner {
-            text-align: center;
-            max-width: 850px;
-            margin: 0 auto 0.8rem;
-        }
+        .hero-banner { text-align: center; max-width: 850px; margin: 0 auto 0.8rem; }
+        .hero-banner h2 { font-size: 2.1rem; color: var(--primary); font-weight: 800; margin-bottom: 0.5rem; }
+        .hero-banner p { font-size: 1rem; color: var(--text-muted); margin-bottom: 0; line-height: 1.5; }
 
-        .hero-banner h2 {
-            font-size: 2.1rem;
-            color: var(--primary);
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
+        .ruben-link { color: #0284c7; text-decoration: underline; font-weight: 700; transition: color 0.2s ease; }
+        .ruben-link:hover { color: var(--primary); }
 
-        .hero-banner p {
-            font-size: 1rem;
-            color: var(--text-muted);
-            margin-bottom: 0;
-            line-height: 1.5;
-        }
-
-        /* Estilo para el enlace a la biografía de Rubén */
-        .ruben-link {
-            color: #0284c7;
-            text-decoration: underline;
-            font-weight: 700;
-            transition: color 0.2s ease;
-        }
-
-        .ruben-link:hover {
-            color: var(--primary);
-        }
-
-        /* LIVE COUNTER BANNER */
         .kpi-live-counter-container {
             display: flex;
             flex-wrap: nowrap;
@@ -312,14 +234,11 @@
             min-width: 150px;
         }
 
-        .kpi-live-card:hover {
-            transform: translateY(-2px);
-        }
+        .kpi-live-card:hover { transform: translateY(-2px); }
 
         .kpi-live-icon {
             font-size: 1rem;
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border-radius: 8px;
             background: var(--light-bg);
             display: flex;
@@ -328,24 +247,9 @@
             flex-shrink: 0;
         }
 
-        .kpi-live-number {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--primary);
-            line-height: 1;
-        }
+        .kpi-live-number { font-size: 1.15rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .kpi-live-label { font-size: 0.62rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; letter-spacing: 0.3px; white-space: nowrap; }
 
-        .kpi-live-label {
-            font-size: 0.62rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-top: 0.15rem;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-        }
-
-        /* ===== PROFILE SELECTOR: PÍLDORA CHICO Y COMPACTO ===== */
         .profile-selector {
             display: flex;
             flex-wrap: wrap;
@@ -375,10 +279,7 @@
             white-space: nowrap;
         }
 
-        .profile-btn i {
-            font-size: 0.88rem;
-            flex-shrink: 0;
-        }
+        .profile-btn i { font-size: 0.88rem; flex-shrink: 0; }
 
         .profile-btn:hover {
             border-color: var(--secondary);
@@ -394,9 +295,7 @@
             box-shadow: 0 4px 12px rgba(11, 37, 69, 0.25);
         }
 
-        .profile-btn.active i {
-            color: #fff !important;
-        }
+        .profile-btn.active i { color: #fff !important; }
 
         .profile-btn.btn-idea-highlight {
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
@@ -432,15 +331,8 @@
             flex-shrink: 0;
         }
 
-        .badge-idea {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .badge-positive {
-            background: var(--green-positive);
-            color: #fff;
-        }
+        .badge-idea { background: var(--accent); color: #fff; }
+        .badge-positive { background: var(--green-positive); color: #fff; }
 
         .form-card {
             background: var(--card-bg);
@@ -452,30 +344,11 @@
             margin: 0 auto;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.3rem;
-        }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.3rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .form-group.full-width { grid-column: span 2; }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .form-group.full-width {
-            grid-column: span 2;
-        }
-
-        label {
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        label { font-weight: 700; font-size: 0.88rem; color: var(--text-dark); display: flex; align-items: center; gap: 6px; }
 
         input, select, textarea {
             width: 100%;
@@ -521,53 +394,16 @@
             transition: var(--transition);
         }
 
-        .checkbox-item:hover {
-            border-color: var(--green-positive);
-            background: #f0fdf4;
-            transform: translateX(3px);
-        }
+        .checkbox-item:hover { border-color: var(--green-positive); background: #f0fdf4; transform: translateX(3px); }
 
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--green-positive);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
+        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green-positive); cursor: pointer; flex-shrink: 0; }
+        .checkbox-item span { font-size: 0.88rem; font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
 
-        .checkbox-item span {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .geo-picker-container { border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; margin-top: 0.4rem; }
+        #pickerMap { height: 260px; width: 100%; z-index: 1; }
 
-        .geo-picker-container {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 0.4rem;
-        }
-
-        #pickerMap {
-            height: 260px;
-            width: 100%;
-            z-index: 1;
-        }
-
-        .custom-pin-icon {
-            width: 32px;
-            height: 32px;
-            display: block;
-        }
-
-        .custom-pin-icon svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35));
-        }
+        .custom-pin-icon { width: 32px; height: 32px; display: block; }
+        .custom-pin-icon svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35)); }
 
         .geo-controls-bar {
             background: #f8fafc;
@@ -595,29 +431,12 @@
             transition: var(--transition);
         }
 
-        .btn-geo-gps:hover {
-            background: var(--primary);
-        }
+        .btn-geo-gps:hover { background: var(--primary); }
+        .geo-coords-readout { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
+        .website-field-hp { display: none !important; }
 
-        .geo-coords-readout {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-
-        .website-field-hp {
-            display: none !important;
-        }
-
-        input[type="file"] {
-            padding: 0.6rem 0.8rem;
-            cursor: pointer;
-        }
-
-        .archivo-hint {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-        }
+        input[type="file"] { padding: 0.6rem 0.8rem; cursor: pointer; }
+        .archivo-hint { font-size: 0.78rem; color: var(--text-muted); }
 
         .archivo-contador {
             display: flex;
@@ -629,16 +448,9 @@
             margin-top: 0.3rem;
         }
 
-        .archivo-contador span.limite-alcanzado {
-            color: var(--accent);
-        }
+        .archivo-contador span.limite-alcanzado { color: var(--accent); }
 
-        .archivos-lista {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 0.6rem;
-        }
+        .archivos-lista { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.6rem; }
 
         .archivo-item {
             display: flex;
@@ -652,11 +464,7 @@
             color: var(--text-dark);
         }
 
-        .archivo-item .archivo-item-nombre {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .archivo-item .archivo-item-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .archivo-item button {
             margin-left: auto;
@@ -668,68 +476,29 @@
             flex-shrink: 0;
         }
 
-        .turnstile-wrap {
-            display: flex;
-            justify-content: center;
-            margin-top: 1.4rem;
-        }
+        .turnstile-wrap { display: flex; justify-content: center; margin-top: 1.4rem; }
 
-        .btn-submit.btn-submit-locked {
-            background: #94a3b8;
-            box-shadow: none;
-            cursor: not-allowed;
-            opacity: 0.85;
-        }
+        .btn-submit.btn-submit-locked { background: #94a3b8; box-shadow: none; cursor: not-allowed; opacity: 0.85; }
+        .btn-submit.btn-submit-locked:hover { background: #94a3b8; transform: none; }
+        .btn-submit.btn-submit-idea { background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%); }
+        .btn-submit.btn-submit-positive { background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%); }
 
-        .btn-submit.btn-submit-locked:hover {
-            background: #94a3b8;
-            transform: none;
-        }
-
-        .btn-submit.btn-submit-idea {
-            background: linear-gradient(135deg, var(--gold) 0%, #b45309 100%);
-        }
-
-        .btn-submit.btn-submit-positive {
-            background: linear-gradient(135deg, var(--green-positive) 0%, #15803d 100%);
-        }
-
-        /* ===== RESPONSIVE CELULAR ===== */
         @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .form-group.full-width {
-                grid-column: span 1;
-            }
-            .form-card {
-                padding: 1.3rem;
-            }
-
-            .hero-banner h2 {
-                font-size: 1.5rem;
-            }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+            .form-card { padding: 1.3rem; }
+            .hero-banner h2 { font-size: 1.5rem; }
         }
 
         @media (max-width: 480px) {
-            .hero-banner {
-                margin-bottom: 0.5rem;
-            }
-            .profile-selector {
-                gap: 0.45rem;
-                margin-top: 0.5rem;
-                margin-bottom: 1.1rem;
-            }
-            .profile-btn {
-                padding: 0.48rem 0.8rem;
-                font-size: 0.76rem;
-            }
+            .hero-banner { margin-bottom: 0.5rem; }
+            .profile-selector { gap: 0.45rem; margin-top: 0.5rem; margin-bottom: 1.1rem; }
+            .profile-btn { padding: 0.48rem 0.8rem; font-size: 0.76rem; }
         }
     </style>
 </head>
 <body class="video-gate-active">
 
-    <!-- ===== OVERLAY DE CARGA (AZUL OSCURO BLUR CON MOTION GRAPHIC) ===== -->
     <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
         <div class="loading-card">
             <div class="motion-spinner-container">
@@ -741,7 +510,6 @@
         </div>
     </div>
 
-    <!-- ===== VIDEO DE BIENVENIDA OBLIGATORIO ===== -->
     <div class="video-gate-overlay" id="videoGateOverlay">
         <div class="video-gate-popup">
             <button type="button" class="video-gate-close" id="btnSkipVideo" aria-label="Cerrar video">
@@ -754,11 +522,9 @@
         </div>
     </div>
 
-    <!-- Contenedor de popups de confirmación (toasts) -->
     <div id="toastContainer" aria-live="polite"></div>
 
     <header>
-        <!-- Título envuelto en enlace hacia el Inicio -->
         <a href="index.html" class="brand-link" title="Ir al Inicio">
             <div class="brand">
                 <div class="brand-icon"><i class="fas fa-bullhorn"></i></div>
@@ -782,7 +548,6 @@
                 <p>Iniciativa impulsada por el <a href="rubenfernandezseppi/" class="ruben-link">Ing. Rubén Fernández Seppi</a> (Conocé más sobre él) para escuchar a vecinos, comerciantes y jóvenes: registrá problemáticas, destacá lo que sí funciona o proponé tus proyectos para transformar Neuquén.</p>
             </div>
 
-            <!-- LIVE COUNTER BANNER -->
             <div class="kpi-live-counter-container">
                 <div class="kpi-live-card" data-counter-card="reclamos" style="display:none;">
                     <div class="kpi-live-icon"><i class="fas fa-bullhorn" style="color: var(--accent);"></i></div>
@@ -821,7 +586,6 @@
                 </div>
             </div>
 
-            <!-- Profile Selector Rounded Buttons -->
             <div class="profile-selector">
                 <button type="button" class="profile-btn active" data-profile="ciudadano">
                     <i class="fas fa-user-check"></i> Vecino / Ciudadano
@@ -840,14 +604,12 @@
                 </button>
             </div>
 
-            <!-- DYNAMIC FORM CONTAINER -->
             <div class="form-card">
                 <form id="citizenForm" novalidate>
                     <input type="hidden" id="tipoPerfil" name="tipoPerfil" value="Vecino / Ciudadano">
                     <input type="hidden" id="geoLat" name="geoLat" value="-38.9516">
                     <input type="hidden" id="geoLng" name="geoLng" value="-68.0591">
 
-                    <!-- Anti-Bot Honeypot Field -->
                     <div class="website-field-hp">
                         <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off">
                     </div>
@@ -885,7 +647,6 @@
                             <input type="tel" id="contacto" name="contacto" placeholder="Ej. 2994123456" required>
                         </div>
 
-                        <!-- GEOLOCATION PICKER MAP -->
                         <div class="form-group full-width">
                             <label id="lblMapLocation"><i class="fas fa-map-marker-alt" style="color: var(--accent);"></i> Ubicación Exacta dentro de Neuquén (Marcar punto) *</label>
                             <div class="geo-picker-container">
@@ -901,7 +662,6 @@
                             </div>
                         </div>
 
-                        <!-- MERCHANTS SPECIFIC -->
                         <div class="form-group merchant-field" style="display:none;">
                             <label for="nombreComercio"><i class="fas fa-store-alt" style="color: var(--accent);"></i> Nombre Fantasía / Rubro del Comercio *</label>
                             <input type="text" id="nombreComercio" name="nombreComercio" placeholder="Ej. Panadería San Martín / Calzados">
@@ -935,7 +695,6 @@
                             </select>
                         </div>
 
-                        <!-- IDEAS & PROJECTS SPECIFIC -->
                         <div class="form-group idea-field full-width" style="display:none;">
                             <label for="tituloProyecto"><i class="fas fa-heading" style="color: var(--gold);"></i> Título de la Idea o Proyecto *</label>
                             <input type="text" id="tituloProyecto" name="tituloProyecto" placeholder="Ej. Corredor Verde y Deportivo en Av. del Trabajador">
@@ -958,7 +717,6 @@
                             <input type="text" id="porQueProyecto" name="porQueProyecto" placeholder="Ej. Beneficiará a más de 500 familias que no tienen espacios seguros...">
                         </div>
 
-                        <!-- POSITIVE MULTI-SELECT SPECIFIC -->
                         <div class="form-group positive-field full-width" style="display:none;">
                             <label><i class="fas fa-thumbs-up" style="color: var(--green-positive);"></i> ¿Qué aspectos positivos y proyectos valorás de la ciudad? (Podés marcar varios) *</label>
                             <div class="checkbox-grid">
@@ -997,7 +755,6 @@
                             </div>
                         </div>
 
-                        <!-- GENERAL CATEGORIES -->
                         <div class="form-group general-field">
                             <label for="problematica"><i class="fas fa-list-alt" style="color: var(--secondary);"></i> Área Temática Principal *</label>
                             <select id="problematica" name="problematica">
@@ -1040,7 +797,7 @@
                         <details>
                             <summary>Ver más sobre tus derechos</summary>
                             <div class="privacy-extra">
-                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiending ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
+                                Como titular de tus datos, tenés derecho de acceso, rectificación, actualización y supresión (Art. 43, Constitución Nacional — acción de hábeas data), pudiendo ejercerlo ante quienes gestionan esta iniciativa o ante la AAIP (<a href="https://www.argentina.gob.ar/aaip/datospersonales" target="_blank" rel="noopener">argentina.gob.ar/aaip/datospersonales</a>). Los datos se utilizan de forma agregada y anónima para el diagnóstico público (mapas, estadísticas), y los identificatorios solo se usan para verificación y contacto, no se venden ni ceden.
                             </div>
                         </details>
                     </div>
@@ -1100,7 +857,6 @@
     <script src="assets/shared.js"></script>
     <script src="assets/citizen.js"></script>
 
-    <!-- Script para asegurar que al cargar la página empiece siempre arriba de todo -->
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
