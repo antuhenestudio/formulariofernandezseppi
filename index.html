@@ -5,7 +5,8 @@
     <meta name="description" content="Canal participativo de Neuquén. Registrá problemáticas comunitarias, comerciales o viales, destacá aspectos positivos y proponé proyectos para tu barrio.">
     
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://tu-dominio.com/"> <meta property="og:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
+    <meta property="og:url" content="https://tu-dominio.com/"> 
+    <meta property="og:title" content="Neuquén Escucha | Registro Vecinal y Proyectos">
     <meta property="og:description" content="Sumá tu aporte, reclamo o idea para transformar la ciudad. Canal directo de participación y analítica territorial.">
     <meta property="og:image" content="https://lh3.googleusercontent.com/d/1FLL99HAFye-3YBnJPM_hCaeqvqOgciQG">
     <meta property="og:image:type" content="image/png">
@@ -27,7 +28,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     <link rel="stylesheet" href="assets/shared.css">
@@ -171,33 +171,12 @@
 
         .video-gate-close:hover { background: rgba(0,0,0,0.8); }
 
-        #youtubeGatePlayer { width: 100%; height: 100%; }
-        #youtubeGatePlayer iframe { width: 100% !important; height: 100% !important; }
-
-        .video-gate-hint {
-            position: absolute;
-            bottom: 20px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: #fff;
-            padding: 0.65rem 1.1rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            z-index: 5002;
-            white-space: nowrap;
-            animation: pulseGlowGold 2s infinite ease-in-out;
-        }
+        .video-gate-popup iframe { width: 100% !important; height: 100% !important; border: none; }
 
         @media (max-width: 480px) {
             .video-gate-overlay { padding: 12px; }
             .video-gate-popup { height: min(90vh, 700px); max-width: 96vw; border-radius: 14px; }
             .video-gate-close { top: 8px; right: 8px; width: 34px; height: 34px; font-size: 0.9rem; }
-            .video-gate-hint { font-size: 0.74rem; padding: 0.55rem 0.9rem; bottom: 14px; }
         }
 
         .hero-banner { text-align: center; max-width: 850px; margin: 0 auto 0.8rem; }
@@ -515,10 +494,11 @@
             <button type="button" class="video-gate-close" id="btnSkipVideo" aria-label="Cerrar video">
                 <i class="fas fa-times"></i>
             </button>
-            <div id="youtubeGatePlayer"></div>
-            <div class="video-gate-hint" id="videoGateSoundHint">
-                <i class="fas fa-volume-up"></i> Tocá para activar el sonido
-            </div>
+            <iframe 
+                src="https://drive.google.com/file/d/1swct3er20jFc5PXCbR-gUKAgQJ7JPXSU/preview?autoplay=1&mute=1" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+            </iframe>
         </div>
     </div>
 
