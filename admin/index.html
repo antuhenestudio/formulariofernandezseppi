@@ -6,7 +6,6 @@
     <title>Neuquén Escucha | Panel Administrativo</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230b2545'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='%23d90429'%3EN%3C/text%3E%3C/svg%3E">
 
-    <!-- Librerías de Iconos y Gráficos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,17 +13,12 @@
     <script src="https://cdn.jsdelivr.net/npm/heatmap.js@2.0.5/build/heatmap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-heatmap@1.0.0/leaflet-heatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-    
-    <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Librerías jsPDF y AutoTable para informes ejecutivos en PDF NATIVO VECTORIAL -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <link rel="stylesheet" href="../assets/shared.css">
     <style>
-        /* ===== HEADER STICKY CON EFECTO BLUR TRANSPARENTE ===== */
         header {
             position: sticky;
             top: 0;
@@ -44,8 +38,12 @@
             transition: opacity 0.2s ease;
         }
 
-        .brand-link:hover {
-            opacity: 0.85;
+        .brand-link:hover { opacity: 0.85; }
+
+        /* Los modales de esta página (detalle y confirmación) se abren/cierran
+           agregando o quitando la clase .active desde admin.js. */
+        .modal-overlay.active {
+            display: flex !important;
         }
 
         .admin-login-view {
@@ -67,7 +65,6 @@
             text-align: center;
         }
 
-        /* Dashboard UI & IA Recommendation Panel */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -77,11 +74,7 @@
             gap: 1rem;
         }
 
-        .action-export-bar {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
+        .action-export-bar { display: flex; gap: 0.8rem; flex-wrap: wrap; }
 
         .btn-export {
             padding: 0.65rem 1.2rem;
@@ -127,20 +120,8 @@
             color: #a7f3d0;
         }
 
-        .ia-content h3 {
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin-bottom: 0.4rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ia-content p {
-            font-size: 0.92rem;
-            color: #e0e7ff;
-            line-height: 1.5;
-        }
+        .ia-content h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; }
+        .ia-content p { font-size: 0.92rem; color: #e0e7ff; line-height: 1.5; }
 
         .filter-bar {
             background: #fff;
@@ -165,12 +146,7 @@
             background: #fff;
         }
 
-        .kpi-grid-advanced {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.3rem;
-            margin-bottom: 2rem;
-        }
+        .kpi-grid-advanced { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.3rem; margin-bottom: 2rem; }
 
         .kpi-card-prof {
             background: #fff;
@@ -186,17 +162,13 @@
             transition: var(--transition);
         }
 
-        .kpi-card-prof:hover {
-            transform: translateY(-3px);
-        }
+        .kpi-card-prof:hover { transform: translateY(-3px); }
 
         .kpi-card-prof::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
+            top: 0; left: 0;
+            width: 5px; height: 100%;
             background: var(--secondary);
         }
 
@@ -205,46 +177,13 @@
         .kpi-card-prof.kpi-green::before { background: var(--green-positive); }
         .kpi-card-prof.kpi-teal::before { background: var(--teal); }
 
-        .kpi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
+        .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .kpi-title { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-icon { font-size: 1.25rem; color: var(--text-muted); opacity: 0.75; }
+        .kpi-value { font-size: 1.8rem; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        .kpi-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; }
 
-        .kpi-title {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .kpi-icon {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            opacity: 0.75;
-        }
-
-        .kpi-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary);
-            line-height: 1.2;
-        }
-
-        .kpi-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.4rem;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.8rem;
-            margin-bottom: 2rem;
-        }
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.8rem; margin-bottom: 2rem; }
 
         .chart-card {
             background: #fff;
@@ -258,23 +197,8 @@
         }
 
         .chart-card.full-width { grid-column: span 2; }
-
-        .chart-card h4 {
-            font-size: 1rem;
-            color: var(--primary);
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .chart-container-wrapper {
-            position: relative;
-            flex: 1;
-            width: 100%;
-            min-height: 240px;
-        }
-
+        .chart-card h4 { font-size: 1rem; color: var(--primary); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .chart-container-wrapper { position: relative; flex: 1; width: 100%; min-height: 240px; }
         #analyticsMapContainer { height: 440px; width: 100%; border-radius: 10px; z-index: 1; }
 
         .audit-panel {
@@ -286,86 +210,61 @@
             box-shadow: var(--shadow);
         }
 
-        .audit-table {
+        .table-responsive-wrapper {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 640px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .audit-table th, .audit-table td {
-            padding: 0.7rem 0.9rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
+        .audit-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 640px; }
+        .audit-table th, .audit-table td { padding: 0.7rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .audit-table tbody tr { cursor: pointer; transition: background 0.2s; }
+        .audit-table tbody tr:hover { background: #f0f9ff; }
 
-        .audit-table tbody tr {
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .audit-table tbody tr:hover {
-            background: #f0f9ff;
-        }
-
-        .status-badge {
-            padding: 3px 9px;
-            border-radius: 50px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
+        .status-badge { padding: 3px 9px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
         .status-valid { background: #dcfce7; color: #15803d; }
         .status-spam { background: #fee2e2; color: #b91c1c; }
 
-        .btn-action-sm {
-            padding: 4px 9px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
+        .btn-action-sm { padding: 4px 9px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
         .btn-approve { background: #16a34a; color: #fff; }
         .btn-discard { background: var(--accent); color: #fff; }
 
-        /* ===== OCULTAR BARRA DE DESPLAZAMIENTO DEL MODAL DE DETALLE ===== */
+        .btn-popup-adjunto {
+            margin-top: 6px;
+            background: var(--secondary);
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.9rem; }
+
         .modal-detail-card {
             background: #fff;
             border-radius: 16px;
             max-width: 820px;
             width: 92vw;
             max-height: 90vh;
-            overflow-y: auto; /* Mantiene la funcionalidad de desplazamiento */
+            overflow-y: auto;
             padding: 2rem;
             position: relative;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        
-            /* Ocultar barra en Firefox */
             scrollbar-width: none;
-            
-            /* Ocultar barra en Internet Explorer / Edge antiguo */
             -ms-overflow-style: none;
         }
-        
-        /* Ocultar barra de desplazamiento en Chrome, Safari, Opera y Edge Chromium */
-        .modal-detail-card::-webkit-scrollbar {
-            display: none;
-            width: 0;
-            height: 0;
-        }
+
+        .modal-detail-card::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
         .modal-close-icon {
             position: absolute;
-            top: 1.2rem;
-            right: 1.2rem;
+            top: 1.2rem; right: 1.2rem;
             background: #f1f5f9;
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -378,114 +277,23 @@
 
         .modal-close-icon:hover { background: #e2e8f0; }
 
-        .detail-header {
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
+        .detail-header { border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .detail-header h3 { font-size: 1.5rem; color: var(--primary); margin-bottom: 0.3rem; }
 
-        .detail-header h3 {
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-bottom: 0.3rem;
-        }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .detail-item { background: #f8fafc; padding: 0.8rem 1rem; border-radius: 10px; border: 1px solid var(--border-color); }
+        .detail-item label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.2rem; }
+        .detail-item p { font-size: 0.92rem; font-weight: 600; color: var(--text-dark); margin: 0; word-break: break-word; }
 
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
+        .detail-box { background: #f8fafc; padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .detail-box h4 { font-size: 0.9rem; color: var(--primary); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px; }
 
-        .detail-item {
-            background: #f8fafc;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .detail-item label {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            font-weight: 700;
-            display: block;
-            margin-bottom: 0.2rem;
-        }
-
-        .detail-item p {
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin: 0;
-            word-break: break-word;
-        }
-
-        .detail-box {
-            background: #f8fafc;
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-box h4 {
-            font-size: 0.9rem;
-            color: var(--primary);
-            margin-bottom: 0.6rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* WEBVIEW PREVIEW CONTAINER */
-        .media-viewer-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-            margin-top: 0.8rem;
-        }
-
-        .media-card {
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .media-preview-box {
-            width: 100%;
-            max-height: 400px;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .media-preview-box img, .media-preview-box video {
-            max-width: 100%;
-            max-height: 400px;
-            object-fit: contain;
-        }
-
-        .media-preview-box iframe {
-            width: 100%;
-            height: 380px;
-            border: none;
-        }
-
-        .media-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
+        .media-viewer-container { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 0.8rem; }
+        .media-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+        .media-preview-box { width: 100%; max-height: 400px; border-radius: 8px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; }
+        .media-preview-box img, .media-preview-box video { max-width: 100%; max-height: 400px; object-fit: contain; }
+        .media-preview-box iframe { width: 100%; height: 380px; border: none; }
+        .media-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 
         .btn-download-file {
             background: var(--secondary);
@@ -528,10 +336,7 @@
             transition: transform 0.2s;
         }
 
-        .btn-ws-direct:hover {
-            transform: translateY(-2px);
-            background: #1eb954;
-        }
+        .btn-ws-direct:hover { transform: translateY(-2px); background: #1eb954; }
 
         .btn-delete-citizen {
             background: #ef4444;
@@ -550,48 +355,11 @@
 
         .btn-delete-citizen:hover { background: #dc2626; }
 
-        /* MODAL DE RENOTIFICACIÓN Y ELIMINACIÓN */
-        .confirm-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 450px;
-            width: 90vw;
-            text-align: center;
-        }
-
-        .confirm-icon {
-            font-size: 3rem;
-            color: #ef4444;
-            margin-bottom: 1rem;
-        }
-
-        .confirm-btns {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1.5rem;
-        }
-
-        .btn-confirm-cancel {
-            background: #e2e8f0;
-            color: var(--text-dark);
-            border: none;
-            padding: 0.7rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-confirm-delete {
-            background: #ef4444;
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-        }
+        .confirm-card { background: #fff; border-radius: 16px; padding: 2rem; max-width: 450px; width: 90vw; text-align: center; }
+        .confirm-icon { font-size: 3rem; color: #ef4444; margin-bottom: 1rem; }
+        .confirm-btns { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+        .btn-confirm-cancel { background: #e2e8f0; color: var(--text-dark); border: none; padding: 0.7rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .btn-confirm-delete { background: #ef4444; color: #fff; border: none; padding: 0.7rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
 
         @media (max-width: 992px) {
             .charts-grid { grid-template-columns: 1fr; }
@@ -601,15 +369,17 @@
         }
 
         @media (max-width: 768px) {
-            .hero-banner h2 { font-size: 1.5rem; }
             header { padding: 0.8rem 4%; }
             .brand-text h1 { font-size: 1rem; }
-            .brand-text p { display: none; }
+            .brand-text p { font-size: 0.62rem; }
             .main-wrapper { padding: 1.2rem 4%; }
             .dashboard-header h2 { font-size: 1.25rem; }
             .ia-recommendation-box { flex-direction: column; }
             .action-export-bar { width: 100%; }
             .action-export-bar .btn-export { flex: 1; justify-content: center; }
+            .modal-detail-card { padding: 1.3rem; width: 95vw; max-height: 92vh; }
+            .modal-action-bar { flex-direction: column; }
+            .btn-ws-direct, .btn-delete-citizen { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -639,7 +409,6 @@
 
     <main class="main-wrapper" style="display:flex; flex-direction:column; flex:1;">
 
-        <!-- ===== PANTALLA DE LOGIN ===== -->
         <div class="admin-login-view" id="adminLoginView" style="display:none;">
             <div class="login-card">
                 <div class="modal-icon icon-admin"><i class="fas fa-lock"></i></div>
@@ -664,7 +433,6 @@
             </div>
         </div>
 
-        <!-- ===== DASHBOARD GENERAL DE ANALÍTICA Y TABLA ===== -->
         <section id="dashboardView" style="display:none;">
             <div id="reportExportContainer">
                 <div class="dashboard-header">
@@ -672,7 +440,6 @@
                         <h2>Centro de Registro Vecinal & Proyectos</h2>
                         <p>Tablero Gerencial de Analítica Cruzada, KPIs Avanzados e Informes Descargables</p>
                     </div>
-                    
                     <div class="action-export-bar">
                         <button class="btn-export btn-export-pdf" id="btnExportPdf">
                             <i class="fas fa-file-pdf"></i> Descargar Reporte PDF
@@ -683,7 +450,6 @@
                     </div>
                 </div>
 
-                <!-- BOX RECOMENDACIÓN IA -->
                 <div class="ia-recommendation-box">
                     <div class="ia-icon"><i class="fas fa-brain"></i></div>
                     <div class="ia-content">
@@ -692,7 +458,6 @@
                     </div>
                 </div>
 
-                <!-- FILTERS BAR CON CONTROL TEMPORAL -->
                 <div class="filter-bar">
                     <div class="form-group">
                         <label><i class="fas fa-filter"></i> Estado Auditoría</label>
@@ -735,7 +500,6 @@
                             <option value="Otro">Otro</option>
                         </select>
                     </div>
-                    <!-- FILTROS DE FECHA Y PERÍODO -->
                     <div class="form-group">
                         <label><i class="fas fa-calendar-alt"></i> Desde</label>
                         <input type="date" id="filterFechaDesde">
@@ -758,7 +522,6 @@
                     </div>
                 </div>
 
-                <!-- KPIS GRID -->
                 <div class="kpi-grid-advanced">
                     <div class="kpi-card-prof">
                         <div class="kpi-header">
@@ -806,46 +569,32 @@
                     </div>
                 </div>
 
-                <!-- CHARTS GRID -->
                 <div class="charts-grid">
                     <div class="chart-card full-width">
                         <h4><i class="fas fa-fire" style="color: var(--accent);"></i> Mapa de Calor Geolocalizado (Densidad Territorial Exacta)</h4>
                         <div id="analyticsMapContainer"></div>
                     </div>
-
                     <div class="chart-card">
                         <h4><i class="fas fa-chart-bar" style="color: var(--secondary);"></i> Distribución por Área Temática / Proyectos</h4>
-                        <div class="chart-container-wrapper">
-                            <canvas id="chartCategories"></canvas>
-                        </div>
+                        <div class="chart-container-wrapper"><canvas id="chartCategories"></canvas></div>
                     </div>
-
                     <div class="chart-card">
                         <h4><i class="fas fa-thumbs-up" style="color: var(--green-positive);"></i> Aspectos Positivos Más Valorados</h4>
-                        <div class="chart-container-wrapper">
-                            <canvas id="chartPositivos"></canvas>
-                        </div>
+                        <div class="chart-container-wrapper"><canvas id="chartPositivos"></canvas></div>
                     </div>
-
                     <div class="chart-card">
                         <h4><i class="fas fa-store-alt-slash" style="color: var(--accent);"></i> Causal de Impacto Comercial (Comerciantes)</h4>
-                        <div class="chart-container-wrapper">
-                            <canvas id="chartMerchants"></canvas>
-                        </div>
+                        <div class="chart-container-wrapper"><canvas id="chartMerchants"></canvas></div>
                     </div>
-
                     <div class="chart-card">
                         <h4><i class="fas fa-users" style="color: var(--teal);"></i> Demografía por Edades y Sexo</h4>
-                        <div class="chart-container-wrapper">
-                            <canvas id="chartDemographics"></canvas>
-                        </div>
+                        <div class="chart-container-wrapper"><canvas id="chartDemographics"></canvas></div>
                     </div>
                 </div>
 
-                <!-- AUDIT & CURATION PANEL -->
                 <div class="audit-panel">
-                    <h4><i class="fas fa-user-shield" style="color: var(--secondary);"></i> Registro y Auditoría de Datos de Entrada (Calidad de Datos)</h4>
-                    <div style="overflow-x: auto;">
+                    <h4><i class="fas fa-user-shield" style="color: var(--secondary);"></i> Registro y Auditoría de Datos de Entrada (Calidad de Datos) — tocá una fila para ver el detalle</h4>
+                    <div class="table-responsive-wrapper">
                         <table class="audit-table">
                             <thead>
                                 <tr>
@@ -857,9 +606,7 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="auditTableBody">
-                                <!-- Populated dynamically -->
-                            </tbody>
+                            <tbody id="auditTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -868,7 +615,6 @@
 
     </main>
 
-    <!-- ===== MODAL DE DETALLE DEL CIUDADANO / WEBVIEW MULTIMEDIA ===== -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal-detail-card">
             <button type="button" class="modal-close-icon" id="btnCloseDetailModal"><i class="fas fa-times"></i></button>
@@ -879,22 +625,10 @@
             </div>
 
             <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Edad y Sexo</label>
-                    <p id="modalCiudadanoEdadSexo">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Barrio</label>
-                    <p id="modalCiudadanoBarrio">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Teléfono / WhatsApp</label>
-                    <p id="modalCiudadanoContacto">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Coordenadas GPS</label>
-                    <p id="modalCiudadanoCoords">-</p>
-                </div>
+                <div class="detail-item"><label>Edad y Sexo</label><p id="modalCiudadanoEdadSexo">-</p></div>
+                <div class="detail-item"><label>Barrio</label><p id="modalCiudadanoBarrio">-</p></div>
+                <div class="detail-item"><label>Teléfono / WhatsApp</label><p id="modalCiudadanoContacto">-</p></div>
+                <div class="detail-item"><label>Coordenadas GPS</label><p id="modalCiudadanoCoords">-</p></div>
             </div>
 
             <div class="detail-box" id="boxComercio" style="display:none;">
@@ -917,15 +651,11 @@
                 <p id="modalCiudadanoDetalle" style="white-space: pre-line;">-</p>
             </div>
 
-            <!-- VISOR WEBVIEW DE ARCHIVOS ADJUNTOS -->
-            <div class="detail-box" id="boxAdjuntos">
+            <div class="detail-box" id="boxAdjuntos" style="display:none;">
                 <h4><i class="fas fa-paperclip"></i> Archivos Adjuntos Subidos</h4>
-                <div class="media-viewer-container" id="mediaViewerContainer">
-                    <!-- Inyectado dinámicamente -->
-                </div>
+                <div class="media-viewer-container" id="mediaViewerContainer"></div>
             </div>
 
-            <!-- ACCIONES DEL MODAL -->
             <div class="modal-action-bar">
                 <a href="#" target="_blank" class="btn-ws-direct" id="btnWsDirect">
                     <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
@@ -937,7 +667,6 @@
         </div>
     </div>
 
-    <!-- ===== MODAL DE CONFIRMACIÓN DE ELIMINACIÓN ===== -->
     <div class="modal-overlay" id="confirmDeleteModal">
         <div class="confirm-card">
             <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -957,7 +686,6 @@
     <script src="../assets/shared.js"></script>
     <script src="../assets/admin.js"></script>
     <script>
-        // Muestra el botón de "Cerrar sesión" solo cuando el dashboard está visible.
         const _dashObserver = new MutationObserver(() => {
             const visible = document.getElementById('dashboardView').style.display !== 'none';
             document.getElementById('btnLogout').style.display = visible ? 'flex' : 'none';
